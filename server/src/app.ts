@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import authRouter from "./modules/auth/auth.routes.js";
 import { connectMongoDB } from "./shared/lib/mongo.js";
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 connectMongoDB();
+
+app.use("/auth", authRouter);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
