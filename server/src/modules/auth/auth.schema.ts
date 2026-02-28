@@ -16,6 +16,16 @@ export const loginSchema = z.object({
         .max(64, "Password must be at most 64 characters long"),
 })
 
+export const ProfileSchema = z.object({
+    sub: z.string(),
+    name: z.string(),
+    given_name: z.string(),
+    family_name: z.string(),
+    picture: z.string(),
+    email: z.email(),
+    email_verified: z.boolean(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 

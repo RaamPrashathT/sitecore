@@ -73,7 +73,7 @@ const AuthService = {
 
         return { accessToken, refreshToken };
 
-    }
+    },
 }
 
 export default AuthService;
