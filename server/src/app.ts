@@ -1,18 +1,18 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
 import authRouter from "./modules/auth/auth.routes.js";
 import { connectMongoDB } from "./shared/lib/mongo.js";
-dotenv.config();
-
-const PORT = process.env.PORT || 5000;
+import { env } from "./shared/config/env.js";
+const PORT = env.PORT || 5000;
 
 const app = express();
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    }),
+);
 
 app.use(cookieParser());
 app.use(express.json());

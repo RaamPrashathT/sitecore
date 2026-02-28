@@ -1,36 +1,44 @@
 import bcrypt from "bcryptjs";
 import { User } from "../../shared/models/user.js";
-import type { LoginInput, RegisterInput } from "./auth.schema.js";
+import type { RegisterInputSchema, LoginInputSchema } from "./auth.schema.js";
 import generateName from "../../shared/lib/fantastical.js";
-import { createAccessToken, createRefreshToken } from "../../shared/lib/jose.js";
+import { ConflictError } from "../../shared/error/conflict.error.js";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 
-const AuthService = {
-    async register(data: RegisterInput) {
-        const existingUser = await User.findOne({email: data.email})
+const authService = {
+    async register(data: RegisterInputSchema) {
+        const existingUser = await User.findOne({ email: data.email });
 
         if(existingUser) {
-            const hasPasswordAccount = existingUser.accounts.some(account => account.provider === 'credentials')
-            if(hasPasswordAccount) {
-                throw new Error('EXISTS')
+            const isCredentialAccount = existingUser.accounts.some(account => account.provider === 'credentials')
+            
+            if(isCredentialAccount) {
+                throw new ConflictError("User already exists");
             }
-            const hashedPassword = await bcrypt.hash(data.password, 10)
+
+            const hashedPassword = await bcrypt.hash(data.password, 10);
+
             await User.findOneAndUpdate(
-                {email: data.email},
+                {email  : data.email},
                 {
-                    $push: {
+                    $addToSet: {
                         accounts: {
                             provider: 'credentials',
                             providerAccountId: data.email,
                             password: hashedPassword
                         }
                     }
-                }
+                }    
             )
-            return { message: "LINKED"}
+
+            return {
+                success: true
+            }
         }
 
+        const hashedPassword = await bcrypt.hash(data.password, 10);
         const randomName = generateName()
-        const hashedPassword = await bcrypt.hash(data.password, 10)
+
         await User.create({
             username: randomName,
             email: data.email,
@@ -40,40 +48,39 @@ const AuthService = {
                 password: hashedPassword
             }]
         })
-        return { message: "CREATED" };
+
+        return {
+            success: true
+        }
     },
 
-    async login(data: LoginInput) {
-        const existingUser = await User.findOne({email: data.email})
+    async login(data: LoginInputSchema) {
+        const existingUser = await User.findOne({email: data.email}).select('+accounts.password');
+
 
         if(!existingUser) {
-            throw new Error('INVALID')
+            throw new UnAuthorizedError();
         }
 
         const password = existingUser.accounts.find(account => account.provider === 'credentials')?.password
 
         if(!password) {
-            throw new Error('INVALID')
+            throw new UnAuthorizedError();
         }
-        const isPasswordCorrect = await bcrypt.compare(data.password,password)
-        if(!isPasswordCorrect) {
-            throw new Error('INVALID')
+
+        const isPasswordValid = await bcrypt.compare(data.password, password);
+
+        if(!isPasswordValid) {
+            throw new UnAuthorizedError();
         }
-        const accessToken = await createAccessToken({
-            userId: existingUser.id,
-            email: existingUser.email,
-            tokenType: "access",
-        });
 
-        const refreshToken = await createRefreshToken({
-            userId: existingUser.id,
-            email: existingUser.email,
-            tokenType: "refresh",
-        });
+        const sessionId = crypto.randomUUID();
 
-        return { accessToken, refreshToken };
-
-    },
+        return {
+            sessionId,
+            userId: existingUser._id
+        }
+    }
 }
 
-export default AuthService;
+export default authService;

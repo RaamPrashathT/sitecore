@@ -1,37 +1,36 @@
 import type { Request, Response } from "express";
-import AuthService from "./auth.service.js";
-import type { LoginInput, RegisterInput } from "./auth.schema.js";
-import { createAccessToken, verifyRefreshToken } from "../../shared/lib/jose.js";
-
-const AuthController = {
+import authService from "./auth.service.js";
+import { logger } from "../../shared/lib/logger.js";
+import { ConflictError } from "../../shared/error/conflict.error.js";
+import redis from "../../shared/lib/redis.js";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
+import { env } from "../../shared/config/env.js";
+const authController = {
     async register(request: Request, response: Response) {
         try {
-            const result = await AuthService.register(
-                request.body as RegisterInput,
-            );
-            if (result.message === "LINKED") {
+            const result = await authService.register(request.body);
+            if (result.success) {
                 return response.status(200).json({
                     success: true,
-                    message: "Account linked with existing email",
+                    message: "User created successfully",
                 });
             }
-            if (result.message === "CREATED") {
-                return response.status(201).json({
-                    success: true,
-                    message: "Account created",
-                });
-            }
-            return response.status(400).json({
-                    success: false,
-                    message: "Account already exists",
-                });
+            logger.error("Something went wrong");
+            return response.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
         } catch (error) {
-            if (error instanceof Error && error.message === "EXISTS") {
+            if (
+                error instanceof ConflictError ||
+                (error as any).code === 11000
+            ) {
                 return response.status(400).json({
                     success: false,
-                    message: "Account already exists",
+                    message: "User already exists",
                 });
-            } 
+            }
+            logger.error(error);
             return response.status(500).json({
                 success: false,
                 message: "Internal server error",
@@ -41,120 +40,42 @@ const AuthController = {
 
     async login(request: Request, response: Response) {
         try {
-            const {accessToken, refreshToken} = await AuthService.login(
-                request.body as LoginInput,
+            const { sessionId, userId } = await authService.login(request.body);
+
+            await redis.set(
+                `session:${sessionId}`,
+                JSON.stringify({
+                    userId: userId,
+                    userAgent: request.headers["user-agent"],
+                }),
+                { ex: 60 * 60 * 24 },
             );
 
-            response.cookie("refreshToken", refreshToken, {
+            response.cookie("session", sessionId, {
                 httpOnly: true,
-                secure: false,
+                secure: process.env.NODE_ENV === "production",
                 sameSite: "lax",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-                path: "/",
-            });
-
-            response.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                secure: false,
-                sameSite: "lax",
-                maxAge: 15 * 60 * 1000,
-                path: "/",
+                maxAge: 1000 * 60 * 60 * 24,
             });
 
             return response.status(200).json({
                 success: true,
-                message: "Login successful",
+                message: "User logged in successfully",
             });
-
         } catch (error) {
-            if(error instanceof Error && error.message === "INVALID") {
+            if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({
                     success: false,
-                    message: "Invalid credentials",
-                })
+                    message: error.message,
+                });
             }
-
+            logger.error(error);
             return response.status(500).json({
                 success: false,
                 message: "Internal server error",
-            })
+            });
         }
     },
-
-    async refresh(request: Request, response: Response) {
-        try {
-            const refreshToken = request.cookies.refreshToken;
-            if (!refreshToken) {
-                return response.status(401).json({
-                    success: false,
-                    message: "Unauthorized",
-                });   
-            }
-            const isVerified = await verifyRefreshToken(refreshToken);
-            if (!isVerified) {
-                return response.status(401).json({
-                    success: false,
-                    message: "Unauthorized",
-                });
-            }
-            const accessToken = await createAccessToken({
-                userId: isVerified.userId,
-                email: isVerified.email,
-                tokenType: "access",
-            });
-            response.cookie("accessToken", accessToken, {
-                httpOnly: true,
-                secure: false,
-                sameSite: "lax",
-                maxAge: 15 * 60 * 1000,
-                path: "/",
-            });
-            return response.status(200).json({
-                success: true,
-                message: "Access token refreshed",
-            });
-        } catch(error){
-            return response.status(500).json({
-                success: false,
-                message: "Internal server error: " + error,
-            })
-        }
-    },
-
-    async me(request: Request, response: Response) {
-        return response.status(200).json({
-            success: true,
-            message: "Authorized",
-        })
-    },
-
-    async logout(request: Request, response: Response) {
-        try {
-            response.clearCookie("refreshToken", {
-                httpOnly: true,
-                secure: false,
-                sameSite: "lax",
-                path: "/",
-            });
-
-            response.clearCookie("accessToken", {
-                httpOnly: true,
-                secure: false,
-                sameSite: "lax",
-                path: "/",
-            });
-            return response.status(200).json({
-                success: true,
-                message: "Logout successful",
-            });
-        } catch (error) {
-            return response.status(500).json({
-                success: false,
-                message: "Internal server error: " + error,
-            })
-        }
-    }
 };
 
-
-export default AuthController;
+export default authController;
