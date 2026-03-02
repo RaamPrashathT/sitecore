@@ -8,7 +8,9 @@ import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 const authController = {
     async register(request: Request, response: Response) {
         try {
+            
             const result = await authService.register(request.body);
+            console.log(result);
             if (result.success) {
                 return response.status(200).json({
                     success: true,

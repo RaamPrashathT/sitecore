@@ -10,16 +10,15 @@ import redis from "../../shared/lib/redis.js";
 const authService = {
     async register(data: RegisterInputSchema) {
         const existingUser = await User.findOne({ email: data.email });
-
         if (existingUser) {
             const isCredentialAccount = existingUser.accounts.some(
                 (account) => account.provider === "credentials",
             );
-
+            
             if (isCredentialAccount) {
                 throw new ConflictError("User already exists");
             }
-
+            console.log("found user")
             const hashedPassword = await bcrypt.hash(data.password, 10);
 
             await User.findOneAndUpdate(

@@ -12,7 +12,7 @@ authRouter.post('/login', validate(LoginSchema), authController.login)
 
 authRouter.post('/logout', authController.logout)
 
-authRouter.post('/me', authorize, authController.me)
+authRouter.get('/me', authorize, authController.me)
 
 authRouter.get('/google', authController.google)
 

@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const checkSession = async () => {
             try {
                 const response = await api.get("/auth/me");
-                setUser(response.data);
+                setUser(response.data.data);
             } catch (error) {
                 console.log(error);
                 setUser(null);

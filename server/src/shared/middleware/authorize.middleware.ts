@@ -9,14 +9,12 @@ export const authorize = async (
 ) => {
     try {
         const sessionId = request.cookies.session;
-
         if (!sessionId) {
             return response.status(401).json({
                 success: false,
                 message: "Unauthorized",
             });
         }
-
         const raw = await redis.get(`session:${sessionId}`);
 
         if (!raw) {
@@ -24,8 +22,7 @@ export const authorize = async (
                 .status(401)
                 .json({ success: false, message: "Unauthorized" });
         }
-
-        request.session = JSON.parse(raw as string);
+        request.session = typeof raw === "string" ? JSON.parse(raw) : raw;
         next();
     } catch (error) {
         logger.error(error);
