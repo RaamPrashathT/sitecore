@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Spinner } from "../ui/spinner";
 import axios from "axios";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LoginForm({
     className,
@@ -39,6 +40,7 @@ export function LoginForm({
         },
     });
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const onSubmit = async (data: LoginInput) => {
         setApiMessage(null);
@@ -49,7 +51,9 @@ export function LoginForm({
                 message: result.data.message,
             });
             if (result.data.success) {
-                navigate("/dashboard");
+                const userResponse = await api.get("/auth/me");
+                login(userResponse.data.data);
+                navigate("/organizations");
             }
         } catch (error: unknown) {
             const message = axios.isAxiosError(error)
@@ -108,7 +112,11 @@ export function LoginForm({
                     )}
                 </Field>
                 <Field>
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className=""
+                    >
                         {isSubmitting ? (
                             <div className="flex items-center gap-x-1.5">
                                 <Spinner />
@@ -140,7 +148,7 @@ export function LoginForm({
                         Don&apos;t have an account?{" "}
                         <a
                             href="register"
-                            className="underline underline-offset-4"
+                            className="underline underline-offset-4 hover:text-green-700"
                         >
                             Register
                         </a>

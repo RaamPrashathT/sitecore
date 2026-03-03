@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
 interface User {
     id: string;
@@ -14,7 +14,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { readonly children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } catch (error) {
                 console.log(error);
                 setUser(null);
+                
             } finally {
                 setIsLoading(false);
             }
@@ -33,19 +34,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkSession();
     }, []);
 
-    const login = (userData: User) => setUser(userData);
+    const login = useCallback((userData: User) => {
+        setUser(userData);
+    }, []);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             await api.post("/auth/logout");
         } finally {
             setUser(null);
         }
-    };
+    }, []);
 
     const value = useMemo(
         () => ({ user, isLoading, login, logout }),
-        [user, isLoading]
+        [user, isLoading, login, logout]
     );
 
     return (

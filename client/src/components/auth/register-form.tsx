@@ -142,7 +142,7 @@ export function RegisterForm({
                         Already have an account?{" "}
                         <a
                             href="login"
-                            className="underline underline-offset-4"
+                            className="underline underline-offset-4 hover:text-green-700"
                         >
                             Log in
                         </a>

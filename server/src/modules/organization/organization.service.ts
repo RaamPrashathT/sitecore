@@ -30,16 +30,20 @@ const orgService = {
     },
 
     async getOrgs(userId: string) {
-        const orgs = await prisma.organization.findMany({
+        return prisma.membership.findMany({
             where: {
-                members: {
-                    some: {
-                        userId: userId,
+                userId: userId,
+            },
+            select: {
+                role: true,
+                organizationId: true,
+                organization: {
+                    select: {
+                        orgName: true
                     }
                 }
-            }
+            } 
         })
-        return orgs;
     }
 
 

@@ -69,11 +69,7 @@ const orgController = {
 
             const result = await orgService.getOrgs(sessionId as string);
 
-            return response.status(200).json({
-                success: true,
-                message: "Organizations fetched",
-                data: result,
-            });
+            return response.status(200).json(result);
 
         }catch (error) {
             logger.error(error);
