@@ -2,7 +2,6 @@ datasource db {
     provider = "postgresql"
 }
 
-
 generator client {
     provider = "prisma-client"
     output   = "../generated/prisma"
@@ -14,14 +13,25 @@ enum Role {
     USER
 }
 
+enum CatalogueCategory {
+    MATERIALS
+    LABOUR
+    EQUIPMENT
+    SUBCONTRACTORS
+    TRANSPORT
+    OVERHEAD
+}
+
 model Organization {
     id        String   @id @default(uuid())
     orgName   String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    image     String
 
-    members  Membership[]
-    projects Project[]
+    catalogue Catalogue[]
+    members   Membership[]
+    projects  Project[]
 }
 
 model Membership {
@@ -33,6 +43,30 @@ model Membership {
     organizationId String
 
     @@unique([userId, organizationId])
+}
+
+model Catalogue {
+    id              String            @id @default(uuid())
+    name            String
+    category        CatalogueCategory
+    unit            String
+    defaultLeadTime Int               @default(0)
+
+    supplierQuotes SupplierQuote[]
+
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId String
+}
+
+model SupplierQuote {
+    id           String  @id @default(uuid())
+    supplier     String
+    truePrice    Decimal
+    standardRate Decimal
+    leadTime     Int
+
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+    catalogueId String
 }
 
 model Project {
