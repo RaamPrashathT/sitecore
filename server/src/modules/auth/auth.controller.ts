@@ -50,7 +50,7 @@ const authController = {
                     userId: userId,
                     userAgent: request.headers["user-agent"],
                 }),
-                { ex: 60 * 60 * 24 },
+                { EX: 60 * 60 * 24 },
             );
 
             response.cookie("session", sessionId, {

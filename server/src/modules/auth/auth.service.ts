@@ -99,7 +99,7 @@ const authService = {
             .update(codeVerifier)
             .digest("base64url");
 
-        await redis.set(`oauth_state:${state}`, codeVerifier, { ex: 600 });
+        await redis.set(`oauth_state:${state}`, codeVerifier, { EX : 600 });
 
         const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
         const options = {
