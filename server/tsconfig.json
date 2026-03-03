@@ -5,10 +5,6 @@
         "rootDir": ".",
         "outDir": "./dist",
 
-        // Environment Settings
-        // See also https://aka.ms/tsconfig/module
-        "module": "nodenext",
-        "target": "esnext",
         // For nodejs:
         "lib": ["esnext"],
         "types": ["node"],
@@ -38,6 +34,11 @@
         "isolatedModules": true,
         "noUncheckedSideEffectImports": true,
         "moduleDetection": "force",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "target": "ES2023",
+        "esModuleInterop": true,
     }
 }
