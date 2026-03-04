@@ -22,9 +22,6 @@ export const OrgProvider = ({children} : {readonly children: React.ReactNode}) =
     const [isLoading, setIsLoading] = useState(true);
     const {orgSlug} = useParams();
 
-
-
-
     useEffect(() => {
         const fetchMembership = async () => {
             console.log("Context is running!")
@@ -33,7 +30,7 @@ export const OrgProvider = ({children} : {readonly children: React.ReactNode}) =
                 const response = await api.post("/org/identity", {
                     orgName: orgSlug
                 })
-                setMembership(response.data)
+                setMembership(response.data.data)
             }catch (error) {
                 console.log(error)
                 setMembership(null)

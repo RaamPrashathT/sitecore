@@ -21,10 +21,9 @@ import {
     SidebarHeader,
     SidebarRail,
 } from "@/components/ui/sidebar";
+import { useParams } from "react-router-dom";
 
-interface OrgSidebarProps extends React.ComponentProps<typeof Sidebar> {
-    slug: string;
-}
+
 
 const data = {
     user: {
@@ -88,8 +87,8 @@ const data = {
     ],
 };
 
-const OrgSidebar = ({ slug, ...props }: OrgSidebarProps) => {
-
+const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
+    const { orgSlug } = useParams<{ orgSlug: string }>();
     return (
 
         <Sidebar collapsible="icon" {...props}>
@@ -99,7 +98,7 @@ const OrgSidebar = ({ slug, ...props }: OrgSidebarProps) => {
             <SidebarContent>
                 <SidebarContents items={data.sidebarContents.map((item) => ({
                     ...item,
-                    url: `/org/${slug}${item.url}`,
+                    url: `/org/${orgSlug}${item.url}`,
                 }))}/>
             </SidebarContent>
             <SidebarFooter>
