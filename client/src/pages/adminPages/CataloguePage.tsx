@@ -1,7 +1,7 @@
 const CataloguePage = () => {
     return (
         <div>
-            
+            hi
         </div>
     )
 }

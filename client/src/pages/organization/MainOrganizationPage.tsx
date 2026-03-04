@@ -16,7 +16,6 @@ const MainOrganizationPage = () => {
     const segments = location.pathname.split("/");
 
     React.useEffect(() => {
-        console.log(segments);
         setCurrentLocation(segments[3]);
     }, [segments]);
 

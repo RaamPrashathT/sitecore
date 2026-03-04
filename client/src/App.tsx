@@ -12,6 +12,7 @@ import EngineerPage from "./pages/adminPages/EngineersPage";
 import ClientPage from "./pages/adminPages/ClientPage";
 import ProjectPage from "./pages/adminPages/ProjectsPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
+import { OrgProvider } from "./contexts/OrgContext";
 
 function App() {
     return (
@@ -28,18 +29,26 @@ function App() {
                         />
                         <Route
                             path="/organizations/create"
-                            element={<CreateOrgPage/>}
+                            element={<CreateOrgPage />}
                         />
+
                         <Route
                             path="/org/:orgSlug"
-                            element={<MainOrganizationPage />}
+                            element={
+                                <OrgProvider>
+                                    <MainOrganizationPage />
+                                </OrgProvider>
+                            }
                         >
-                            <Route index element={<DashboardPage/>}/>
-                            <Route path="catalogue" element={<CataloguePage/>}/>
-                            <Route path="engineers" element={<EngineerPage/>}/>
-                            <Route path="clients" element={<ClientPage/>}/>
-                            <Route path="projects" element={<ProjectPage/>}/>
-                            <Route path="settings" element={<SettingsPage/>}/>
+                            <Route index element={<DashboardPage />} />
+                            <Route
+                                path="catalogue"
+                                element={<CataloguePage />}
+                            />
+                            <Route path="engineers" element={<EngineerPage />}/>
+                            <Route path="clients" element={<ClientPage />} />
+                            <Route path="projects" element={<ProjectPage />} />
+                            <Route path="settings" element={<SettingsPage />} />
                         </Route>
                     </Route>
                 </Routes>

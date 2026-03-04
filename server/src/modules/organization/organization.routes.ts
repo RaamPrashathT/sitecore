@@ -8,4 +8,6 @@ orgRouter.post("/create", authorize, orgController.createOrg)
 
 orgRouter.get("/getOrgs", authorize, orgController.getOrg)
 
+orgRouter.post("/identity", authorize, orgController.identity);
+
 export default orgRouter
