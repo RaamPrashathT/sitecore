@@ -24,7 +24,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 
-const SidebarUser =({
+const SidebarUser = ({
     user,
 }: {
     readonly user: {
@@ -49,8 +49,8 @@ const SidebarUser =({
                                     src={user.avatar}
                                     alt={user.name}
                                 />
-                                <AvatarFallback className="rounded-lg">
-                                    CN
+                                <AvatarFallback className="rounded-lg bg-purple-500 text-white">
+                                    R
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -77,8 +77,8 @@ const SidebarUser =({
                                         src={user.avatar}
                                         alt={user.name}
                                     />
-                                    <AvatarFallback className="rounded-lg">
-                                        CN
+                                    <AvatarFallback className="rounded-lg bg-purple-500 text-white">
+                                        R
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -91,23 +91,14 @@ const SidebarUser =({
                                 </div>
                             </div>
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <Sparkles />
-                                Upgrade to Pro
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
                                 <BadgeCheck />
                                 Account
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <CreditCard />
-                                Billing
-                            </DropdownMenuItem>
+                           
                             <DropdownMenuItem>
                                 <Bell />
                                 Notifications
@@ -123,6 +114,6 @@ const SidebarUser =({
             </SidebarMenuItem>
         </SidebarMenu>
     );
-}
+};
 
 export default SidebarUser;

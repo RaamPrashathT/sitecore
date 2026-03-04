@@ -63,7 +63,7 @@ model SupplierQuote {
     supplier     String
     truePrice    Decimal
     standardRate Decimal
-    leadTime     Int
+    leadTime     Int?
 
     catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
     catalogueId String

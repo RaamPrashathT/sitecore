@@ -1,7 +1,9 @@
+import CatalogueTable from "@/components/catalogue/CatalogueTable"
+
 const CataloguePage = () => {
     return (
         <div>
-            hi
+            <CatalogueTable/>
         </div>
     )
 }

@@ -7,6 +7,7 @@ import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { ConflictError } from "../../shared/error/conflict.error.js";
 
 import { MissingError } from "../../shared/error/missing.error.js";
+import redis from "../../shared/lib/redis.js";
 
 const orgController = {
     async createOrg(request: Request, response: Response) {
@@ -30,6 +31,8 @@ const orgController = {
                 orgName: validatedData.data.orgName.trim(),
                 userId: request.session.userId,
             });
+
+
 
             return response.status(201).json({
                 success: true,
@@ -95,6 +98,18 @@ const orgController = {
             };
 
             const result = await orgService.identity(input);
+
+            const sessionId = request.cookies.session;
+            const sessionStr = await redis.get(`session:${sessionId}`);
+            const sessionObj = JSON.parse(sessionStr as string);
+            sessionObj.contexts[result.orgId] = {
+                orgName: result.orgName,
+                role: result.role,
+            }
+            await redis.set(`session:${sessionId}`, JSON.stringify(sessionObj), {
+                KEEPTTL: true,
+            });
+
             return response.status(200).json({
                 success: true,
                 message: "Data fetched successfully",

@@ -5,6 +5,7 @@ import { connectMongoDB } from "./shared/lib/mongo.js";
 import { env } from "./shared/config/env.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import orgRouter from "./modules/organization/organization.routes.js";
+import catalogueRouter from "./modules/catalogue/catalogue.route.js";
 const PORT = env.PORT || 5000;
 
 const app = express();
@@ -21,6 +22,7 @@ connectMongoDB();
 
 app.use("/auth", authRouter);
 app.use("/org", orgRouter);
+app.use("/catalogue", catalogueRouter)
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

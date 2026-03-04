@@ -49,6 +49,7 @@ const authController = {
                 JSON.stringify({
                     userId: userId,
                     userAgent: request.headers["user-agent"],
+                    contexts:{}
                 }),
                 { EX: 60 * 60 * 24 },
             );

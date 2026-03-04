@@ -27,25 +27,25 @@ import { useParams } from "react-router-dom";
 
 const data = {
     user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
+        name: "Raam Prashath T",
+        email: "raamthiruna@gmail.com",
+        avatar: "/avatars/raam.jpg",
     },
     orgs: [
         {
-            name: "Acme Inc",
+            name: "Site Core",
             logo: GalleryVerticalEnd,
-            role: "Enterprise",
+            role: "Admin",
         },
         {
             name: "Acme Corp.",
             logo: AudioWaveform,
-            role: "Startup",
+            role: "Client",
         },
         {
             name: "Evil Corp.",
             logo: Command,
-            role: "Free",
+            role: "Engineer",
         },
     ],
     sidebarContents: [
