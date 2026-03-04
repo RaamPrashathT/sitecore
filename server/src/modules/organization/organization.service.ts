@@ -3,8 +3,7 @@ import { prisma } from "../../shared/lib/prisma.js";
 import type { CreateOrganizationInput } from "./organization.schema.js";
 
 const orgService = {
-    async createOrg(data: CreateOrganizationInput): Promise<void> {
-        
+    async createOrg(data: CreateOrganizationInput) {
         const existingOrg = await prisma.organization.findUnique({
             where: {
                 orgName: data.orgName,
@@ -16,7 +15,7 @@ const orgService = {
         }
 
 
-        await prisma.organization.create({
+        const newOrg = await prisma.organization.create({
             data: {
                 orgName: data.orgName,
                 members: {
@@ -27,6 +26,11 @@ const orgService = {
                 },
             },
         });
+
+        return {
+            orgId: newOrg.id,
+            orgName: newOrg.orgName,
+        }
     },
 
     async getOrgs(userId: string) {

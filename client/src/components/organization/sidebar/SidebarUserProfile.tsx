@@ -1,5 +1,3 @@
-"use client";
-
 import {
     BadgeCheck,
     Bell,
@@ -26,7 +24,7 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavUser({
+const SidebarUser =({
     user,
 }: {
     readonly user: {
@@ -34,7 +32,7 @@ export function NavUser({
         email: string;
         avatar: string;
     };
-}) {
+}) => {
     const { isMobile } = useSidebar();
 
     return (
@@ -126,3 +124,5 @@ export function NavUser({
         </SidebarMenu>
     );
 }
+
+export default SidebarUser;

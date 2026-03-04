@@ -25,14 +25,15 @@ const orgController = {
                 throw new ValidationError(validatedData.error.message);
             }
 
-            await orgService.createOrg({
-                orgName: validatedData.data.orgName,
+            const result = await orgService.createOrg({
+                orgName: validatedData.data.orgName.trim(),
                 userId: request.session.userId,
             });
 
             return response.status(201).json({
                 success: true,
                 message: "Organization created",
+                data: result,
             });
         } catch (error) {
             if(error instanceof UnAuthorizedError) {

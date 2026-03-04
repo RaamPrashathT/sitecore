@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { ChevronsUpDown, Plus } from "lucide-react";
 
@@ -19,17 +17,17 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 
-export function TeamSwitcher({
-    teams,
+const OrgSwitcher = ({
+    orgs,
 }: {
-    readonly teams: {
+    readonly orgs: {
         name: string;
         logo: React.ElementType;
-        plan: string;
+        role: string;
     }[];
-}) {
+}) => {
     const { isMobile } = useSidebar();
-    const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+    const [activeTeam, setActiveTeam] = React.useState(orgs[0]);
 
     if (!activeTeam) {
         return null;
@@ -52,7 +50,7 @@ export function TeamSwitcher({
                                     {activeTeam.name}
                                 </span>
                                 <span className="truncate text-xs">
-                                    {activeTeam.plan}
+                                    {activeTeam.role}
                                 </span>
                             </div>
                             <ChevronsUpDown className="ml-auto" />
@@ -67,16 +65,16 @@ export function TeamSwitcher({
                         <DropdownMenuLabel className="text-xs text-muted-foreground">
                             Teams
                         </DropdownMenuLabel>
-                        {teams.map((team, index) => (
+                        {orgs.map((org, index) => (
                             <DropdownMenuItem
-                                key={team.name}
-                                onClick={() => setActiveTeam(team)}
+                                key={org.name}
+                                onClick={() => setActiveTeam(org)}
                                 className="gap-2 p-2"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-md border">
-                                    <team.logo className="size-3.5 shrink-0" />
+                                    <org.logo className="size-3.5 shrink-0" />
                                 </div>
-                                {team.name}
+                                {org.name}
                                 <DropdownMenuShortcut>
                                     ⌘{index + 1}
                                 </DropdownMenuShortcut>
@@ -88,7 +86,7 @@ export function TeamSwitcher({
                                 <Plus className="size-4" />
                             </div>
                             <div className="font-medium text-muted-foreground">
-                                Add team
+                                Add Organization
                             </div>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -97,3 +95,5 @@ export function TeamSwitcher({
         </SidebarMenu>
     );
 }
+
+export default OrgSwitcher;

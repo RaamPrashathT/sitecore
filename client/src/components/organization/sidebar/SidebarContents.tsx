@@ -1,4 +1,4 @@
-"use client";
+import { type LucideIcon } from "lucide-react";
 
 import {
     SidebarGroup,
@@ -7,10 +7,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import type { LucideIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-export function NavMain({
+const SidebarContents = ({
     items,
 }: {
     readonly items: {
@@ -19,23 +18,24 @@ export function NavMain({
         icon?: LucideIcon;
         isActive?: boolean;
     }[];
-}) {
-    const navigate = useNavigate();
+}) => {
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel>Organization</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton
-                            onClick={() => navigate(item.url)}
-                        >
-                            {item.icon && <item.icon />}
-                            <span>{item.title}</span>
-                        </SidebarMenuButton>
+                        <Link to={item.url} className="flex">
+                            <SidebarMenuButton tooltip={item.title}>
+                                {item.icon && <item.icon />}
+                                <p>{item.title}</p>
+                            </SidebarMenuButton>
+                        </Link>
                     </SidebarMenuItem>
                 ))}
             </SidebarMenu>
         </SidebarGroup>
     );
-}
+};
+
+export default SidebarContents;
