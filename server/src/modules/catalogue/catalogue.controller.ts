@@ -5,11 +5,13 @@ import catalogueService from "./catalogue.service";
 
 const catalogueController = {
     async getCatalogue(request: Request, response: Response) {
+
         try {
             if(request.tenant?.role !== "ADMIN") {
                 throw new UnAuthorizedError("Unauthorized");
             }
             const result = await catalogueService.getCatalogue(request.tenant.orgId)
+            console.log(result)
             return response.status(200).json({
                 success: true,
                 message: "Catalogue fetched successfully",
