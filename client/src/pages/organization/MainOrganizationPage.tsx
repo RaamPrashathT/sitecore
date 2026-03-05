@@ -17,7 +17,7 @@ const MainOrganizationPage = () => {
     const { orgSlug } = useParams<{ orgSlug: string }>();
     const location = useLocation();
     const segments = location.pathname.split("/");
-
+    
     const { membership, isLoading } = useOrg();
 
     React.useEffect(() => {

@@ -7,4 +7,6 @@ const catalogueRouter = Router();
 
 catalogueRouter.get("/getCatalogue", authorize, orgAuthorize, catalogueController.getCatalogue)
 
+catalogueRouter.post("/createCatalogue", authorize, orgAuthorize, catalogueController.createCatalogue)
+
 export default catalogueRouter;

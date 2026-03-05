@@ -26,7 +26,6 @@ export const OrgProvider = ({
 
     useEffect(() => {
         const fetchMembership = async () => {
-            console.log("Context is running!");
             if (!orgSlug) {
                 setIsLoading(false); 
                 return;

@@ -13,15 +13,15 @@ export const orgAuthorize = async (
         const sessionId = request.cookies.session;
 
         const sessionStr = await redis.get(`session:${sessionId}`);
+
         const sessionObj = JSON.parse(sessionStr as string);
         const context = sessionObj.contexts?.[incomingOrgId]
-
         if(!context) {
             throw new UnAuthorizedError("Unauthorized")
         }
 
         request.tenant = {
-            orgId: context.orgId,
+            orgId: incomingOrgId,
             role: context.role
         }
         next();

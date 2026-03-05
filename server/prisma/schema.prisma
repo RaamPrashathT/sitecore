@@ -56,6 +56,8 @@ model Catalogue {
 
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
+
+    @@unique([name, organizationId])
 }
 
 model SupplierQuote {
@@ -67,6 +69,8 @@ model SupplierQuote {
 
     catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
     catalogueId String
+
+    @@unique([catalogueId, supplier])
 }
 
 model Project {
@@ -75,6 +79,7 @@ model Project {
 
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
+
 
     assignments Assignment[]
 }

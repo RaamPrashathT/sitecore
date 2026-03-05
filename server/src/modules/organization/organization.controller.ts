@@ -32,14 +32,13 @@ const orgController = {
                 userId: request.session.userId,
             });
 
-
-
             return response.status(201).json({
                 success: true,
                 message: "Organization created",
                 data: result,
             });
         } catch (error) {
+
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({
                     success: false,
@@ -115,6 +114,8 @@ const orgController = {
                 message: "Data fetched successfully",
                 data: result,
             });
+
+
         } catch (error) {
             if (error instanceof ValidationError) {
                 return response.status(400).json({
