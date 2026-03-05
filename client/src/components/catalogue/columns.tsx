@@ -1,5 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import type { CatalogueWithQuotes } from '@/hooks/useGetCatalogs'; 
+import { TableCell } from '../ui/table';
+import CatalogueActionButton from './CatalogueActionButton';
 
 const columnHelper = createColumnHelper<CatalogueWithQuotes>();
 
@@ -7,7 +9,7 @@ export const columns = [
     columnHelper.accessor('name', {
         header: "Item Name",
         cell: info => (
-            <div className='font-bold flex items-center h-full'>
+            <div className='font-medium flex items-center h-full'>
                 {info.getValue()}
             </div>
         )
@@ -16,9 +18,9 @@ export const columns = [
     columnHelper.accessor('category', {
         header: "Category",
         cell: info => (
-            <div className='font-bold flex items-center h-full'>
-                {info.getValue()}
-            </div>
+            <TableCell className='font-medium flex items-center h-full capitalize px-0'>
+                {info.getValue().toLowerCase()}
+            </TableCell>
         )
     }),
 
@@ -29,12 +31,12 @@ export const columns = [
             return (
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
-                        <div 
+                        <TableCell 
                             key={quote.id}
-                            className='flex items-center'
+                            className='flex items-center px-0 font-medium'
                         >
                             {quote.supplier}
-                        </div>
+                        </TableCell>
                     ))}
                 </div>
             )
@@ -49,12 +51,12 @@ export const columns = [
             return (
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
-                        <div 
+                        <TableCell 
                             key={quote.id}
-                            className='flex items-center'
+                            className='flex items-center px-0 font-medium'
                         >
                             {quote.truePrice}/{unit}
-                        </div>
+                        </TableCell>
                     ))}
                 </div>
             )
@@ -69,12 +71,12 @@ export const columns = [
             return (
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
-                        <div 
+                        <TableCell 
                             key={quote.id}
-                            className='flex items-center'
+                            className='flex items-center px-0 font-medium'
                         >
                             {quote.standardRate}/{unit}
-                        </div>
+                        </TableCell>
                     ))}
                 </div>
             )
@@ -89,17 +91,32 @@ export const columns = [
             return (
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
-                        <div 
+                        <TableCell 
                             key={quote.id}
-                            className='flex items-center'
+                            className='flex items-center px-0 font-medium'
                         >
                             {quote.leadTime ? quote.leadTime : defaultLeadTime}
-                        </div>
+                        </TableCell>
                     ))}
                 </div>
             )
         }
     }),
 
+    columnHelper.display({
+        id: 'Actions',
+        header: "Actions",
+        cell: ({row}) => {
+            return (
+                <div className="flex flex-col divide-y w-full">
+                    {row.original.supplierQuotes.map((quote) => (
+                        <div key={quote.id} >
+                            <CatalogueActionButton id={quote.id} />
+                        </div>
+                    ))}
+                </div>
+            )
+        }
+    }),
     
 ]

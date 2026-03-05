@@ -10,7 +10,6 @@ const authController = {
         try {
             
             const result = await authService.register(request.body);
-            console.log(result);
             if (result.success) {
                 return response.status(200).json({
                     success: true,

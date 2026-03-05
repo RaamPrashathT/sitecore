@@ -11,7 +11,6 @@ const catalogueController = {
                 throw new UnAuthorizedError("Unauthorized");
             }
             const result = await catalogueService.getCatalogue(request.tenant.orgId)
-            console.log(result)
             return response.status(200).json({
                 success: true,
                 message: "Catalogue fetched successfully",

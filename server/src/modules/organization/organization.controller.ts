@@ -123,7 +123,6 @@ const orgController = {
                 });
             }
             if (error instanceof MissingError) {
-                console.log("missing")
                 return response.status(404).json({
                     success: false,
                     message: error.message,

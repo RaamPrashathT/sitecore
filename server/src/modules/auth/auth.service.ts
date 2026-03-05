@@ -18,7 +18,6 @@ const authService = {
             if (isCredentialAccount) {
                 throw new ConflictError("User already exists");
             }
-            console.log("found user")
             const hashedPassword = await bcrypt.hash(data.password, 10);
 
             await User.findOneAndUpdate(

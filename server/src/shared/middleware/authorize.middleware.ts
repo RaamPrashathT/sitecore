@@ -7,7 +7,6 @@ export const authorize = async (
     response: Response,
     next: NextFunction,
 ) => {
-    console.log("auth");
     try {
         const sessionId = request.cookies.session;
         if (!sessionId) {

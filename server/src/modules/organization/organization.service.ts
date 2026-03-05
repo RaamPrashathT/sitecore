@@ -51,7 +51,6 @@ const orgService = {
     },
 
     async identity(data: { orgName: string; userId: string }) {
-        console.log()
         const fetchedData = await prisma.membership.findFirst({
             where: {
                 userId: data.userId,
