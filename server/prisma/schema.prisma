@@ -24,7 +24,10 @@ enum CatalogueCategory {
 
 model Organization {
     id        String   @id @default(uuid())
-    orgName   String   @unique
+    name   String
+    slug      String   @unique
+    slugBase  String   
+    slugIndex Int      
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     image     String?
@@ -79,7 +82,6 @@ model Project {
 
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
-
 
     assignments Assignment[]
 }

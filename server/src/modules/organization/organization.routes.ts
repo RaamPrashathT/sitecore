@@ -4,7 +4,7 @@ import orgController from "./organization.controller.js";
 
 const orgRouter = Router();
 
-orgRouter.post("/create", authorize, orgController.createOrg)
+orgRouter.post("/", authorize, orgController.create)
 
 orgRouter.get("/getOrgs", authorize, orgController.getOrg)
 

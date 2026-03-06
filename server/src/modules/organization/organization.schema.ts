@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 export const createOrganizationSchema = z.object({
-    orgName: z.string(),
-    userId: z.string(),
+    name: z.string().trim().min(3).max(80)
 });
 
 export const orgSlugSchema = z
@@ -12,4 +11,4 @@ export const orgSlugSchema = z
     .trim()
     .regex(/^[a-z0-9-]+$/, "Invalid Organization name(slug)")
 
-export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
+export type CreateOrganizationBody = z.infer<typeof createOrganizationSchema>;

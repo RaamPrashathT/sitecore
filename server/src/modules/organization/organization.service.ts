@@ -1,23 +1,31 @@
 import { ConflictError } from "../../shared/error/conflict.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
-import type { CreateOrganizationInput } from "./organization.schema.js";
+import { slugify } from "../../shared/utils/slugify.js";
+
+export type CreateOrganizationInput = {
+    name: string;
+    userId: string;
+};
 
 const orgService = {
-    async createOrg(data: CreateOrganizationInput) {
-        const existingOrg = await prisma.organization.findUnique({
-            where: {
-                orgName: data.orgName,
-            },
+    async create(data: CreateOrganizationInput) {
+        const slugBase = slugify(data.name);
+
+        const lastOrg = await prisma.organization.findFirst({
+            where: { slugBase },
+            orderBy: { slugIndex: "desc" },
         });
 
-        if (existingOrg) {
-            throw new ConflictError("Organization already exists");
-        }
+        const nextIndex = lastOrg ? lastOrg.slugIndex + 1 : 1;
+        const slug = nextIndex === 1 ? slugBase : `${slugBase}-${nextIndex}`;
 
         const newOrg = await prisma.organization.create({
             data: {
-                orgName: data.orgName,
+                name: data.name,
+                slugBase,
+                slugIndex: nextIndex,
+                slug,
                 members: {
                     create: {
                         userId: data.userId,
@@ -29,7 +37,8 @@ const orgService = {
 
         return {
             orgId: newOrg.id,
-            orgName: newOrg.orgName,
+            orgName: newOrg.name,
+            slug: newOrg.slug,
         };
     },
 
@@ -43,7 +52,7 @@ const orgService = {
                 organizationId: true,
                 organization: {
                     select: {
-                        orgName: true,
+                        name: true,
                     },
                 },
             },
@@ -55,14 +64,14 @@ const orgService = {
             where: {
                 userId: data.userId,
                 organization: {
-                    orgName: data.orgName,
+                    name: data.orgName,
                 },
             },
             select: {
                 role: true,
                 organizationId: true,
                 organization: {
-                    select: { orgName: true },
+                    select: { name: true },
                 },
             },
         });
@@ -72,7 +81,7 @@ const orgService = {
         }
 
         const response = {
-            orgName: fetchedData.organization.orgName,
+            orgName: fetchedData.organization.name,
             orgId: fetchedData.organizationId,
             role: fetchedData.role,
         };

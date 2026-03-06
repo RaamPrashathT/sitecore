@@ -10,35 +10,25 @@ import { MissingError } from "../../shared/error/missing.error.js";
 import redis from "../../shared/lib/redis.js";
 
 const orgController = {
-    async createOrg(request: Request, response: Response) {
+    async create(request: Request, response: Response) {
         try {
             if (!request.session?.userId) {
                 throw new UnAuthorizedError();
             }
 
-            const input = {
-                orgName: request.body.orgName,
-                userId: request.session.userId,
-            };
-
-            const validatedData = createOrganizationSchema.safeParse(input);
+            const validatedData = createOrganizationSchema.safeParse(request.body);
 
             if (!validatedData.success) {
                 throw new ValidationError(validatedData.error.message);
             }
 
-            const result = await orgService.createOrg({
-                orgName: validatedData.data.orgName.trim(),
+            const result = await orgService.create({
+                name: validatedData.data.name,
                 userId: request.session.userId,
             });
 
-            return response.status(201).json({
-                success: true,
-                message: "Organization created",
-                data: result,
-            });
+            return response.status(201).json(result);
         } catch (error) {
-
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({
                     success: false,
