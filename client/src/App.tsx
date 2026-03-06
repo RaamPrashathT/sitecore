@@ -14,6 +14,7 @@ import ProjectPage from "./pages/adminPages/ProjectsPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
 import { OrgProvider } from "./contexts/OrgContext";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
+import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 
 function App() {
     return (
@@ -46,8 +47,18 @@ function App() {
                                 path="catalogue"
                                 element={<CataloguePage />}
                             />
-                            <Route path="catalogue/create" element={<CreateCataloguePage />} />
-                            <Route path="engineers" element={<EngineerPage />}/>
+                            <Route
+                                path="catalogue/create"
+                                element={<CreateCataloguePage />}
+                            />
+                            <Route
+                                path="catalogue/edit/:catalogueId/:quoteId"
+                                element={<EditCataloguePage />}
+                            />
+                            <Route
+                                path="engineers"
+                                element={<EngineerPage />}
+                            />
                             <Route path="clients" element={<ClientPage />} />
                             <Route path="projects" element={<ProjectPage />} />
                             <Route path="settings" element={<SettingsPage />} />

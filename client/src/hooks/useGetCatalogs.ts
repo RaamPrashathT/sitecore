@@ -13,12 +13,14 @@ export type CatalogueWithQuotes = {
         | "OVERHEAD";
     unit: string;
     defaultLeadTime: number;
+    organizationId: string;
     supplierQuotes: {
         id: string;
         supplier: string;
         truePrice: number;
         standardRate: number;
         leadTime: number | null;
+        catalogueId: string;
     }[];
 };
 

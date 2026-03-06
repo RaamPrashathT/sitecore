@@ -1,12 +1,26 @@
 import { Edit, EllipsisVertical, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Link } from "react-router-dom";
+import { useOrg } from "@/hooks/useOrg";
 
 interface CatalogueActionButtonProps {
-    id: string;
+    catalogueId: string;
+    quoteId: string;
 }
 
-const CatalogueActionButton = (id: CatalogueActionButtonProps) => {
+const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
+    const { membership , isLoading} = useOrg();
+    if(isLoading) return (
+        <div>
+            Loading...
+        </div>
+    )
+    if(!membership) return (
+        <div>
+            No access
+        </div>
+    )
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -20,8 +34,13 @@ const CatalogueActionButton = (id: CatalogueActionButtonProps) => {
             </PopoverTrigger>
             <PopoverContent align="end" className="p-1 flex flex-col w-30">
                 <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
-                    <Edit />
-                    Edit
+                    <Link 
+                        className="flex" 
+                        to={`/org/${membership.orgName}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
+                    >
+                        <Edit />
+                        Edit
+                    </Link>
                 </Button>
                 <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
                     <Trash />

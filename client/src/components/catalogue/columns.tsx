@@ -111,7 +111,7 @@ export const columns = [
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
                         <div key={quote.id} >
-                            <CatalogueActionButton id={quote.id} />
+                            <CatalogueActionButton quoteId={quote.id} catalogueId={quote.catalogueId} />
                         </div>
                     ))}
                 </div>

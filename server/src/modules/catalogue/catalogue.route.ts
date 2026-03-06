@@ -9,4 +9,6 @@ catalogueRouter.get("/getCatalogue", authorize, orgAuthorize, catalogueControlle
 
 catalogueRouter.post("/createCatalogue", authorize, orgAuthorize, catalogueController.createCatalogue)
 
+catalogueRouter.post("/editCatalogue", authorize, orgAuthorize, catalogueController.editCatalogue)
+
 export default catalogueRouter;
