@@ -24,5 +24,12 @@ export const editFormSchema = z.object({
     quoteId: z.string().min(1, "Quote Id is required")
 });
 
+export const deleteFormSchema = z.object({
+    catalogueId: z.string().min(1, "Catalogue Id is required"),
+    quoteId: z.string().min(1, "Quote Id is required")
+})
+
+
 export type createCatalogueFormSchema = z.infer<typeof formSchema>;
 export type editCatalogueFormSchema = z.infer<typeof editFormSchema>;
+export type deleteCatalogueFormSchema = z.infer<typeof deleteFormSchema>;

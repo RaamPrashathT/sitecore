@@ -1,8 +1,9 @@
-import { Edit, EllipsisVertical, Trash } from "lucide-react";
+import { Edit, EllipsisVertical } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Link } from "react-router-dom";
 import { useOrg } from "@/hooks/useOrg";
+import DeleteCatalogueButton from "./DeleteCatalogueButton";
 
 interface CatalogueActionButtonProps {
     catalogueId: string;
@@ -42,10 +43,12 @@ const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
                         Edit
                     </Link>
                 </Button>
-                <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
-                    <Trash />
-                    Delete
-                </Button>
+                <DeleteCatalogueButton 
+                    
+                    orgId={membership.orgId}
+                    catalogueId={props.catalogueId}
+                    quoteId={props.quoteId}
+                />
             </PopoverContent>
         </Popover>
     );

@@ -1,6 +1,6 @@
 import { MissingError } from "../../shared/error/missing.error";
 import { prisma } from "../../shared/lib/prisma";
-import type { createCatalogueFormSchema, editCatalogueFormSchema } from "./catalogue.schema";
+import type { createCatalogueFormSchema, deleteCatalogueFormSchema, editCatalogueFormSchema } from "./catalogue.schema";
 
 const catalogueService = {
     async getCatalogue(orgId: string) {
@@ -137,7 +137,34 @@ const catalogueService = {
                 })
             }
         }
-    }
+    },
+
+    async deleteCatalogue(data: deleteCatalogueFormSchema, orgId: string) {
+        const existingCatalogue = await prisma.catalogue.findFirst({
+            where: {
+                id: data.catalogueId,
+            },
+            include: {
+                supplierQuotes: true
+            }  
+        })
+        if(!existingCatalogue) {
+            throw new MissingError("Catalogue not found")
+        }
+        if(existingCatalogue.supplierQuotes.length >= 2) {
+            await prisma.supplierQuote.delete({
+                where: {
+                    id: data.quoteId
+                }
+            })
+        } else {
+            await prisma.catalogue.delete({
+                where: {
+                    id: data.catalogueId
+                }
+            })
+        }
+    }   
 }
 
 export default catalogueService;

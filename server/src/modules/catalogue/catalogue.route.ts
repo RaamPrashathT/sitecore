@@ -11,4 +11,7 @@ catalogueRouter.post("/createCatalogue", authorize, orgAuthorize, catalogueContr
 
 catalogueRouter.post("/editCatalogue", authorize, orgAuthorize, catalogueController.editCatalogue)
 
+catalogueRouter.post("/deleteCatalogue", authorize, orgAuthorize, catalogueController.deleteCatalogue)
+
+
 export default catalogueRouter;

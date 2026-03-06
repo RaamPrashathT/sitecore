@@ -8,6 +8,7 @@ export const authorize = async (
     next: NextFunction,
 ) => {
     try {
+        
         const sessionId = request.cookies.session;
         if (!sessionId) {
             return response.status(401).json({

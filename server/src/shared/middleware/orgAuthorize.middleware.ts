@@ -9,7 +9,6 @@ export const orgAuthorize = async (
     next: NextFunction,
 ) => {
     try {
-        
         const incomingOrgId = request.headers["x-org-id"] as string
         const sessionId = request.cookies.session;
 
