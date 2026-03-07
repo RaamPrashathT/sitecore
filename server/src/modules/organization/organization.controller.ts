@@ -8,6 +8,8 @@ import { ConflictError } from "../../shared/error/conflict.error.js";
 
 import { MissingError } from "../../shared/error/missing.error.js";
 import redis from "../../shared/lib/redis.js";
+import { ZodError } from "zod";
+import { addOrgContext } from "../../shared/utils/session.js";
 
 const orgController = {
     async create(request: Request, response: Response) {
@@ -73,45 +75,30 @@ const orgController = {
 
     async identity(request: Request, response: Response) {
         try {
-            const validatedOrgName = orgSlugSchema.safeParse(
-                request.body.orgName,
-            );
-
-            if (!validatedOrgName.success) {
-                throw new ValidationError(validatedOrgName.error.message);
-            }
+            const slug = orgSlugSchema.parse(request.body.slug)
 
             const input = {
-                orgName: validatedOrgName.data,
-                userId: request.session?.userId as string,
+                slug: slug,
+                userId: request.session!.userId,
             };
 
             const result = await orgService.identity(input);
 
-            const sessionId = request.cookies.session;
-            const sessionStr = await redis.get(`session:${sessionId}`);
-            const sessionObj = JSON.parse(sessionStr as string);
-            sessionObj.contexts[result.orgId] = {
-                orgName: result.orgName,
+            await addOrgContext(request.cookies.session, {
+                orgId: result.id,
+                slug: result.slug,
                 role: result.role,
-            }
-            await redis.set(`session:${sessionId}`, JSON.stringify(sessionObj), {
-                KEEPTTL: true,
-            });
+            })
 
-            return response.status(200).json({
-                success: true,
-                message: "Data fetched successfully",
-                data: result,
-            });
+            return response.status(200).json(result);
 
 
         } catch (error) {
-            if (error instanceof ValidationError) {
+            if(error instanceof ZodError) {
                 return response.status(400).json({
                     success: false,
-                    message: error.message,
-                });
+                    message: error.issues[0]?.message,
+                })
             }
             if (error instanceof MissingError) {
                 return response.status(404).json({

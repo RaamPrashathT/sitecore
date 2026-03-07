@@ -6,7 +6,7 @@ const orgRouter = Router();
 
 orgRouter.post("/", authorize, orgController.create)
 
-orgRouter.get("/getOrgs", authorize, orgController.getOrg)
+orgRouter.get("/", authorize, orgController.getOrg)
 
 orgRouter.post("/identity", authorize, orgController.identity);
 

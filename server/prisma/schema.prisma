@@ -10,7 +10,7 @@ generator client {
 enum Role {
     ADMIN
     ENGINEER
-    USER
+    CLIENT
 }
 
 enum CatalogueCategory {

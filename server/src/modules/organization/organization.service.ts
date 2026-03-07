@@ -1,4 +1,3 @@
-import { ConflictError } from "../../shared/error/conflict.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { slugify } from "../../shared/utils/slugify.js";
@@ -7,6 +6,14 @@ export type CreateOrganizationInput = {
     name: string;
     userId: string;
 };
+
+
+type OrgIdentity = {
+    id: string
+    name: string
+    slug: string
+    role: "ADMIN" | "ENGINEER" | "CLIENT"
+}
 
 const orgService = {
     async create(data: CreateOrganizationInput) {
@@ -43,35 +50,48 @@ const orgService = {
     },
 
     async getOrgs(userId: string) {
-        return prisma.membership.findMany({
+        const memberships = await prisma.membership.findMany({
             where: {
                 userId: userId,
             },
             select: {
                 role: true,
-                organizationId: true,
                 organization: {
                     select: {
+                        id: true,
                         name: true,
+                        slug: true,
                     },
                 },
             },
         });
+
+        return memberships.map((membership) => {
+            return {
+                id: membership.organization.id,
+                name: membership.organization.name,
+                slug: membership.organization.slug,
+                role: membership.role,
+            };
+        });
     },
 
-    async identity(data: { orgName: string; userId: string }) {
+    async identity(data: { slug: string; userId: string }): Promise<OrgIdentity> {
         const fetchedData = await prisma.membership.findFirst({
             where: {
                 userId: data.userId,
                 organization: {
-                    name: data.orgName,
+                    slug: data.slug,
                 },
             },
             select: {
                 role: true,
                 organizationId: true,
                 organization: {
-                    select: { name: true },
+                    select: { 
+                        name: true, 
+                        slug: true 
+                    },
                 },
             },
         });
@@ -80,13 +100,13 @@ const orgService = {
             throw new MissingError("Membership not found");
         }
 
-        const response = {
-            orgName: fetchedData.organization.name,
-            orgId: fetchedData.organizationId,
+        return {
+            id: fetchedData.organizationId,
+            name: fetchedData.organization.name,
+            slug: fetchedData.organization.slug,
             role: fetchedData.role,
         };
 
-        return response;
     },
 };
 
