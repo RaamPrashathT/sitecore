@@ -18,7 +18,7 @@ const OrgList = () => {
         const fetchOrganizations = async () => {
             setError(null);
             try {
-                const result = await api.get<FetchOrgType[]>("/org/getOrgs");
+                const result = await api.get<FetchOrgType[]>("/org");
                 setOrgList(result.data);
             } catch (error) {
                 if (error instanceof Error) {

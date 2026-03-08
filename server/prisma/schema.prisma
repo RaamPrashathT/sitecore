@@ -3,7 +3,7 @@ datasource db {
 }
 
 generator client {
-    provider = "prisma-client"
+    provider = "prisma-client-js"
     output   = "../generated/prisma"
 }
 
@@ -24,10 +24,10 @@ enum CatalogueCategory {
 
 model Organization {
     id        String   @id @default(uuid())
-    name   String
+    name      String
     slug      String   @unique
-    slugBase  String   
-    slugIndex Int      
+    slugBase  String
+    slugIndex Int
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     image     String?

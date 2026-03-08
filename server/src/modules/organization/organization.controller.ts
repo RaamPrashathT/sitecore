@@ -5,9 +5,7 @@ import { createOrganizationSchema, orgSlugSchema } from "./organization.schema.j
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { ConflictError } from "../../shared/error/conflict.error.js";
-
 import { MissingError } from "../../shared/error/missing.error.js";
-import redis from "../../shared/lib/redis.js";
 import { ZodError } from "zod";
 import { addOrgContext } from "../../shared/utils/session.js";
 
@@ -74,7 +72,7 @@ const orgController = {
     },
 
     async identity(request: Request, response: Response) {
-        try {
+        try {   
             const slug = orgSlugSchema.parse(request.body.slug)
 
             const input = {

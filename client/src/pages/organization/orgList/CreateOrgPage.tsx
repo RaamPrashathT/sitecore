@@ -23,8 +23,8 @@ const CreateOrgPage = () => {
             setIsLoading(true);
             setError(null);
 
-            const { data } = await api.post("/org/create", {
-                orgName: name,
+            const { data } = await api.post("/org", {
+                name: name,
             });
 
             const slug = data.orgName

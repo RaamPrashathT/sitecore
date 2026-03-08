@@ -1,8 +1,8 @@
 import CreateCatalogueForm from "@/components/catalogue/CreateCatalogueForm"
-import { useOrg } from "@/hooks/useOrg";
+import { useMembership } from "@/hooks/useMembership";
 
 const CreateCataloguePage = () => {
-    const {membership, isLoading} = useOrg();
+    const {data: membership, isLoading} = useMembership();
 
     if(isLoading) return (
         <div>
@@ -16,7 +16,7 @@ const CreateCataloguePage = () => {
     )
     return (
         <div>
-            <CreateCatalogueForm orgId={membership.orgId} orgName={membership.orgName}/>
+            <CreateCatalogueForm orgId={membership.id} orgName={membership.name}/>
         </div>
     )
 }

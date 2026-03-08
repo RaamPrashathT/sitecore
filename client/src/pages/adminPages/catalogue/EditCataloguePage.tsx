@@ -1,9 +1,10 @@
 import EditCatalogueForm from "@/components/catalogue/EditCatalogueForm"
-import { useOrg } from "@/hooks/useOrg";
+import { useMembership } from "@/hooks/useMembership";
+
 import { useParams } from "react-router-dom";
 
 const EditCataloguePage = () => {
-    const {membership, isLoading} = useOrg();
+    const {data: membership, isLoading} = useMembership();
     const params = useParams();
 
     if(!params.catalogueId || !params.quoteId) return (
@@ -24,7 +25,7 @@ const EditCataloguePage = () => {
     )
     return (
         <div>
-            <EditCatalogueForm orgId={membership.orgId} orgName={membership.orgName} catalogueId={params.catalogueId} quoteId={params.quoteId}/>
+            <EditCatalogueForm orgId={membership.id} orgName={membership.slug} catalogueId={params.catalogueId} quoteId={params.quoteId}/>
         </div>
     )
 }

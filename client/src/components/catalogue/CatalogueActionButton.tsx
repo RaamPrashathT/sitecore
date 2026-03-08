@@ -2,8 +2,8 @@ import { Edit, EllipsisVertical } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Link } from "react-router-dom";
-import { useOrg } from "@/hooks/useOrg";
 import DeleteCatalogueButton from "./DeleteCatalogueButton";
+import { useMembership } from "@/hooks/useMembership";
 
 interface CatalogueActionButtonProps {
     catalogueId: string;
@@ -11,7 +11,7 @@ interface CatalogueActionButtonProps {
 }
 
 const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
-    const { membership , isLoading} = useOrg();
+    const { data: membership, isLoading } = useMembership();
     if(isLoading) return (
         <div>
             Loading...
@@ -37,15 +37,14 @@ const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
                 <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
                     <Link 
                         className="flex" 
-                        to={`/org/${membership.orgName}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
+                        to={`/org/${membership.slug}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
                     >
                         <Edit />
                         Edit
                     </Link>
                 </Button>
                 <DeleteCatalogueButton 
-                    
-                    orgId={membership.orgId}
+                    orgId={membership.id}
                     catalogueId={props.catalogueId}
                     quoteId={props.quoteId}
                 />

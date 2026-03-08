@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        console.log("Context running")
         const checkSession = async () => {
             try {
                 const response = await api.get("/auth/me");

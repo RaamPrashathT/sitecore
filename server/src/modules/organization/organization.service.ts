@@ -65,7 +65,6 @@ const orgService = {
                 },
             },
         });
-
         return memberships.map((membership) => {
             return {
                 id: membership.organization.id,

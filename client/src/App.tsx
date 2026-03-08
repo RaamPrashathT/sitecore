@@ -12,9 +12,9 @@ import EngineerPage from "./pages/adminPages/EngineersPage";
 import ClientPage from "./pages/adminPages/ClientPage";
 import ProjectPage from "./pages/adminPages/ProjectsPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
-import { OrgProvider } from "./contexts/OrgContext";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
+import OrgGuard from "./contexts/OrgContext";
 
 function App() {
     return (
@@ -34,34 +34,38 @@ function App() {
                             element={<CreateOrgPage />}
                         />
 
-                        <Route
-                            path="/org/:orgSlug"
-                            element={
-                                <OrgProvider>
-                                    <MainOrganizationPage />
-                                </OrgProvider>
-                            }
-                        >
-                            <Route index element={<DashboardPage />} />
-                            <Route
-                                path="catalogue"
-                                element={<CataloguePage />}
-                            />
-                            <Route
-                                path="catalogue/create"
-                                element={<CreateCataloguePage />}
-                            />
-                            <Route
-                                path="catalogue/edit/:catalogueId/:quoteId"
-                                element={<EditCataloguePage />}
-                            />
-                            <Route
-                                path="engineers"
-                                element={<EngineerPage />}
-                            />
-                            <Route path="clients" element={<ClientPage />} />
-                            <Route path="projects" element={<ProjectPage />} />
-                            <Route path="settings" element={<SettingsPage />} />
+                        <Route path="/org/:orgSlug" element={<OrgGuard />}>
+                            <Route element={<MainOrganizationPage />}>
+                                <Route index element={<DashboardPage />} />
+                                <Route
+                                    path="catalogue"
+                                    element={<CataloguePage />}
+                                />
+                                <Route
+                                    path="catalogue/create"
+                                    element={<CreateCataloguePage />}
+                                />
+                                <Route
+                                    path="catalogue/edit/:catalogueId/:quoteId"
+                                    element={<EditCataloguePage />}
+                                />
+                                <Route
+                                    path="engineers"
+                                    element={<EngineerPage />}
+                                />
+                                <Route
+                                    path="clients"
+                                    element={<ClientPage />}
+                                />
+                                <Route
+                                    path="projects"
+                                    element={<ProjectPage />}
+                                />
+                                <Route
+                                    path="settings"
+                                    element={<SettingsPage />}
+                                />
+                            </Route>
                         </Route>
                     </Route>
                 </Routes>

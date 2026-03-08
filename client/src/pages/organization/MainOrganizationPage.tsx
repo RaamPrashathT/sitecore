@@ -7,9 +7,9 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, Outlet, useLocation, useParams } from "react-router-dom";
-import { useOrg } from "@/hooks/useOrg";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useMembership } from "@/hooks/useMembership";
 
 const MainOrganizationPage = () => {
     const [currentLocation, setCurrentLocation] = React.useState("");
@@ -18,7 +18,7 @@ const MainOrganizationPage = () => {
     const location = useLocation();
     const segments = location.pathname.split("/");
     
-    const { membership, isLoading } = useOrg();
+    const { data: membership, isLoading } = useMembership();
 
     React.useEffect(() => {
         setCurrentLocation(segments[segments.length - 1 ]);

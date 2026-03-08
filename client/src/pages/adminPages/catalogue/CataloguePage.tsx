@@ -1,8 +1,8 @@
 import CatalogueTable from "@/components/catalogue/CatalogueTable"
-import { useOrg } from "@/hooks/useOrg"
+import { useMembership } from "@/hooks/useMembership";
 
 const CataloguePage = () => {
-    const {membership, isLoading} = useOrg();
+    const {data: membership, isLoading} = useMembership();
     if(isLoading) return (
         <div>
             Loading...
@@ -15,7 +15,7 @@ const CataloguePage = () => {
     )
     return (
         <div>
-            <CatalogueTable orgId={membership.orgId}/>
+            <CatalogueTable orgId={membership.id}/>
         </div>
     )
 }
