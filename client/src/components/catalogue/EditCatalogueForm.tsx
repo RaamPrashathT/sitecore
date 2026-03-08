@@ -44,23 +44,26 @@ const formSchema = z.object({
 type createCatalogueFormSchema = z.infer<typeof formSchema>;
 
 interface EditCatalogueFormProps {
-    orgId: string;
-    orgName: string;
+    id: string;
+    slug: string;
     catalogueId: string;
     quoteId: string;
 }
 
-const EditCatalogueForm = (props: EditCatalogueFormProps) => {
-    const { data: catalogueItems, isLoading } = useGetCatalogue(props.orgId);
+const EditCatalogueForm = ({
+    id,
+    slug,
+    catalogueId,
+    quoteId,
+}: EditCatalogueFormProps) => {
+    const { data: catalogueItems, isLoading } = useGetCatalogue(id);
     const selectedCatalogueItem = catalogueItems?.find(
-        (item) => item.id === props.catalogueId,
+        (item) => item.id === catalogueId,
     );
 
     const selectedQuote = selectedCatalogueItem?.supplierQuotes.find(
-        (quote) => quote.id === props.quoteId,
-    );
-
-    
+        (quote) => quote.id === quoteId,
+    );  
     
     const {
         register,
@@ -87,23 +90,23 @@ const EditCatalogueForm = (props: EditCatalogueFormProps) => {
         setIsLoadingState(true);
         setError(null);
         try {
-            const response = await api.post(
-                "/catalogue/editCatalogue",
+            const response = await api.put(
+                "/catalogue",
                 {
                     ...data,
-                    catalogueId: props.catalogueId,
-                    quoteId: props.quoteId,
+                    catalogueId: catalogueId,
+                    quoteId: quoteId,
                 },
                 {
                     headers: {
-                        "x-org-id": props.orgId,
+                        "x-organization-id": id,
                     },
                 },
             );
             if (!response.data.success) {
                 setError(response.data.message);
             }
-            navigate(`/org/${props.orgName}/catalogue`);
+            navigate(`/org/${slug}/catalogue`);
         } catch (error) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -119,7 +122,7 @@ const EditCatalogueForm = (props: EditCatalogueFormProps) => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-3xl"
             >
-                <h1 className="text-3xl font-semibold mb-4">
+                <h1 className="text-3xl font-semibold my-8">
                     Edit Catalogue Item:
                 </h1>
                 <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-y-4">
@@ -208,7 +211,8 @@ const EditCatalogueForm = (props: EditCatalogueFormProps) => {
                             </FieldError>
                         )}
                     </Field>
-                    <Field>
+                </FieldGroup>
+                <Field className="mt-4">
                         <FieldLabel>Lead Time</FieldLabel>
                         <Input {...register("leadTime")} />
                         {errors.leadTime && (
@@ -217,10 +221,9 @@ const EditCatalogueForm = (props: EditCatalogueFormProps) => {
                             </FieldError>
                         )}
                     </Field>
-                </FieldGroup>
                 {error && <p className="text-red-500 py-2">{error}</p>}
-                <div className="flex justify-center mt-4">
-                    <Button type="submit" className="w-48">
+                <div className="flex justify-end mt-8">
+                    <Button type="submit" className="w-60">
                         {isLoadingState && <Spinner />}
                         <p>Edit Item</p>
                     </Button>

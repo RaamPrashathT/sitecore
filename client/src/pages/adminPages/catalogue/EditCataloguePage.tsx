@@ -25,7 +25,7 @@ const EditCataloguePage = () => {
     )
     return (
         <div>
-            <EditCatalogueForm orgId={membership.id} orgName={membership.slug} catalogueId={params.catalogueId} quoteId={params.quoteId}/>
+            <EditCatalogueForm id={membership.id} slug={membership.slug} catalogueId={params.catalogueId} quoteId={params.quoteId}/>
         </div>
     )
 }

@@ -1,50 +1,29 @@
-import api from "@/lib/axios";
-import { useEffect, useState } from "react";
 import OrgListItem from "./OrgListItem";
-
-interface FetchOrgType {
-    role: string;
-    organizationId: string;
-    organization: {
-        orgName: string;
-    };
-}
+import { useOrganizations } from "@/hooks/useOrganization";
 
 const OrgList = () => {
-    const [orgList, setOrgList] = useState<FetchOrgType[]>([]);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            setError(null);
-            try {
-                const result = await api.get<FetchOrgType[]>("/org");
-                setOrgList(result.data);
-            } catch (error) {
-                if (error instanceof Error) {
-                    setError(error.message);
-                }
-            }
-        };
-
-        fetchOrganizations();
-    }, []);
-
-    if (error) {
-        return <p className="text-sm text-red-500">{error}</p>;
+    const { data: organizations, isLoading, error } = useOrganizations()
+    
+    if (isLoading) {
+        return <p className="text-sm text-gray-400">Loading...</p>;
     }
 
-    if (orgList.length === 0) {
+    if (error instanceof Error) {
+        return <p className="text-sm text-red-500">{error.message}</p>;
+    }
+
+    if (!organizations || organizations.length === 0) {
         return <p className="text-sm text-gray-400">No organizations found.</p>;
     }
 
     return (
         <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 overflow-hidden">
-            {orgList.map((org, index) => (
+            {organizations.map((org, index) => (
                 <OrgListItem
-                    key={org.organizationId}
+                    key={org.id}
                     role={org.role}
-                    orgName={org.organization.orgName}
+                    name={org.name}
+                    slug={org.slug}
                     index={index}
                 />
             ))}

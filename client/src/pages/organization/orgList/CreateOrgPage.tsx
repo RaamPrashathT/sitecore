@@ -13,8 +13,10 @@ const CreateOrgPage = () => {
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if(isLoading) return;
 
-        if (name.trim() === "") {
+        const trimmedName = name.trim();
+        if (!trimmedName) {
             setError("Organization name is required");
             return;
         }
@@ -23,18 +25,13 @@ const CreateOrgPage = () => {
             setIsLoading(true);
             setError(null);
 
-            const { data } = await api.post("/org", {
-                name: name,
+            const result = await api.post("/org", {
+                name: trimmedName,
             });
 
-            const slug = data.orgName
-                .toLowerCase()
-                .trim()
-                .replaceAll(/\s+/g, "-");
-
-            navigate(`/org/${slug}`);
+            navigate(`/org/${result.data.slug}`);
         } catch (err: unknown) {
-            if (axios.isAxiosError(err)) {
+            if (axios.isAxiosError<{ message: string }>(err)) {
                 setError(err.response?.data?.message ?? "Request failed");
             } else {
                 setError("Something went wrong");

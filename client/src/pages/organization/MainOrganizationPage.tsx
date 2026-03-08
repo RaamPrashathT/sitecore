@@ -9,7 +9,6 @@ import {
 import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useMembership } from "@/hooks/useMembership";
 
 const MainOrganizationPage = () => {
     const [currentLocation, setCurrentLocation] = React.useState("");
@@ -17,25 +16,14 @@ const MainOrganizationPage = () => {
     const { orgSlug } = useParams<{ orgSlug: string }>();
     const location = useLocation();
     const segments = location.pathname.split("/");
-    
-    const { data: membership, isLoading } = useMembership();
 
     React.useEffect(() => {
-        setCurrentLocation(segments[segments.length - 1 ]);
+        setCurrentLocation(segments[3]);
     }, [segments]);
 
     if (!orgSlug) {
         return <div>invalid organization</div>;
     }
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!membership) {
-        return <div>No access</div>;
-    }
-
     return (
         <SidebarProvider>
             <OrgSidebar />

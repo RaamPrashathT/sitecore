@@ -16,7 +16,7 @@ const CreateCataloguePage = () => {
     )
     return (
         <div>
-            <CreateCatalogueForm orgId={membership.id} orgName={membership.name}/>
+            <CreateCatalogueForm orgId={membership.id} slug={membership.slug}/>
         </div>
     )
 }

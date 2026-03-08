@@ -11,7 +11,6 @@ interface DeleteCatalogueButtonProps {
 const DeleteCatalogueButton = (props: DeleteCatalogueButtonProps) => {
     const handleDelete = async () => {
         try {
-            console.log(props);
             const response = await api.post(
                 "/catalogue/deleteCatalogue",
                 {
@@ -20,7 +19,7 @@ const DeleteCatalogueButton = (props: DeleteCatalogueButtonProps) => {
                 },
                 {
                     headers: {
-                        "x-org-id": props.orgId,
+                        "x-organization-id": props.orgId,
                     },
                 },
             );

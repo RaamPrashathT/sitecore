@@ -5,11 +5,11 @@ import catalogueController from "./catalogue.controller";
 
 const catalogueRouter = Router();
 
-catalogueRouter.get("/getCatalogue", authorize, orgAuthorize, catalogueController.getCatalogue)
+catalogueRouter.get("/", authorize, orgAuthorize, catalogueController.getCatalogue)
 
-catalogueRouter.post("/createCatalogue", authorize, orgAuthorize, catalogueController.createCatalogue)
+catalogueRouter.post("/", authorize, orgAuthorize, catalogueController.createCatalogue)
 
-catalogueRouter.post("/editCatalogue", authorize, orgAuthorize, catalogueController.editCatalogue)
+catalogueRouter.put("/", authorize, orgAuthorize, catalogueController.editCatalogue)
 
 catalogueRouter.post("/deleteCatalogue", authorize, orgAuthorize, catalogueController.deleteCatalogue)
 

@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import redis from "../lib/redis.js";
 import { logger } from "../lib/logger.js";
 import { UnAuthorizedError } from "../error/unauthorized.error";
+import { ValidationError } from "../error/validation.error.js";
 
 export const orgAuthorize = async (
     request: Request,
@@ -9,28 +10,48 @@ export const orgAuthorize = async (
     next: NextFunction,
 ) => {
     try {
-        const incomingOrgId = request.headers["x-org-id"] as string
+        const incomingOrgId = request.headers["x-organization-id"];
+
+        if (!incomingOrgId || typeof incomingOrgId !== "string") {
+            throw new ValidationError("Organization ID missing");
+        }
+
         const sessionId = request.cookies.session;
+
+        if (!sessionId) {
+            throw new UnAuthorizedError("Unauthorized");
+        }
 
         const sessionStr = await redis.get(`session:${sessionId}`);
 
-        const sessionObj = JSON.parse(sessionStr as string);
-        const context = sessionObj.contexts?.[incomingOrgId]
-        if(!context) {
-            throw new UnAuthorizedError("Unauthorized")
+        if (!sessionStr) {
+            throw new UnAuthorizedError("Unauthorized");
+        }
+
+        
+        let sessionObj;
+        try {
+            sessionObj = JSON.parse(sessionStr);
+        } catch {
+            throw new UnAuthorizedError("Unauthorized");
+        }
+
+        const context = sessionObj.contexts?.[incomingOrgId];
+        if (!context) {
+            throw new UnAuthorizedError("Unauthorized");
         }
 
         request.tenant = {
             orgId: incomingOrgId,
-            role: context.role
-        }
+            role: context.role,
+        };
         next();
     } catch (error) {
-        if(error instanceof UnAuthorizedError) {
+        if (error instanceof UnAuthorizedError) {
             return response.status(401).json({
                 success: false,
-                message: error.message
-            })
+                message: error.message,
+            });
         }
         logger.error(error);
         return response.status(500).json({
@@ -38,4 +59,4 @@ export const orgAuthorize = async (
             message: "Internal server error",
         });
     }
-}
+};

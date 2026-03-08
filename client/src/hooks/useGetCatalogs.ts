@@ -24,26 +24,18 @@ export type CatalogueWithQuotes = {
     }[];
 };
 
-type CatalogueApiResponse = {
-    success: boolean;
-    message: string;
-    data: CatalogueWithQuotes[];
-};
 
 export const useGetCatalogue = (orgId: string) => {
 
     return useQuery({
         queryKey: ['catalogue', orgId],
         queryFn: async () => {
-            const response = await api.get<CatalogueApiResponse>("/catalogue/getCatalogue", {
+            const response = await api.get<CatalogueWithQuotes[]>("/catalogue/", {
                 headers:{
-                    "x-org-id": orgId
+                    "x-organization-id": orgId
                 }
             })
-            if(!response.data.success) {
-                throw new Error(response.data.message)
-            }
-            const safeData = response.data.data.map(item => ({
+            const safeData = response.data.map(item => ({
                 ...item,
                 supplierQuotes: item.supplierQuotes || [] 
             }));

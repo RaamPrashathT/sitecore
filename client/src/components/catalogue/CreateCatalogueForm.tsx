@@ -37,10 +37,13 @@ type createCatalogueFormSchema = z.infer<typeof formSchema>;
 
 interface CreateCatalogueFormProps {
     orgId: string;
-    orgName: string
+    slug: string
 }
 
-const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
+const CreateCatalogueForm = ({
+    orgId,
+    slug
+}: CreateCatalogueFormProps) => {
     const {
         register,
         control,
@@ -52,9 +55,6 @@ const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
             name: "",
             supplier: "",
             unit: "",
-            truePrice: 0,
-            standardRate: 0,
-            leadTime: 0,
         },
     });
     const navigate = useNavigate();
@@ -64,16 +64,16 @@ const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await api.post('/catalogue/createCatalogue', data, {
+            const response = await api.post('/catalogue', data, {
                 
                 headers:{
-                    "x-org-id": props.orgId
+                    "x-organization-id": orgId
                 }
             })
             if(!response.data.success) {
                 setError(response.data.message)
             }
-            navigate(`/org/${props.orgName}/catalogue`)
+            navigate(`/org/${slug}/catalogue`)
         } catch (error) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -89,7 +89,7 @@ const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-3xl"
             >
-                <h1 className="text-3xl font-semibold mb-4">
+                <h1 className="text-3xl font-semibold my-8">
                     Create Catalogue Item:
                 </h1>
                 <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-y-4">
@@ -126,8 +126,8 @@ const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
                                             <SelectItem value="MATERIALS">
                                                 Materials
                                             </SelectItem>
-                                            <SelectItem value="SERVICES">
-                                                Services
+                                            <SelectItem value="LABOUR">
+                                                Labour  
                                             </SelectItem>
                                             <SelectItem value="EQUIPMENT">
                                                 Equipment
@@ -138,7 +138,6 @@ const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
                                             <SelectItem value="TRANSPORT">
                                                 Transport
                                             </SelectItem>
-
                                             <SelectItem value="OVERHEAD">
                                                 Overhead
                                             </SelectItem>
@@ -164,33 +163,33 @@ const CreateCatalogueForm = (props: CreateCatalogueFormProps) => {
                     </Field>
                     <Field>
                         <FieldLabel>True Price</FieldLabel>
-                        <Input {...register("truePrice")} />
+                        <Input {...register("truePrice")} placeholder="0"/>
                         {errors.truePrice && (
                             <FieldError>{errors.truePrice.message}</FieldError>
                         )}
                     </Field>
                     <Field>
                         <FieldLabel>Standard Rate</FieldLabel>
-                        <Input {...register("standardRate")} />
+                        <Input {...register("standardRate")} placeholder="0"/>
                         {errors.standardRate && (
                             <FieldError>
                                 {errors.standardRate.message}
                             </FieldError>
                         )}
                     </Field>
-                    <Field>
+                </FieldGroup>
+                    <Field className="mt-4">
                         <FieldLabel>Lead Time</FieldLabel>
-                        <Input {...register("leadTime")} />
+                        <Input {...register("leadTime")} placeholder="0"/>
                         {errors.leadTime && (
                             <FieldError className="">
                                 {errors.leadTime.message}
                             </FieldError>
                         )}
                     </Field>
-                </FieldGroup>
                 {error && <p className="text-red-500 py-2">{error}</p>}
-                <div className="flex justify-center mt-4">
-                    <Button type="submit" className="w-48">
+                <div className="flex justify-end mt-8">
+                    <Button type="submit" className="w-60">
                         {isLoading && <Spinner />}
                         <p>Create Item</p>
                     </Button>
