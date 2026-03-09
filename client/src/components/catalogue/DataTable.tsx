@@ -39,9 +39,9 @@ const DataTable = ({data} : DataTableProps) => {
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody className=''>
+                <TableBody className='p-0'>
                     {table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id} className='p-'>
+                        <TableRow key={row.id} className='p-0'>
                             {row.getVisibleCells().map(cell => (
                                 <TableCell key={cell.id} className=' p-0'>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

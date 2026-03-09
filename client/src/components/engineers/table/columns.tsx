@@ -10,7 +10,7 @@ export const columns = [
         cell: (info) => {
             const username = info.row.original.username || "A"
             return (
-                <div className="flex items-center gap-x-2">
+                <div className="flex items-center gap-x-2 ">
                     <Avatar>
                         <AvatarFallback>
                             {username[0].toUpperCase()}
@@ -25,7 +25,7 @@ export const columns = [
     columnHelper.accessor("email", {
         header: "Email",
         cell: (info) => (
-            <div>
+            <div className="flex">
                 <p>{info.getValue()}</p>
             </div>
         ),

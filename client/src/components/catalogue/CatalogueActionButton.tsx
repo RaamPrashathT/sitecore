@@ -26,14 +26,14 @@ const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
         <Popover>
             <PopoverTrigger asChild>
                 <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-0 shadow-none bg-transparent hover:bg-transparent"
+                    variant="ghost"
+                    
+                    className="shadow-none bg-transparent hover:bg-transparent h-12 px-4"
                 >
                     <EllipsisVertical />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="p-1 flex flex-col w-30">
+            <PopoverContent align="end" className="flex flex-col w-30">
                 <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
                     <Link 
                         className="flex" 
