@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
-import type { CatalogueWithQuotes } from '@/hooks/useGetCatalogs'; 
-import { TableCell } from '../ui/table';
+import type { CatalogueWithQuotes } from '@/hooks/useGetCatalogs';
 import CatalogueActionButton from './CatalogueActionButton';
 
 const columnHelper = createColumnHelper<CatalogueWithQuotes>();
@@ -18,9 +17,9 @@ export const columns = [
     columnHelper.accessor('category', {
         header: "Category",
         cell: info => (
-            <TableCell className='font-medium flex items-center h-full capitalize px-0'>
+            <div className='font-medium flex items-center h-full capitalize px-0'>
                 {info.getValue().toLowerCase()}
-            </TableCell>
+            </div>
         )
     }),
 
@@ -29,14 +28,14 @@ export const columns = [
         header: "Supplier",
         cell: ({row}) => {
             return (
-                <div className="flex flex-col divide-y w-full">
+                <div className="flex flex-col divide-y w-full bg-red-500 p-0">
                     {row.original.supplierQuotes.map((quote) => (
-                        <TableCell 
+                        <div 
                             key={quote.id}
-                            className='flex items-center px-0 font-medium'
+                            className='flex items-center p-0 font-medium'
                         >
                             {quote.supplier}
-                        </TableCell>
+                        </div>
                     ))}
                 </div>
             )
@@ -51,12 +50,12 @@ export const columns = [
             return (
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
-                        <TableCell 
+                        <div 
                             key={quote.id}
-                            className='flex items-center px-0 font-medium'
+                            className='flex items-center p-0 font-medium'
                         >
                             {quote.truePrice}/{unit}
-                        </TableCell>
+                        </div>
                     ))}
                 </div>
             )
@@ -69,14 +68,14 @@ export const columns = [
         cell: ({row}) => {
             const unit = row.original.unit;
             return (
-                <div className="flex flex-col divide-y w-full">
+                <div className="flex flex-col divide-y w-full  bg-green-500">
                     {row.original.supplierQuotes.map((quote) => (
-                        <TableCell 
+                        <div 
                             key={quote.id}
-                            className='flex items-center px-0 font-medium'
+                            className='flex items-center p-0 font-medium '
                         >
                             {quote.standardRate}/{unit}
-                        </TableCell>
+                        </div>
                     ))}
                 </div>
             )
@@ -91,12 +90,12 @@ export const columns = [
             return (
                 <div className="flex flex-col divide-y w-full">
                     {row.original.supplierQuotes.map((quote) => (
-                        <TableCell 
+                        <div 
                             key={quote.id}
                             className='flex items-center px-0 font-medium'
                         >
                             {quote.leadTime ? quote.leadTime : defaultLeadTime}
-                        </TableCell>
+                        </div>
                     ))}
                 </div>
             )

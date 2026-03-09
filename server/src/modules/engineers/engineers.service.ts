@@ -22,7 +22,7 @@ const engineerService = {
         return engineers.map(engineer => {
             return {
                 id: engineer._id,
-                name: engineer.username,
+                username: engineer.username,
                 email: engineer.email,
                 profileImage: engineer.profileImage
             }

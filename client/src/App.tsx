@@ -8,7 +8,7 @@ import CreateOrgPage from "./pages/organization/orgList/CreateOrgPage";
 import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
 import DashboardPage from "./pages/adminPages/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
-import EngineerPage from "./pages/adminPages/EngineersPage";
+import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import ClientPage from "./pages/adminPages/ClientPage";
 import ProjectPage from "./pages/adminPages/ProjectsPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
