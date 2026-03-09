@@ -55,6 +55,34 @@ const orgController = {
         }
     },
 
+    async signin(request: Request, response: Response) {
+        try {
+            if (!request.session?.userId) {
+                throw new UnAuthorizedError();
+            }
+
+            const userId = request.session.userId;
+            const orgId = request.body.id;
+            console.log(orgId, userId)
+
+            const result = await orgService.signup(userId, orgId);
+
+            return response.status(200).json({result});
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({
+                    success: false,
+                    message: error.message,
+                });
+            }
+            logger.error(error);
+            return response.status(500).json({
+                success: false,
+                message: "Something went wrong",
+            })
+        }
+    },
+
     async getOrg(request: Request, response: Response) {
         try {
             const sessionId = request.session?.userId;
@@ -68,6 +96,27 @@ const orgController = {
                 success: false,
                 message: "Something went wrong",
             });
+        }
+    },
+
+    async getAllOrg(request: Request, response: Response) {
+        try {
+           const query = request.params.query as string || "";
+            const page = Number(request.query.page) || 1;
+            const limit = Number(request.query.limit) || 10;
+            const result = await orgService.getAllOrgs({
+                query,
+                page,
+                limit
+            });
+
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response.status(500).json({
+                success: false,
+                message: "Something went wrong",
+            })
         }
     },
 

@@ -15,6 +15,7 @@ import SettingsPage from "./pages/adminPages/SettingsPage";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 import OrgGuard from "./contexts/OrgContext";
+import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
 
 function App() {
     return (
@@ -32,6 +33,9 @@ function App() {
                         <Route
                             path="/organizations/create"
                             element={<CreateOrgPage />}
+                        />
+                        <Route path="/organizations/search"
+                            element={<SearchOrgPage />}
                         />
 
                         <Route path="/org/:orgSlug" element={<OrgGuard />}>
