@@ -33,10 +33,10 @@ const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
                     <EllipsisVertical />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="flex flex-col w-30">
+            <PopoverContent align="end" className="flex flex-col w-30 p-1">
                 <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
                     <Link 
-                        className="flex" 
+                        className="flex w-full justify-center items-center gap-x-2" 
                         to={`/org/${membership.slug}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
                     >
                         <Edit />

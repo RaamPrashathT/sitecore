@@ -9,7 +9,7 @@ import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
 import DashboardPage from "./pages/adminPages/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
-import ClientPage from "./pages/adminPages/ClientPage";
+import ClientPage from "./pages/adminPages/clients/ClientPage";
 import ProjectPage from "./pages/adminPages/ProjectsPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";

@@ -1,5 +1,3 @@
-import { profile } from "node:console";
-import { MissingError } from "../../shared/error/missing.error";
 import { prisma } from "../../shared/lib/prisma";
 import { User } from "../../shared/models/user";
 
@@ -7,7 +5,8 @@ const engineerService = {
     async getEngineers(organizationId: string) {
         const user = await prisma.membership.findMany({
             where: {
-                organizationId
+                organizationId,
+                role: "ENGINEER"
             },
             select: {
                 userId: true
