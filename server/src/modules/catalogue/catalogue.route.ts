@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { authorize } from "../../shared/middleware/authorize.middleware";
-import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware";
-import catalogueController from "./catalogue.controller";
+import { authorize } from "../../shared/middleware/authorize.middleware.js";
+import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware.js";
+import catalogueController from "./catalogue.controller.js";
 
 const catalogueRouter = Router();
 

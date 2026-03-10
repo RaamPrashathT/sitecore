@@ -1,11 +1,20 @@
-import {createClient} from 'redis'
+import { createClient } from 'redis';
+import { env } from '../config/env.js';
 
 const redis = createClient({
-    url: 'redis://localhost:6379' 
+    url: env.REDIS_URL,
+    socket: {
+        tls: true,
+        rejectUnauthorized: false
+    }
 });
 
 redis.on('error', (err) => console.log('Redis Client Error', err));
 
-export default redis;
 
-await redis.connect();
+(async () => {
+    await redis.connect();
+    console.log('Connected to Redis successfully');
+})();
+
+export default redis;

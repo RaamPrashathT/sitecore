@@ -1,5 +1,5 @@
-import { MissingError } from "../error/missing.error"
-import redis from "../lib/redis"
+import { MissingError } from "../error/missing.error.js"
+import redis from "../lib/redis.js"
 
 export const addOrgContext = async(sessionId: string, context: {
     orgId: string,

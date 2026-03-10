@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import redis from "../lib/redis.js";
 import { logger } from "../lib/logger.js";
-import { UnAuthorizedError } from "../error/unauthorized.error";
+import { UnAuthorizedError } from "../error/unauthorized.error.js";
 import { ValidationError } from "../error/validation.error.js";
 
 export const orgAuthorize = async (

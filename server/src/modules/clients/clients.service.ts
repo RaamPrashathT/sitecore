@@ -1,5 +1,5 @@
-import { prisma } from "../../shared/lib/prisma"
-import { User } from "../../shared/models/user"
+import { prisma } from "../../shared/lib/prisma.js"
+import { User } from "../../shared/models/user.js"
 
 const clientService = {
     async getClients(organizationId: string) {

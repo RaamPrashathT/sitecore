@@ -2,7 +2,7 @@
     // Visit https://aka.ms/tsconfig to read more about this file
     "compilerOptions": {
         // File Layout
-        "rootDir": ".",
+        "rootDir": "./src",
         "outDir": "./dist",
 
         // For nodejs:
@@ -38,7 +38,8 @@
 
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "target": "ES2023",
+        "target": "ES2023", 
         "esModuleInterop": true,
-    }
+    },
+    "include": ["src/**/*"]
 }

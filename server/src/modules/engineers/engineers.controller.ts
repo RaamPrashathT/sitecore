@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { logger } from "../../shared/lib/logger";
-import engineerService from "./engineers.service";
-import { ValidationError } from "../../shared/error/validation.error";
+import { logger } from "../../shared/lib/logger.js";
+import engineerService from "./engineers.service.js";
+import { ValidationError } from "../../shared/error/validation.error.js";
 
 const engineerController = {
     async getEngineers(request : Request, response: Response) {

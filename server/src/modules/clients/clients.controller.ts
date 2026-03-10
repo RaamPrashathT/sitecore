@@ -1,7 +1,7 @@
-import { ValidationError } from "../../shared/error/validation.error";
-import { logger } from "../../shared/lib/logger";
+import { ValidationError } from "../../shared/error/validation.error.js";
+import { logger } from "../../shared/lib/logger.js";
 import type { Request, Response } from "express";
-import clientService from "./clients.service";
+import clientService from "./clients.service.js";
 
 
 const clientController = {

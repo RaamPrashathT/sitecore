@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { authorize } from "../../shared/middleware/authorize.middleware";
-import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware";
-import { requiredRole } from "../../shared/middleware/requireRole.middleware";
-import clientController from "./clients.controller";
+import { authorize } from "../../shared/middleware/authorize.middleware.js";
+import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware.js";
+import { requiredRole } from "../../shared/middleware/requireRole.middleware.js";
+import clientController from "./clients.controller.js";
 
 const clientRouter = Router();
 

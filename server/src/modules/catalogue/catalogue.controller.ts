@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { logger } from "../../shared/lib/logger";
-import { UnAuthorizedError } from "../../shared/error/unauthorized.error";
-import catalogueService from "./catalogue.service";
-import { deleteFormSchema, editFormSchema, formSchema } from "./catalogue.schema";
-import { ValidationError } from "../../shared/error/validation.error";
-import { MissingError } from "../../shared/error/missing.error";
+import { logger } from "../../shared/lib/logger.js";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
+import catalogueService from "./catalogue.service.js";
+import { deleteFormSchema, editFormSchema, formSchema } from "./catalogue.schema.js";
+import { ValidationError } from "../../shared/error/validation.error.js";
+import { MissingError } from "../../shared/error/missing.error.js";
 
 const catalogueController = {
     async getCatalogue(request: Request, response: Response) {

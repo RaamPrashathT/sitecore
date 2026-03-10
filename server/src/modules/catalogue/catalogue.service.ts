@@ -1,5 +1,5 @@
-import { MissingError } from "../../shared/error/missing.error";
-import { prisma } from "../../shared/lib/prisma";
+import { MissingError } from "../../shared/error/missing.error.js";
+import { prisma } from "../../shared/lib/prisma.js";
 import type { createCatalogueFormSchema, deleteCatalogueFormSchema, editCatalogueFormSchema } from "./catalogue.schema";
 
 const catalogueService = {
