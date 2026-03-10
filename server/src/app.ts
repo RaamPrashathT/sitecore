@@ -11,6 +11,7 @@ import clientRouter from "./modules/clients/clients.route.js";
 const PORT = env.PORT || 5000;
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(
     cors({
         origin:env.CLIENT_ORIGIN,
