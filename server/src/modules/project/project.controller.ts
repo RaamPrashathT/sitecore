@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import projectService from "./project.service";
-import { logger } from "../../shared/lib/logger";
+import projectService from "./project.service.js";
+import { logger } from "../../shared/lib/logger.js";
 
 const projectController = {
     async createProject(request: Request, response: Response) {

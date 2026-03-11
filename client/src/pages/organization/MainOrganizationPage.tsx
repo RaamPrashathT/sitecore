@@ -50,8 +50,8 @@ const MainOrganizationPage = () => {
                                 </Button>
                             )}
                             {(currentLocation === "projects" && segments.length === 3) && (
-                                <Button>
-                                    <Link to={`/${orgSlug}/projects/create`} className="flex items-center gap-x-1">
+                                <Button className="p-0">
+                                    <Link to={`/${orgSlug}/projects/create`} className="flex items-center gap-x-1 p-3">
                                         <Plus />
                                         <p className="mb-px">Add Project</p>
                                     </Link>

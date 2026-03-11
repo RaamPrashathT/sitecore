@@ -42,6 +42,6 @@ export const useGetCatalogue = (orgId: string) => {
 
             return safeData;
         },
-        enabled: !!orgId,
+        enabled: !!orgId,   
     })
 }

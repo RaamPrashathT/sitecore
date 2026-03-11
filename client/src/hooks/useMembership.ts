@@ -20,6 +20,6 @@ export const useMembership = () => {
             });
             return response.data as MembershipType;
         },
-        enabled: !!orgSlug,
+        enabled: !!orgSlug, 
     });
 };

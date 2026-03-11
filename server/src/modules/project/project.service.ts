@@ -1,5 +1,5 @@
-import { prisma } from "../../shared/lib/prisma";
-import { slugify } from "../../shared/utils/slugify";
+import { prisma } from "../../shared/lib/prisma.js";
+import { slugify } from "../../shared/utils/slugify.js";
 
 const projectService = {
     async createProject({
