@@ -41,11 +41,19 @@ const MainOrganizationPage = () => {
                             </p>
                         </div>
                         <div>
-                            {(currentLocation === "catalogue" && segments.length === 4)  &&  (
+                            {(currentLocation === "catalogue" && segments.length === 3)  &&  (
                                 <Button>
                                     <Link to={`/${orgSlug}/catalogue/create`} className="flex items-center gap-x-1">
                                         <Plus />
                                         <p className="mb-px">Add Item</p>
+                                    </Link>
+                                </Button>
+                            )}
+                            {(currentLocation === "projects" && segments.length === 3) && (
+                                <Button>
+                                    <Link to={`/${orgSlug}/projects/create`} className="flex items-center gap-x-1">
+                                        <Plus />
+                                        <p className="mb-px">Add Project</p>
                                     </Link>
                                 </Button>
                             )}
