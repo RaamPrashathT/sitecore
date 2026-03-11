@@ -40,6 +40,7 @@ const authController = {
     },
 
     async login(request: Request, response: Response) {
+        console.log("login")
         try {
             const { sessionId, userId } = await authService.login(request.body);
 
@@ -47,19 +48,18 @@ const authController = {
                 `session:${sessionId}`,
                 JSON.stringify({
                     userId: userId,
-                    userAgent: request.headers["user-agent"],
-                    contexts:{}
+                    userAgent: request.headers["user-agent"]
                 }),
                 { EX: 60 * 60 * 24 },
             );
 
             response.cookie("session", sessionId, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
-
+            
             return response.status(200).json({
                 success: true,
                 message: "User logged in successfully",
@@ -94,7 +94,7 @@ const authController = {
 
             response.clearCookie("session", {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
             });
 

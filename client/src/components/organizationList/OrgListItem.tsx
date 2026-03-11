@@ -13,7 +13,7 @@ const OrgListItem = ({ role, name, slug, index }: OrgListItemProps) => {
     return (
         <li className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
             <Link
-                to={`/org/${slug}`}
+                to={`/${slug}`}
                 className="flex items-center justify-between px-4 py-3  transition-colors"
             >
                 <span className="text-sm font-medium text-gray-900">

@@ -98,7 +98,7 @@ const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
             <SidebarContent>
                 <SidebarContents items={data.sidebarContents.map((item) => ({
                     ...item,
-                    url: `/org/${orgSlug}${item.url}`,
+                    url: `/${orgSlug}${item.url}`,
                 }))}/>
             </SidebarContent>
             <SidebarFooter>

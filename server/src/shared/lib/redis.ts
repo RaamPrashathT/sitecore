@@ -1,12 +1,14 @@
 import { createClient } from 'redis';
 import { env } from '../config/env.js';
+import { logger } from './logger.js';
 
 const redis = createClient({
     url: env.REDIS_URL,
-    socket: {
+
+    socket: env.NODE_ENV === 'production' ? {
         tls: true,
         rejectUnauthorized: false
-    }
+    } : {}
 });
 
 redis.on('error', (err) => console.log('Redis Client Error', err));
@@ -14,7 +16,8 @@ redis.on('error', (err) => console.log('Redis Client Error', err));
 
 (async () => {
     await redis.connect();
-    console.log('Connected to Redis successfully');
+    logger.info('Connected to Redis successfully');
 })();
+
 
 export default redis;

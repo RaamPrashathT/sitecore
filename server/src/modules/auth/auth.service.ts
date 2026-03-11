@@ -82,7 +82,7 @@ const authService = {
         }
 
         const sessionId = crypto.randomBytes(32).toString("hex");
-
+        
         return {
             sessionId,
             userId: existingUser._id,

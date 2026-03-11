@@ -16,7 +16,7 @@ const SelectOrgListItem = ({name, slug, index, id }: SelectOrgListItemProps) => 
             await api.post("/org/signup", {
                 id
             }) 
-            navigate(`/org/${slug}`)
+            navigate(`/${slug}`)
         } catch (error) {
             if(error instanceof Error) console.log(error.message)
         }

@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import redis from "../lib/redis.js";
 import { logger } from "../lib/logger.js";
+import { UnAuthorizedError } from "../error/unauthorized.error.js";
 
 export const authorize = async (
     request: Request,
@@ -8,17 +9,13 @@ export const authorize = async (
     next: NextFunction,
 ) => {
     try {
-        const unauthorized = () =>
-            response.status(401).json({
-                success: false,
-                message: "Unauthorized",
-            });
-
+    
         const sessionId = request.cookies.session;
-        if (!sessionId) return unauthorized();
+        
+        if (!sessionId) throw new UnAuthorizedError();
 
         const raw = await redis.get(`session:${sessionId}`);
-        if (!raw) return unauthorized();
+        if (!raw) throw new UnAuthorizedError();
 
         let session;
 
@@ -26,15 +23,21 @@ export const authorize = async (
             session = JSON.parse(raw);
         } catch {
             logger.error("Invalid session JSON");
-            return unauthorized();
+            throw new UnAuthorizedError();
         }
 
-        if (!session?.userId) return unauthorized();
+        if (!session?.userId) throw new UnAuthorizedError();
 
         request.session = session;
 
         return next();
     } catch (error) {
+        if(error instanceof UnAuthorizedError) {
+            return response.status(401).json({
+                success: false,
+                message: error.message,
+            });
+        }
         logger.error(error);
         return response.status(500).json({
             success: false,

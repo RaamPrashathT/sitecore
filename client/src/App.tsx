@@ -38,7 +38,7 @@ function App() {
                             element={<SearchOrgPage />}
                         />
 
-                        <Route path="/org/:orgSlug" element={<OrgGuard />}>
+                        <Route path="/:orgSlug" element={<OrgGuard />}>
                             <Route element={<MainOrganizationPage />}>
                                 <Route index element={<DashboardPage />} />
                                 <Route

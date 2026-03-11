@@ -106,7 +106,7 @@ const EditCatalogueForm = ({
             if (!response.data.success) {
                 setError(response.data.message);
             }
-            navigate(`/org/${slug}/catalogue`);
+            navigate(`/${slug}/catalogue`);
         } catch (error) {
             if (error instanceof Error) {
                 setError(error.message);

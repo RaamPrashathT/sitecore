@@ -8,10 +8,10 @@ import orgRouter from "./modules/organization/organization.routes.js";
 import catalogueRouter from "./modules/catalogue/catalogue.route.js";
 import engRouter from "./modules/engineers/engineers.route.js";
 import clientRouter from "./modules/clients/clients.route.js";
+import { logger } from "./shared/lib/logger.js";
 const PORT = env.PORT || 5000;
 
 const app = express();
-app.set("trust proxy", 1);
 app.use(
     cors({
         origin:env.CLIENT_ORIGIN,
@@ -30,7 +30,7 @@ app.use('/engineers', engRouter)
 app.use('/clients', clientRouter)
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
 });
 
 app.get("/", (_req, res) => {

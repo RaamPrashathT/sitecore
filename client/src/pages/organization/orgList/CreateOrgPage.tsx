@@ -29,7 +29,7 @@ const CreateOrgPage = () => {
                 name: trimmedName,
             });
 
-            navigate(`/org/${result.data.slug}`);
+            navigate(`/${result.data.slug}`);
         } catch (err: unknown) {
             if (axios.isAxiosError<{ message: string }>(err)) {
                 setError(err.response?.data?.message ?? "Request failed");

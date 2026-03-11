@@ -18,7 +18,7 @@ const MainOrganizationPage = () => {
     const segments = location.pathname.split("/");
 
     React.useEffect(() => {
-        setCurrentLocation(segments[3]);
+        setCurrentLocation(segments[2]);
     }, [segments]);
 
     if (!orgSlug) {
@@ -43,7 +43,7 @@ const MainOrganizationPage = () => {
                         <div>
                             {(currentLocation === "catalogue" && segments.length === 4)  &&  (
                                 <Button>
-                                    <Link to={`/org/${orgSlug}/catalogue/create`} className="flex items-center gap-x-1">
+                                    <Link to={`/${orgSlug}/catalogue/create`} className="flex items-center gap-x-1">
                                         <Plus />
                                         <p className="mb-px">Add Item</p>
                                     </Link>

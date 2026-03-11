@@ -37,7 +37,7 @@ const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
                 <Button className="border-0 shadow-none bg-white hover:bg-slate-100  text-black">
                     <Link 
                         className="flex w-full justify-center items-center gap-x-2" 
-                        to={`/org/${membership.slug}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
+                        to={`/${membership.slug}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
                     >
                         <Edit />
                         Edit
