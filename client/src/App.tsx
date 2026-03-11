@@ -10,13 +10,14 @@ import DashboardPage from "./pages/adminPages/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import ClientPage from "./pages/adminPages/clients/ClientPage";
-import ProjectPage from "./pages/adminPages/project/ProjectsPage";
+import ProjectPage from "./pages/adminPages/project/ProjectPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 import OrgGuard from "./contexts/OrgContext";
 import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
 import CreateProjectPage from "./pages/adminPages/project/CreateProjectPage";
+import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
 
 function App() {
     return (
@@ -65,6 +66,10 @@ function App() {
                                 />
                                 <Route
                                     path="projects"
+                                    element={<ProjectListPage />}
+                                />
+                                <Route
+                                    path=":projectSlug"
                                     element={<ProjectPage />}
                                 />
                                 <Route
