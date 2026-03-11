@@ -10,12 +10,13 @@ import DashboardPage from "./pages/adminPages/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import ClientPage from "./pages/adminPages/clients/ClientPage";
-import ProjectPage from "./pages/adminPages/ProjectsPage";
+import ProjectPage from "./pages/adminPages/project/ProjectsPage";
 import SettingsPage from "./pages/adminPages/SettingsPage";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 import OrgGuard from "./contexts/OrgContext";
 import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
+import CreateProjectPage from "./pages/adminPages/project/CreateProjectPage";
 
 function App() {
     return (
@@ -34,7 +35,8 @@ function App() {
                             path="/organizations/create"
                             element={<CreateOrgPage />}
                         />
-                        <Route path="/organizations/search"
+                        <Route
+                            path="/organizations/search"
                             element={<SearchOrgPage />}
                         />
 
@@ -65,6 +67,11 @@ function App() {
                                     path="projects"
                                     element={<ProjectPage />}
                                 />
+                                <Route
+                                    path="projects/create"
+                                    element={<CreateProjectPage />}
+                                />
+
                                 <Route
                                     path="settings"
                                     element={<SettingsPage />}
