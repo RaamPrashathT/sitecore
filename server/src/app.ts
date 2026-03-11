@@ -9,6 +9,7 @@ import catalogueRouter from "./modules/catalogue/catalogue.route.js";
 import engRouter from "./modules/engineers/engineers.route.js";
 import clientRouter from "./modules/clients/clients.route.js";
 import { logger } from "./shared/lib/logger.js";
+import projectRouter from "./modules/project/project.route.js";
 const PORT = env.PORT || 5000;
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/org", orgRouter);
 app.use("/catalogue", catalogueRouter)
 app.use('/engineers', engRouter)
 app.use('/clients', clientRouter)
+app.use('/project', projectRouter)
 
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);

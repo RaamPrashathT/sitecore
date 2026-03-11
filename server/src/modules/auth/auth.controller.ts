@@ -40,7 +40,6 @@ const authController = {
     },
 
     async login(request: Request, response: Response) {
-        console.log("login")
         try {
             const { sessionId, userId } = await authService.login(request.body);
 

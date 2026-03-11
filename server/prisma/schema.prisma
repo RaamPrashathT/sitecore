@@ -77,8 +77,11 @@ model SupplierQuote {
 }
 
 model Project {
-    id   String @id @default(uuid())
-    name String
+    id        String @id @default(uuid())
+    name      String
+    slug      String
+    slugBase  String
+    slugIndex Int
 
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
