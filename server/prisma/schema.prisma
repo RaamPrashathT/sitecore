@@ -24,7 +24,7 @@ enum CatalogueCategory {
 
 enum PhaseStatus {
     PLANNING
-    PENDING_PAYMENT
+    PAYMENT_PENDING
     REQUISITION_PENDING
     APPROVAL_PENDING
     ACTIVE

@@ -110,9 +110,9 @@ const projectService = {
                 name: data.name,
                 description: data.description,
                 budget: data.budget,
-                paymentDeadline: data.paymentDeadLine,
+                paymentDeadline: data.paymentDeadline,
                 projectId: projectId,
-                status: "PENDING_PAYMENT"
+                status: "PLANNING"
             }
         })
     },
@@ -134,10 +134,10 @@ const projectService = {
         await prisma.phase.update({
             where: {
                 id: phaseId,
-                status: "PENDING_PAYMENT"
+                status: "PLANNING"
             },
             data: {
-                status: "REQUISITION_PENDING"
+                status: "PAYMENT_PENDING"
             }
         })
     }

@@ -114,7 +114,6 @@ const authController = {
 
     async me(request: Request, response: Response) {
         try {
-            console.log(request.session)
             return response.status(200).json({
                 success: true,
                 message: "User found",

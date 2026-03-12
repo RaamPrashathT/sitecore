@@ -63,7 +63,6 @@ const orgController = {
 
             const userId = request.session.userId;
             const orgId = request.body.id;
-            console.log(orgId, userId)
 
             const result = await orgService.signup(userId, orgId);
 

@@ -76,8 +76,9 @@ const projectController = {
 
     async createPhase(request: Request, response: Response) {
         try {
-            const projectId = request.project!.id;
 
+            const projectId = request.project!.id;
+            console.log(projectId)
             const validatedData = createPhaseSchema.safeParse(request.body);
 
             if (!validatedData.success) {

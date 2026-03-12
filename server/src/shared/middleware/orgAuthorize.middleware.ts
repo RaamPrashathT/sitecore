@@ -11,7 +11,6 @@ export const orgAuthorize = async (
 ) => {
     try {
         const incomingOrgId = request.headers["x-organization-id"];
-
         if (!incomingOrgId || typeof incomingOrgId !== "string") {
             throw new ValidationError("Organization ID missing");
         }

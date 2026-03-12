@@ -3,6 +3,7 @@ import { authorize } from "../../shared/middleware/authorize.middleware.js";
 import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware.js";
 import { requiredRole } from "../../shared/middleware/requireRole.middleware.js";
 import projectController from "./project.controller.js";
+import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middleware.js";
 
 const projectRouter = Router();
 
@@ -10,12 +11,12 @@ projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectC
 
 projectRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getProjects)
 
-projectRouter.get("/:projectSlug", authorize, orgAuthorize, projectController.getProjectDetails)
+projectRouter.post("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]),projectAuthorize, projectController.createPhase)
 
-projectRouter.post("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectController.createPhase)
-
-projectRouter.get("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectController.getPhases) 
+projectRouter.get("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.getPhases) 
 
 projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.paymentApproval)
+
+projectRouter.get("/:projectSlug", authorize, orgAuthorize, projectController.getProjectDetails)
 
 export default projectRouter;
