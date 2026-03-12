@@ -5,9 +5,17 @@ const projectService = {
     async createProject({
         organizationId,
         projectName,
+        address,
+        estimatedBudget,
+        engineerId,
+        clientId,
     }: {
         readonly organizationId: string;
         readonly projectName: string;
+        readonly address: string;
+        readonly estimatedBudget: number;
+        readonly engineerId: string;
+        readonly clientId: string;
     }) {
         const slugBase = slugify(projectName);
         const lastProject = await prisma.project.findFirst({
@@ -29,14 +37,28 @@ const projectService = {
                 slugBase,
                 slugIndex: nextIndex,
                 organizationId: organizationId,
-            }
-        })
+                address,
+                estimatedBudget,
+                assignments: {
+                    create: [
+                        {
+                            userId: engineerId,
+                            role: "ENGINEER",
+                        },
+                        {
+                            userId: clientId,
+                            role: "CLIENT",
+                        },
+                    ],
+                },
+            },
+        });
 
         return {
             id: result.id,
             name: result.name,
             slug: result.slug,
-        }
+        };
     },
 
     async getProjects(organizationId: string) {
@@ -53,8 +75,8 @@ const projectService = {
             id: project.id,
             name: project.name,
             slug: project.slug,
-        }))
-    }
+        }));
+    },
 };
 
 export default projectService;
