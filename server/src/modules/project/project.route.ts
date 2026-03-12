@@ -10,4 +10,6 @@ projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectC
 
 projectRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getProjects)
 
+projectRouter.get("/:projectSlug", authorize, orgAuthorize, projectController.getProjectDetails)
+
 export default projectRouter;

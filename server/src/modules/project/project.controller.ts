@@ -42,6 +42,31 @@ const projectController = {
             logger.error(error);
             return response.status(500).json({ message: "Internal server error" });
         }
+    },
+
+    async getProjectDetails(request: Request, response: Response) {
+        try {
+            const { projectSlug } = request.params;
+            const organizationId = request.tenant!.orgId;
+
+            if(!projectSlug) {
+                throw new ValidationError("Project slug is required");
+            }
+
+            const result = await projectService.getProjectDetails(projectSlug as string, organizationId);
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if(error instanceof ValidationError) {
+                return response.status(400).json({
+                    message: error.message
+                })
+            }
+            logger.error(error)
+            return response.status(500).json({
+                message: "Internal server error"
+            })
+        }
     }
 };
 

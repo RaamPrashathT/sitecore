@@ -77,6 +77,25 @@ const projectService = {
             slug: project.slug,
         }));
     },
+
+    async getProjectDetails(projectSlug: string, organizationId: string) {
+        const result = await prisma.project.findUnique({
+            where: {
+                slug_organizationId: {
+                    slug: projectSlug,
+                    organizationId: organizationId,
+                },
+            }
+        })
+
+        return {
+            id: result?.id,
+            name: result?.name,
+            slug: result?.slug,
+            address: result?.address,
+            estimatedBudget: result?.estimatedBudget,
+        }
+    }
 };
 
 export default projectService;

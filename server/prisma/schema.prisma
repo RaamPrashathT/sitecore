@@ -22,6 +22,20 @@ enum CatalogueCategory {
     OVERHEAD
 }
 
+enum PhaseStatus {
+    PLANNING
+    PENDING_PAYMENT
+    ACTIVE
+    COMPLETED
+}
+
+enum RequisitionStatus {
+    DRAFT
+    PENDING_APPROVAL
+    APPROVED
+    REJECTED
+}
+
 model Organization {
     id        String   @id @default(uuid())
     name      String
@@ -57,8 +71,9 @@ model Catalogue {
 
     supplierQuotes SupplierQuote[]
 
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId String
+    organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId   String
+    requisitionItems RequisitionItem[]
 
     @@unique([name, organizationId])
 }
@@ -70,8 +85,9 @@ model SupplierQuote {
     standardRate Decimal
     leadTime     Int?
 
-    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
-    catalogueId String
+    catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+    catalogueId  String
+    assignedItem RequisitionItem[]
 
     @@unique([catalogueId, supplier])
 }
@@ -89,6 +105,9 @@ model Project {
     organizationId String
 
     assignments Assignment[]
+    phases      Phase[]
+
+    @@unique([slug, organizationId])
 }
 
 model Assignment {
@@ -100,4 +119,47 @@ model Assignment {
     projectId String
 
     @@unique([userId, projectId])
+}
+
+model Phase {
+    id              String      @id @default(uuid())
+    name            String
+    description     String?
+    budget          Decimal
+    paymentDeadline DateTime
+    isPaid          Boolean     @default(false)
+    status          PhaseStatus @default(PLANNING)
+    projectId       String
+    project         Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    requisitions Requisition[]
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+}
+
+model Requisition {
+    id          String            @id @default(uuid())
+    name        String
+    status      RequisitionStatus @default(DRAFT)
+    phaseId     String
+    phase       Phase             @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+    requestedBy String
+    items       RequisitionItem[]
+    createdAt   DateTime          @default(now())
+    updatedAt   DateTime          @updatedAt
+}
+
+model RequisitionItem {
+    id                String  @id @default(uuid())
+    quantity          Decimal
+    estimatedUnitCost Decimal
+    catalogueId       String
+
+    catalogue          Catalogue @relation(fields: [catalogueId], references: [id])
+    assignedSupplierId String?
+
+    assignedSupplier SupplierQuote? @relation(fields: [assignedSupplierId], references: [id])
+    requisitionId    String
+
+    requisition Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
 }
