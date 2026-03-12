@@ -192,7 +192,6 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                             )}
                         </Field>
 
-                        {/* CLIENT SELECT */}
                         <Field className="w-full">
                             <FieldLabel>Clients</FieldLabel>
                             <Controller

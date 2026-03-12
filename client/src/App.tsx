@@ -18,6 +18,7 @@ import OrgGuard from "./contexts/OrgContext";
 import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
 import CreateProjectPage from "./pages/adminPages/project/CreateProjectPage";
 import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
+import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
 
 function App() {
     return (
@@ -71,6 +72,10 @@ function App() {
                                 <Route
                                     path=":projectSlug"
                                     element={<ProjectPage />}
+                                />
+                                <Route
+                                    path=":projectSlug/create-phase"
+                                    element={<PhaseCreationPage />}
                                 />
                                 <Route
                                     path="projects/create"
