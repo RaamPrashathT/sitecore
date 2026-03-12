@@ -1,6 +1,6 @@
 import { prisma } from "../../shared/lib/prisma.js";
 import { slugify } from "../../shared/utils/slugify.js";
-import type { CreatePhaseBody } from "./project.schema.js";
+import { RequistionItemListSchema, RequistionItemSchema, type CreatePhaseBody, type CreateRequisitionBody, type RequistionItemListBody } from "./project.schema.js";
 
 const projectService = {
     async createProject({
@@ -140,7 +140,68 @@ const projectService = {
                 status: "PAYMENT_PENDING"
             }
         })
+    },
+
+    async createRequisition({
+        userId,
+        phaseId 
+    }: {
+        readonly userId: string;
+        readonly phaseId: string
+    }) {
+        const result = await prisma.requisition.create({
+            data: {
+                phaseId: phaseId,
+                requestedBy: userId,
+            }
+        })
+
+        return {
+            id: result.id,
+        }
+    },
+
+    async createRequistionItems({
+        requisitionId,
+        phaseId,
+        items
+    }: {
+        readonly requisitionId: string;
+        readonly phaseId: string;
+        readonly items: RequistionItemListBody
+    }) {
+        const itemsToCreate = items.map((item) => ({
+            quantity: item.quantity,
+            estimatedUnitCost: item.estimatedCost,
+            catalogueId: item.id,
+            requisitionId: requisitionId
+        }))
+        await prisma.requisitionItem.createMany({
+            data: itemsToCreate
+        })
+
+        await prisma.requisition.update({
+            where: {
+                id: requisitionId
+            },
+            data: {
+                status: "PENDING_APPROVAL"
+            }
+        })
+        await prisma.phase.update({
+            where: {
+                id: phaseId
+            },
+            data: {
+                status: "APPROVAL_PENDING"
+            }
+        })
+
+        return {
+            count: items.length,
+        }
     }
+
 };
 
 export default projectService;

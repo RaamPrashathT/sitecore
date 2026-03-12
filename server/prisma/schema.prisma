@@ -143,7 +143,6 @@ model Phase {
 
 model Requisition {
     id          String            @id @default(uuid())
-    name        String
     status      RequisitionStatus @default(DRAFT)
     phaseId     String
     phase       Phase             @relation(fields: [phaseId], references: [id], onDelete: Cascade)

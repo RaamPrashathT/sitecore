@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import projectService from "./project.service.js";
 import { logger } from "../../shared/lib/logger.js";
-import { createPhaseSchema, createProjectSchema } from "./project.schema.js";
+import { createPhaseSchema, createProjectSchema, createRequisitionSchema, RequistionItemListSchema } from "./project.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 
 const projectController = {
@@ -125,6 +125,66 @@ const projectController = {
                 message: "Payment approved successfully",
             });
         } catch (error) {
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async createRequisition(request: Request, response: Response) {
+        try {
+            const userId = request.session!.userId;
+
+            const validatedData = createRequisitionSchema.safeParse(request.body);
+
+            if(!validatedData.success) {
+                throw new ValidationError(validatedData.error.message)
+            }
+
+            const result = await projectService.createRequisition({
+                userId,
+                phaseId: validatedData.data.phaseId
+            })
+
+            return response.status(200).json(result)
+        } catch (error) {
+            if(error instanceof ValidationError) {
+                return response.status(400).json({
+                    message: error.message
+                })
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async createRequistionItems(request: Request, response: Response) {
+        try {
+            const requisitionId = request.body.requisitionId;
+            const validatedData = RequistionItemListSchema.safeParse(request.body.items);
+            const phaseId = request.body.phaseId;
+
+
+            if(!validatedData.success) {
+                throw new ValidationError(validatedData.error.message)
+            }
+
+            const result = await projectService.createRequistionItems({
+                requisitionId,
+                phaseId,
+                items: validatedData.data
+            })
+
+            return response.status(200).json(result)
+        } catch (error) {
+            if(error instanceof ValidationError) {
+                return response.status(400).json({
+                    message: error.message
+                })
+            }
             logger.error(error);
             return response.status(500).json({
                 message: "Internal server error",
