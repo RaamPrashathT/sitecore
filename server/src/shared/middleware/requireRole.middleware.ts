@@ -2,17 +2,18 @@ import type { Request, Response, NextFunction } from "express";
 import { logger } from "../lib/logger.js";
 
 export const requiredRole = (
-    requiredRole: string
+    requiredRole: string | string[]
 ) => async (
     request: Request,
     response: Response,
     next: NextFunction,
 ) => {
     try {
-        const role = request.tenant?.role
+        const userRole = request.tenant?.role
+        const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
-        if (requiredRole === role) {
-            return next()
+        if (userRole && allowedRoles.includes(userRole)) {
+            return next();
         }
         return response.status(401).json({
             success: false,

@@ -12,4 +12,10 @@ projectRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectCo
 
 projectRouter.get("/:projectSlug", authorize, orgAuthorize, projectController.getProjectDetails)
 
+projectRouter.post("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectController.createPhase)
+
+projectRouter.get("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectController.getPhases) 
+
+projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.paymentApproval)
+
 export default projectRouter;

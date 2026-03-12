@@ -25,6 +25,8 @@ enum CatalogueCategory {
 enum PhaseStatus {
     PLANNING
     PENDING_PAYMENT
+    REQUISITION_PENDING
+    APPROVAL_PENDING
     ACTIVE
     COMPLETED
 }
@@ -135,6 +137,8 @@ model Phase {
     requisitions Requisition[]
     createdAt    DateTime      @default(now())
     updatedAt    DateTime      @updatedAt
+
+    @@unique([name, projectId])
 }
 
 model Requisition {

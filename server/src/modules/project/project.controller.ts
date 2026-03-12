@@ -1,16 +1,16 @@
 import type { Request, Response } from "express";
 import projectService from "./project.service.js";
 import { logger } from "../../shared/lib/logger.js";
-import { createProjectSchema } from "./project.schema.js";
+import { createPhaseSchema, createProjectSchema } from "./project.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 
 const projectController = {
     async createProject(request: Request, response: Response) {
         try {
             const organizationId = request.tenant!.orgId;
-        
+
             const validatedData = createProjectSchema.safeParse(request.body);
-            if(!validatedData.success) {
+            if (!validatedData.success) {
                 throw new ValidationError(validatedData.error.message);
             }
 
@@ -40,7 +40,9 @@ const projectController = {
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);
-            return response.status(500).json({ message: "Internal server error" });
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 
@@ -49,23 +51,83 @@ const projectController = {
             const { projectSlug } = request.params;
             const organizationId = request.tenant!.orgId;
 
-            if(!projectSlug) {
+            if (!projectSlug) {
                 throw new ValidationError("Project slug is required");
             }
 
-            const result = await projectService.getProjectDetails(projectSlug as string, organizationId);
+            const result = await projectService.getProjectDetails(
+                projectSlug as string,
+                organizationId,
+            );
 
             return response.status(200).json(result);
         } catch (error) {
-            if(error instanceof ValidationError) {
+            if (error instanceof ValidationError) {
                 return response.status(400).json({
-                    message: error.message
-                })
+                    message: error.message,
+                });
             }
-            logger.error(error)
+            logger.error(error);
             return response.status(500).json({
-                message: "Internal server error"
-            })
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async createPhase(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+
+            const validatedData = createPhaseSchema.safeParse(request.body);
+
+            if (!validatedData.success) {
+                throw new ValidationError(validatedData.error.message);
+            }
+
+            await projectService.createPhase({
+                projectId,
+                data: validatedData.data,
+            });
+
+            return response.status(200).json({
+                message: "Phase created successfully",
+            });
+        } catch (error) {
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async getPhases(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+
+            const result = await projectService.getPhases(projectId);
+
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async paymentApproval(request: Request, response: Response) {
+        try {
+            const phaseId = request.body.phaseId;
+            await projectService.paymentApproval(phaseId);
+
+            return response.status(200).json({
+                message: "Payment approved successfully",
+            });
+        } catch (error) {
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
         }
     }
 };

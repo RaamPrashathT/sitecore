@@ -8,4 +8,13 @@ export const createProjectSchema = z.object({
     clientId: z.string().length(24),
 })
 
+export const createPhaseSchema = z.object({
+    name: z.string().min(1),
+    description: z.string().min(1),
+    budget: z.coerce.number(),
+    paymentDeadLine: z.coerce.date(),
+    isPaid: z.boolean(),
+})
+
 export type CreateProjectBody = z.infer<typeof createProjectSchema>;
+export type CreatePhaseBody = z.infer<typeof createPhaseSchema>;

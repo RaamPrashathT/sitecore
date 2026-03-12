@@ -1,5 +1,6 @@
 import { prisma } from "../../shared/lib/prisma.js";
 import { slugify } from "../../shared/utils/slugify.js";
+import type { CreatePhaseBody } from "./project.schema.js";
 
 const projectService = {
     async createProject({
@@ -95,6 +96,50 @@ const projectService = {
             address: result?.address,
             estimatedBudget: result?.estimatedBudget,
         }
+    },
+
+    async createPhase({
+        projectId,
+        data
+    }: {
+        readonly projectId: string;
+        readonly data: CreatePhaseBody
+    }) {
+        await prisma.phase.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                budget: data.budget,
+                paymentDeadline: data.paymentDeadLine,
+                projectId: projectId,
+                status: "PENDING_PAYMENT"
+            }
+        })
+    },
+
+    async getPhases(projectId: string) {
+        const result = await prisma.phase.findMany({
+            where: {
+                projectId: projectId,
+            },
+            orderBy: {
+                createdAt: "desc",
+            }
+        })
+
+        return result
+    },
+
+    async paymentApproval(phaseId: string) {
+        await prisma.phase.update({
+            where: {
+                id: phaseId,
+                status: "PENDING_PAYMENT"
+            },
+            data: {
+                status: "REQUISITION_PENDING"
+            }
+        })
     }
 };
 
