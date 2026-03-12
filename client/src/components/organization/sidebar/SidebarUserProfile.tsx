@@ -1,11 +1,6 @@
-import {
-    BadgeCheck,
-    Bell,
-    ChevronsUpDown,
-    LogOut,
-} from "lucide-react";
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback,  } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,17 +16,19 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/useAuth";
 
-const SidebarUser = ({
-    user,
-}: {
-    readonly user: {
-        name: string;
-        email: string;
-        avatar: string;
-    };
-}) => {
+const SidebarUser = () => {
     const { isMobile } = useSidebar();
+    const { user, logout, isLoading } = useAuth();
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <SidebarMenu>
@@ -43,17 +40,13 @@ const SidebarUser = ({
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarImage
-                                    src={user.avatar}
-                                    alt={user.name}
-                                />
                                 <AvatarFallback className="rounded-lg bg-purple-500 text-white">
-                                    R
+                                    {user.username[0].toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">
-                                    {user.name}
+                                    {user.username}
                                 </span>
                                 <span className="truncate text-xs">
                                     {user.email}
@@ -71,17 +64,17 @@ const SidebarUser = ({
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage
+                                    {/* <AvatarImage
                                         src={user.avatar}
-                                        alt={user.name}
-                                    />
+                                        alt={user.username}
+                                    /> */}
                                     <AvatarFallback className="rounded-lg bg-purple-500 text-white">
-                                        R
+                                        {user.username[0].toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-medium">
-                                        {user.name}
+                                        {user.username}
                                     </span>
                                     <span className="truncate text-xs">
                                         {user.email}
@@ -89,14 +82,14 @@ const SidebarUser = ({
                                 </div>
                             </div>
                         </DropdownMenuLabel>
-                        
+
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
                                 <BadgeCheck />
                                 Account
                             </DropdownMenuItem>
-                           
+
                             <DropdownMenuItem>
                                 <Bell />
                                 Notifications
@@ -104,8 +97,11 @@ const SidebarUser = ({
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
-                            <LogOut />
-                            Log out
+                            <button onClick={() => logout()}
+                                className="flex w-full items-center gap-x-2">
+                                <LogOut />
+                                Log out
+                            </button>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

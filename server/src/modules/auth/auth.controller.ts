@@ -41,13 +41,15 @@ const authController = {
 
     async login(request: Request, response: Response) {
         try {
-            const { sessionId, userId } = await authService.login(request.body);
+            const { sessionId, userId, username, email} = await authService.login(request.body);
 
             await redis.set(
                 `session:${sessionId}`,
                 JSON.stringify({
                     userId: userId,
-                    userAgent: request.headers["user-agent"]
+                    userAgent: request.headers["user-agent"],
+                    email: email,
+                    username: username,
                 }),
                 { EX: 60 * 60 * 24 },
             );
@@ -112,6 +114,7 @@ const authController = {
 
     async me(request: Request, response: Response) {
         try {
+            console.log(request.session)
             return response.status(200).json({
                 success: true,
                 message: "User found",

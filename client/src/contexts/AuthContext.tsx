@@ -2,7 +2,9 @@ import api from "@/lib/axios";
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
 interface User {
-    id: string;
+    userId: string;
+    username: string;
+    email: string;
 }
 
 interface AuthContextType {
@@ -19,7 +21,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        console.log("Context running")
         const checkSession = async () => {
             try {
                 const response = await api.get("/auth/me");
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         } finally {
             setUser(null);
         }
-    }, []);
+    }, []); 
 
     const value = useMemo(
         () => ({ user, isLoading, login, logout }),

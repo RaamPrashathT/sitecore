@@ -25,7 +25,6 @@ export const authorize = async (
             logger.error("Invalid session JSON");
             throw new UnAuthorizedError();
         }
-
         if (!session?.userId) throw new UnAuthorizedError();
 
         request.session = session;

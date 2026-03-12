@@ -86,6 +86,8 @@ const authService = {
         return {
             sessionId,
             userId: existingUser._id,
+            username: existingUser.username,
+            email: existingUser.email,
         };
     },
 
