@@ -145,15 +145,18 @@ const projectService = {
 
     async createRequisition({
         userId,
-        phaseId 
+        phaseId,
+        budget
     }: {
         readonly userId: string;
         readonly phaseId: string
+        readonly budget: number
     }) {
         const result = await prisma.requisition.create({
             data: {
                 phaseId: phaseId,
                 requestedBy: userId,
+                budget: budget,
             }
         })
 

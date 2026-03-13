@@ -135,7 +135,7 @@ const projectController = {
     async createRequisition(request: Request, response: Response) {
         try {
             const userId = request.session!.userId;
-
+            console.log(request.body)
             const validatedData = createRequisitionSchema.safeParse(request.body);
 
             if(!validatedData.success) {
@@ -144,17 +144,19 @@ const projectController = {
 
             const result = await projectService.createRequisition({
                 userId,
-                phaseId: validatedData.data.phaseId
+                phaseId: validatedData.data.phaseId,
+                budget: validatedData.data.budget
             })
 
             return response.status(200).json(result)
         } catch (error) {
+            logger.error(error);
             if(error instanceof ValidationError) {
                 return response.status(400).json({
                     message: error.message
                 })
             }
-            logger.error(error);
+            
             return response.status(500).json({
                 message: "Internal server error",
             });

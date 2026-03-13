@@ -20,6 +20,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { useParams } from "react-router-dom";
+import { useMembership } from "@/hooks/useMembership";
 
 
 
@@ -66,10 +67,24 @@ const data = {
             icon: Settings2,
         },
     ],
+
+    engineerSidebarContents: [
+        
+    ]
 };
 
 const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
     const { orgSlug } = useParams<{ orgSlug: string }>();
+    const {data: membership, isLoading: membershipLoading} = useMembership();
+
+    if(membershipLoading){
+        return <div>Loading...</div>
+    }
+
+    if(!membership){
+        return <div>No membership found</div>;
+    }
+
     return (
 
         <Sidebar collapsible="icon" {...props}>

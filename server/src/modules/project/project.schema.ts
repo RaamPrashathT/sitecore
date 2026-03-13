@@ -16,7 +16,8 @@ export const createPhaseSchema = z.object({
 })
 
 export const createRequisitionSchema = z.object({
-    phaseId: z.string().length(24)
+    phaseId: z.string().length(36),
+    budget: z.coerce.number()
 })
 
 export const RequistionItemSchema = z.object({

@@ -20,6 +20,7 @@ import CreateProjectPage from "./pages/adminPages/project/CreateProjectPage";
 import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
 import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
 import PendingRequestsPage from "./pages/adminPages/pending/PendingRequestsPage";
+import RequisitionCreationPage from "./pages/adminPages/project/RequisitionCreationPage";
 
 function App() {
     return (
@@ -77,6 +78,10 @@ function App() {
                                 <Route
                                     path=":projectSlug/create-phase"
                                     element={<PhaseCreationPage />}
+                                />
+                                <Route
+                                    path=":projectSlug/requisition/:requisitionIdSlug"
+                                    element={<RequisitionCreationPage/>}
                                 />
                                 <Route
                                     path="projects/create"
