@@ -1,14 +1,12 @@
 import * as React from "react";
 import {
-    AudioWaveform,
     UserRoundCheck,
     ScrollText,
-    Command,
-    GalleryVerticalEnd,
     Settings2,
     ChartNoAxesGantt,
     SquareTerminal,
-    Users
+    Users,
+    ClipboardClock
 } from "lucide-react";
 
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -26,28 +24,6 @@ import { useParams } from "react-router-dom";
 
 
 const data = {
-    user: {
-        name: "Raam Prashath T",
-        email: "raamthiruna@gmail.com",
-        avatar: "/avatars/raam.jpg",
-    },
-    orgs: [
-        {
-            name: "Site Core",
-            logo: GalleryVerticalEnd,
-            role: "Admin",
-        },
-        {
-            name: "Acme Corp.",
-            logo: AudioWaveform,
-            role: "Client",
-        },
-        {
-            name: "Evil Corp.",
-            logo: Command,
-            role: "Engineer",
-        },
-    ],
     sidebarContents: [
         {
             title: "Dashboard",
@@ -80,6 +56,11 @@ const data = {
             icon: ChartNoAxesGantt,
         },
         {
+            title: "Pending Requests",
+            url: "/pending-requests",
+            icon: ClipboardClock,
+        },
+        {
             title: "Settings",
             url: "/settings",
             icon: Settings2,
@@ -93,7 +74,7 @@ const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
 
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <OrgSwitcher orgs={data.orgs} />
+                <OrgSwitcher/>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarContents items={data.sidebarContents.map((item) => ({
@@ -102,7 +83,7 @@ const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
                 }))}/>
             </SidebarContent>
             <SidebarFooter>
-                <SidebarUser user={data.user} />
+                <SidebarUser/>
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>

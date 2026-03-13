@@ -1,6 +1,7 @@
 import { prisma } from "../../shared/lib/prisma.js";
+import { User } from "../../shared/models/user.js";
 import { slugify } from "../../shared/utils/slugify.js";
-import { RequistionItemListSchema, RequistionItemSchema, type CreatePhaseBody, type CreateRequisitionBody, type RequistionItemListBody } from "./project.schema.js";
+import { type CreatePhaseBody, type RequistionItemListBody } from "./project.schema.js";
 
 const projectService = {
     async createProject({
@@ -112,7 +113,7 @@ const projectService = {
                 budget: data.budget,
                 paymentDeadline: data.paymentDeadline,
                 projectId: projectId,
-                status: "PLANNING"
+                status: "PAYMENT_PENDING"
             }
         })
     },
@@ -134,10 +135,10 @@ const projectService = {
         await prisma.phase.update({
             where: {
                 id: phaseId,
-                status: "PLANNING"
+                status: "PAYMENT_PENDING"
             },
             data: {
-                status: "PAYMENT_PENDING"
+                status: "ACTIVE"
             }
         })
     },
@@ -193,13 +194,74 @@ const projectService = {
                 id: phaseId
             },
             data: {
-                status: "APPROVAL_PENDING"
+                status: "PAYMENT_PENDING"
             }
         })
 
         return {
             count: items.length,
         }
+    },
+
+    async getPaymentPendingPhases(organizationId: string) {
+        const result = await prisma.phase.findMany({
+            where: {
+                status: "PAYMENT_PENDING",
+                isPaid: false,
+                project: {
+                    organizationId: organizationId
+                }
+            },
+            select: {
+                id: true,
+                name: true,
+                budget: true,
+                paymentDeadline: true,
+
+                project: {
+                    select: {
+                        name: true,
+
+                        assignments: {
+                            where: {
+                                role: "CLIENT"
+                            },
+                            select: {
+                                userId: true,
+                            }
+                        }
+
+                    }
+                }
+            },
+            orderBy: {
+                paymentDeadline: "asc"
+            }
+        })
+        const userIds = [...new Set(
+            result.flatMap(phase => 
+                phase.project.assignments.map(assignment => assignment.userId)
+            )
+        )];
+        const clients = await User.find({
+            _id: {
+                $in: userIds
+            }
+        })
+
+        const clientMap = new Map(clients.map(client => [client._id.toString(), client.username]))
+        
+        return result.map(phase => {
+            const firstClientId = phase.project.assignments[0]?.userId?.toString();
+            return {
+                id: phase.id,
+                phaseName: phase.name,
+                projectName: phase.name,
+                budget: phase.budget,
+                paymentDeadline: phase.paymentDeadline,
+                client: (firstClientId ? clientMap.get(firstClientId) : null) || "Unknown Client"
+            }
+        })
     }
 
 };

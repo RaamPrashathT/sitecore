@@ -19,6 +19,7 @@ import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
 import CreateProjectPage from "./pages/adminPages/project/CreateProjectPage";
 import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
 import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
+import PendingRequestsPage from "./pages/adminPages/pending/PendingRequestsPage";
 
 function App() {
     return (
@@ -81,7 +82,10 @@ function App() {
                                     path="projects/create"
                                     element={<CreateProjectPage />}
                                 />
-
+                                <Route
+                                    path="pending-requests"
+                                    element={<PendingRequestsPage />}
+                                />
                                 <Route
                                     path="settings"
                                     element={<SettingsPage />}

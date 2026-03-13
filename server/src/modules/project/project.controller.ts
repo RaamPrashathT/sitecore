@@ -78,7 +78,6 @@ const projectController = {
         try {
 
             const projectId = request.project!.id;
-            console.log(projectId)
             const validatedData = createPhaseSchema.safeParse(request.body);
 
             if (!validatedData.success) {
@@ -118,7 +117,8 @@ const projectController = {
 
     async paymentApproval(request: Request, response: Response) {
         try {
-            const phaseId = request.body.phaseId;
+            const phaseId = request.body.id;
+
             await projectService.paymentApproval(phaseId);
 
             return response.status(200).json({
@@ -189,6 +189,21 @@ const projectController = {
             return response.status(500).json({
                 message: "Internal server error",
             });
+        }
+    },
+
+    async getPaymentPendingPhases(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant!.orgId;
+
+            const result = await projectService.getPaymentPendingPhases(organizationId);
+
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     }
 };

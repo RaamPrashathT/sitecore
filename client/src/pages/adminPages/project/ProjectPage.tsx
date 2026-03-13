@@ -5,13 +5,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePhaseList } from "@/hooks/usePhaseList";
 import PhaseList from "@/components/project/phase/PhaseList";
 import { Button } from "@/components/ui/button";
-
+import { Plus } from "lucide-react";
 
 const ProjectPage = () => {
     const { projectSlug } = useParams();
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { data: project, isLoading: projectLoading } = useProjectDetails(projectSlug, membership?.id );
-    const { data: phase, isLoading: phaseLoading } = usePhaseList(project?.id, membership?.id);
+    const { data: project, isLoading: projectLoading } = useProjectDetails(
+        projectSlug,
+        membership?.id,
+    );
+    const { data: phase, isLoading: phaseLoading } = usePhaseList(
+        project?.id,
+        membership?.id,
+    );
     const navigate = useNavigate();
 
     if (membershipLoading || projectLoading || phaseLoading) {
@@ -23,9 +29,13 @@ const ProjectPage = () => {
     return (
         <div>
             <ProjectDetails projectDetails={project} />
-            <Button onClick={() => navigate("create-phase")}>
-                Create Phase
-            </Button>
+            <div className="flex justify-between items-center px-6">
+                <h1 className="text-2xl font-semibold">Phases:</h1>
+                <Button onClick={() => navigate("create-phase")} className="flex items-center justify-center gap-x-1">
+                    <Plus className="" />
+                    Create Phase
+                </Button>
+            </div>
             <PhaseList phases={phase} />
         </div>
     );
