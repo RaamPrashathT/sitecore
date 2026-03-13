@@ -25,7 +25,7 @@ export type CatalogueWithQuotes = {
 };
 
 
-export const useGetCatalogue = (orgId: string) => {
+export const useGetCatalogue = (orgId: string | undefined) => {
 
     return useQuery({
         queryKey: ['catalogue', orgId],
