@@ -11,12 +11,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
-import { registerSchema, type RegisterInput } from "@/schema/authSchema";
+import { registerSchema, type RegisterInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/lib/axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Spinner } from "../ui/spinner";
+import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
 
 export function RegisterForm({

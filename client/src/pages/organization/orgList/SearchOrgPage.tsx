@@ -1,4 +1,4 @@
-import SelectOrgList from "@/components/organizationList/SelectOrgList";
+import SelectOrgList from "@/features/organizationList/components/SelectOrgList";
 
 const SearchOrgPage = () => {
     return (

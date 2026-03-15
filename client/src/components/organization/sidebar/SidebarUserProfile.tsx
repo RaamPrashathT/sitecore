@@ -16,15 +16,14 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "@/features/auth/stores/authStore";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 
 const SidebarUser = () => {
     const { isMobile } = useSidebar();
-    const { user, logout, isLoading } = useAuth();
 
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
+    const user = useAuthStore((s) => s.user);
+    const { mutate: logout } = useLogout()
 
     if (!user) {
         return null;

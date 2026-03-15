@@ -1,4 +1,4 @@
-import OrgList from "@/components/organizationList/OrgList"
+import OrgList from "@/features/organizationList/components/OrgList"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { Link } from "react-router-dom"

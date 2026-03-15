@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAllOrganizations } from "@/hooks/useAllOrganizations";
+import { useAllOrganizations } from "@/features/organizationList/hooks/useAllOrganizations";
 import { useDebounce } from "@/hooks/useDebounce";
 
 import { Input } from "@/components/ui/input";

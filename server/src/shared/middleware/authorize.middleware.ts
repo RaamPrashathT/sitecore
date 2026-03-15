@@ -8,8 +8,7 @@ export const authorize = async (
     response: Response,
     next: NextFunction,
 ) => {
-    try {
-    
+    try {  
         const sessionId = request.cookies.session;
         
         if (!sessionId) throw new UnAuthorizedError();

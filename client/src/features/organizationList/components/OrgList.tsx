@@ -1,5 +1,5 @@
 import OrgListItem from "./OrgListItem";
-import { useOrganizations } from "@/hooks/useOrganization";
+import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 
 const OrgList = () => {
     const { data: organizations, isLoading, error } = useOrganizations()

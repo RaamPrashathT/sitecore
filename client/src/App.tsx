@@ -1,8 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
 import LoginPage from "@/pages/auth/LoginPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
-import PrivateRoutes from "./routes/ProtectedRoutes";
+import PrivateRoutes from "./features/auth/components/ProtectedRoutes";
 import OrganizationListPage from "./pages/organization/orgList/OrgListPage";
 import CreateOrgPage from "./pages/organization/orgList/CreateOrgPage";
 import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
@@ -21,10 +20,20 @@ import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
 import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
 import PendingRequestsPage from "./pages/adminPages/pending/PendingRequestsPage";
 import RequisitionCreationPage from "./pages/adminPages/project/RequisitionCreationPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: false,
+            staleTime: 0, 
+        },
+    },
+});
 
 function App() {
     return (
-        <AuthProvider>
+        <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
@@ -100,7 +109,7 @@ function App() {
                     </Route>
                 </Routes>
             </BrowserRouter>
-        </AuthProvider>
+        </QueryClientProvider>
     );
 }
 

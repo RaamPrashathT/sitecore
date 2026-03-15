@@ -11,14 +11,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
-import { loginSchema, type LoginInput } from "@/schema/authSchema";
+import { loginSchema, type LoginInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/lib/axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Spinner } from "../ui/spinner";
+import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthStore } from "../stores/authStore";
 
 export function LoginForm({
     className,
@@ -40,7 +40,7 @@ export function LoginForm({
         },
     });
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const login = useAuthStore((s) => s.login);
 
     const onSubmit = async (data: LoginInput) => {
         setApiMessage(null);

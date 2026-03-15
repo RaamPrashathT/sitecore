@@ -17,7 +17,7 @@ import {
 import { useMembership } from "@/hooks/useMembership";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { AvatarFallback, Avatar } from "@/components/ui/avatar";
-import { useOrganizations } from "@/hooks/useOrganization";
+import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 
 const OrgSwitcher = () => {
     const { isMobile } = useSidebar();
