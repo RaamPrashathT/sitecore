@@ -16,7 +16,6 @@ const EngineerPage = () => {
     
     }
 
-    
     return (
         <div className="px-4"> 
             <DataTable data={engineers}/>

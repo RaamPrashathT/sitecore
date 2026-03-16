@@ -1,3 +1,4 @@
+import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { User } from "../../shared/models/user.js";
 import { slugify } from "../../shared/utils/slugify.js";
@@ -265,6 +266,25 @@ const projectService = {
                 client: (firstClientId ? clientMap.get(firstClientId) : null) || "Unknown Client"
             }
         })
+    },
+    async getRequisitionDetails(requisitionId: string) {
+        const result = await prisma.requisition.findUnique({
+            where: {
+                id: requisitionId
+            }
+        })
+
+        if(result === null) {
+            throw new MissingError("Requisition not found")
+        }
+
+        return {
+            id: result.id,
+            budget: result.budget,
+            status: result.status,
+            requestedBy: result.requestedBy,
+            phaseId: result.phaseId,
+        }
     }
 
 };

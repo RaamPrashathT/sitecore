@@ -1,16 +1,16 @@
 import { useGetCatalogue } from "@/hooks/useGetCatalogs";
 import { useMembership } from "@/hooks/useMembership";
-import RequisitionSelectDataTable from "./DataTable";
+import RequisitionDataTable from "./RequisitionDatatable";
 
 const RequisitionSelectionForm = () => {
-    const {data: memembership, isLoading: membershipLoading} = useMembership();
-    const {data: catalogue, isLoading: catalogueLoading} = useGetCatalogue(memembership?.id);
+    const {data: membership, isLoading: membershipLoading} = useMembership();
+    const {data: catalogue, isLoading: catalogueLoading} = useGetCatalogue(membership?.id);
 
     if(membershipLoading || catalogueLoading){
         return <div>Loading...</div>
     }
 
-    if(!memembership || !catalogue){
+    if(!membership || !catalogue){
         return <div>No access</div>
     }
 
@@ -18,7 +18,7 @@ const RequisitionSelectionForm = () => {
         <div className="p-2">
             <h1 className="text-2xl font-semibold">Select Requisitions:</h1>
             <div>
-                <RequisitionSelectDataTable data={catalogue}/>
+                <RequisitionDataTable data={catalogue} />
             </div>
         </div>
     );

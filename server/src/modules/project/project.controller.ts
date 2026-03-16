@@ -3,6 +3,7 @@ import projectService from "./project.service.js";
 import { logger } from "../../shared/lib/logger.js";
 import { createPhaseSchema, createProjectSchema, createRequisitionSchema, RequistionItemListSchema } from "./project.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
+import { MissingError } from "../../shared/error/missing.error.js";
 
 const projectController = {
     async createProject(request: Request, response: Response) {
@@ -206,6 +207,26 @@ const projectController = {
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
+        }
+    },
+
+    async getRequisitionDetails(request: Request, response: Response) {
+        try {
+            const { requisitionIdSlug } = request.params;
+
+            const result = await projectService.getRequisitionDetails(requisitionIdSlug as string);
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if(error instanceof MissingError) {
+                return response.status(404).json({
+                    message: error.message
+                })
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
         }
     }
 };

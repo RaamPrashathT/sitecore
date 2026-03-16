@@ -19,10 +19,14 @@ projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRo
 
 projectRouter.post("/phase/requisition", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.createRequisition)
 
+
+
 projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getPaymentPendingPhases)
 
 projectRouter.post("/phase/requisitionItems", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.createRequistionItems)
 
 projectRouter.get("/:projectSlug", authorize, orgAuthorize, projectController.getProjectDetails)
+
+projectRouter.get("/phase/requisition/:requisitionIdSlug", authorize, orgAuthorize, projectAuthorize, projectController.getRequisitionDetails)
 
 export default projectRouter;

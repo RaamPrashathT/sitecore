@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/incompatible-library */
 import {
     flexRender,
     getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import { columns } from "./columns";
+import { RequisitionColumns as columns } from "./requisitionColumns";
 import {
     Table,
     TableBody,
@@ -19,7 +20,7 @@ interface DataTableProps {
     data: CatalogueWithQuotes[];
 }
 
-const RequisitionSelectDataTable = ({ data }: DataTableProps) => {
+const RequisitionDataTable = ({ data }: DataTableProps) => {
     const table = useReactTable({
         data,
         columns,
@@ -62,4 +63,4 @@ const RequisitionSelectDataTable = ({ data }: DataTableProps) => {
     );
 };
 
-export default RequisitionSelectDataTable;
+export default RequisitionDataTable;

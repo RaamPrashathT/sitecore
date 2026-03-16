@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { flexRender, useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import { columns } from "./projectColumn";
-import type { ProjectListType } from "@/hooks/useProjectList";
+import type { ProjectListType } from "@/features/project/manage/hooks/useProjectList";
 import { useNavigate } from "react-router-dom";
 
 interface DataTableProps {

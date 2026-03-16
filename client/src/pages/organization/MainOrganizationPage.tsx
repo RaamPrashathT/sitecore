@@ -41,26 +41,34 @@ const MainOrganizationPage = () => {
                             </p>
                         </div>
                         <div>
-                            {(currentLocation === "catalogue" && segments.length === 3)  &&  (
-                                <Button>
-                                    <Link to={`/${orgSlug}/catalogue/create`} className="flex items-center gap-x-1">
-                                        <Plus />
-                                        <p className="mb-px">Add Item</p>
-                                    </Link>
-                                </Button>
-                            )}
-                            {(currentLocation === "projects" && segments.length === 3) && (
-                                <Button className="p-0">
-                                    <Link to={`/${orgSlug}/projects/create`} className="flex items-center gap-x-1 p-3">
-                                        <Plus />
-                                        <p className="mb-px">Add Project</p>
-                                    </Link>
-                                </Button>
-                            )}
+                            {currentLocation === "catalogue" &&
+                                segments.length === 3 && (
+                                    <Button>
+                                        <Link
+                                            to={`/${orgSlug}/catalogue/create`}
+                                            className="flex items-center gap-x-1"
+                                        >
+                                            <Plus />
+                                            <p className="mb-px">Add Item</p>
+                                        </Link>
+                                    </Button>
+                                )}
+                            {currentLocation === "projects" &&
+                                segments.length === 3 && (
+                                    <Button className="p-0">
+                                        <Link
+                                            to={`/${orgSlug}/projects/create`}
+                                            className="flex items-center gap-x-1 p-3"
+                                        >
+                                            <Plus />
+                                            <p className="mb-px">Add Project</p>
+                                        </Link>
+                                    </Button>
+                                )}
                         </div>
                     </div>
                 </header>
-                <div className="">
+                <div className="flex flex-1 flex-col overflow-auto">
                     <Outlet />
                 </div>
             </SidebarInset>
