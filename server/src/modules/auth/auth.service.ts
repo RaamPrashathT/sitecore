@@ -74,11 +74,6 @@ const authService = {
         if (!password) {
             throw new UnAuthorizedError();
         }
-        console.log({
-            inputPassword: data.password,
-            storedHash: password,
-            isHashValidFormat: password.startsWith('$2b$') || password.startsWith('$2a$')
-        });
         const isPasswordValid = await bcrypt.compare(data.password, password);
 
         if (!isPasswordValid) {

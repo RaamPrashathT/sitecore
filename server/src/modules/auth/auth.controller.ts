@@ -9,7 +9,6 @@ const authController = {
 
     async register(request: Request, response: Response) {
         try {
-            console.log(request.body)
             const result = await authService.register(request.body);
             if (result.success) {
                 return response.status(200).json({

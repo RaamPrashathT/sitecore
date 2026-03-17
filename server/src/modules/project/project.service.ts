@@ -115,7 +115,8 @@ const projectService = {
                 budget: data.budget,
                 paymentDeadline: data.paymentDeadline,
                 projectId: projectId,
-                status: "PAYMENT_PENDING"
+                status: "PAYMENT_PENDING",
+                startDate: data.startDate
             }
         })
     },
@@ -133,7 +134,11 @@ const projectService = {
                 isPaid: true,
                 paymentDeadline: true,
                 status: true,
+                projectId: true,
                 requisitions: {
+                    where: {
+                        status: "APPROVED" 
+                    },
                     select: {
                         id: true,
                         budget: true,
@@ -154,7 +159,6 @@ const projectService = {
                                 assignedSupplier: {
                                     select: {
                                         supplier: true,
-                                        truePrice: true,
                                         standardRate: true,
                                         leadTime: true,
                                     }
@@ -167,9 +171,37 @@ const projectService = {
             orderBy: {
                 createdAt: "desc",
             }
-        })
-
-        return result
+        });
+        
+        return result.map(phase => ({
+            id: phase.id,
+            name: phase.name,
+            description: phase.description,
+            budget: Number(phase.budget),
+            isPaid: phase.isPaid,
+            paymentDeadline: phase.paymentDeadline,
+            status: phase.status,
+            projectId: phase.projectId,
+            requisitions: phase.requisitions.map(req => ({
+                id: req.id,
+                budget: Number(req.budget),
+                status: req.status,
+                requestedBy: req.requestedBy,
+                createdAt: req.createdAt,
+                items: req.items.map(item => ({
+                    id: item.id,
+                    quantity: Number(item.quantity),
+                    estimatedUnitCost: Number(item.estimatedUnitCost),
+                    
+                    itemName: item.catalogue?.name,
+                    unit: item.catalogue?.unit,
+                    
+                    supplierName: item.assignedSupplier?.supplier,
+                    standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : undefined,
+                    leadTime: item.assignedSupplier?.leadTime ?? undefined
+                }))
+            }))
+        }));
     },
 
     async paymentApproval(phaseId: string) {

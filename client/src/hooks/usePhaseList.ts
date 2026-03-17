@@ -1,15 +1,37 @@
 import api from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 
+export interface PhaseItem {
+    id: string;
+    quantity: number;
+    estimatedUnitCost: number;
+    itemName: string | undefined;
+    unit: string | undefined;
+    supplierName: string | undefined;
+    truePrice: number | undefined;
+    standardRate: number | undefined;
+    leadTime: number | undefined;
+}
+
+export interface PhaseRequisition {
+    id: string;
+    budget: number;
+    status: string;
+    requestedBy: string;
+    createdAt: Date;
+    items: PhaseItem[];
+}
+
 export interface PhaseListType {
-    projectId: string;
+    id: string;
     name: string;
     description: string | null;
     budget: number;
     isPaid: boolean;
-    id: string;
     paymentDeadline: Date;
     status: string;
+    projectId: string;
+    requisitions: PhaseRequisition[];
 }
 
 const getPhaseList = async (projectId: string | undefined, organizationId: string | undefined) => {

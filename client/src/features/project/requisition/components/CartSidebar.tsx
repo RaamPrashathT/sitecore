@@ -50,7 +50,7 @@ const CartSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         return <div>No access</div>;
     }
 
-    const handleSubmit = () => {
+    const handleSubmit =async () => {
         setError(null);
         setIsLoading(true);
         if (getTotalCost > RequisitionDetails?.budget) {
@@ -76,14 +76,12 @@ const CartSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         };
 
         try {
-            console.log(payload);
-            const result = api.post("/project/phase/requisitionItems", payload, {
+            await api.post("/project/phase/requisitionItems", payload, {
                 headers: {
                     "x-organization-id": membership?.id,
                     "x-project-id": projectDetails?.id,
                 }
             })
-            console.log(result);
             navigate(`/${membership.slug}/${projectSlug}/`)
         } catch (error) {
             console.log(error);

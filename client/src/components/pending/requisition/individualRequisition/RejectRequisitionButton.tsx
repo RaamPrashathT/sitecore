@@ -45,15 +45,15 @@ const RejectRequisitionButton = ({
         <Button
             variant={"destructive"}
             onClick={rejectRequisition}
-            className="flex items-center gap-2 "
+            
         >
             {isLoading ? (
-                <div>
+                <div className="flex items-center gap-x-2 ">
                     <Spinner />
                     <p>Rejecting Requisition...</p>
                 </div>
             ) : (
-                <div>
+                <div className="flex items-center gap-x-2 ">
                     <X />
                     <p>Reject Requisition</p>
                 </div>

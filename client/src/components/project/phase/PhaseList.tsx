@@ -11,6 +11,7 @@ import api from "@/lib/axios";
 import { getDeadlineStatus } from "@/utils/dateConverter";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import DataTable from "./DataTable";
 const PhaseList = ({ phases }: { phases: PhaseListType[] }) => {
     const navigate = useNavigate();
     const { data: membership, isLoading: membershipLoading } = useMembership();
@@ -102,7 +103,7 @@ const PhaseList = ({ phases }: { phases: PhaseListType[] }) => {
                                     </span>
                                 </div>
                             )}
-                            {phase.status === "ACTIVE" && (
+                            {(phase.status === "ACTIVE" && !phase.requisitions) && (
                                 <button
                                     className="flex justify- items-center gap-x-2"
                                     onClick={() =>
@@ -116,6 +117,9 @@ const PhaseList = ({ phases }: { phases: PhaseListType[] }) => {
                                     <Plus className="size-5" />
                                     <p>Add Requisitions</p>
                                 </button>
+                            )}
+                            {(phase.status === "ACTIVE" && phase.requisitions[0]) && (
+                                <DataTable data={phase.requisitions[0].items} />
                             )}
                         </AccordionContent>
                     </AccordionItem>

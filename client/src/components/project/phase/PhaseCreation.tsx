@@ -23,6 +23,7 @@ const formSchema = z.object({
     description: z.string().trim().min(1, "Description is required"),
     budget: z.string().min(1, "Budget is required"),
     paymentDeadline: z.date("Invalid date"),
+    startDate: z.date("Invalid date"),
 });
 
 type CreatePhaseFormSchema = z.infer<typeof formSchema>;
@@ -139,6 +140,27 @@ const PhaseCreationForm = () => {
                         </div>
                     </Field>
                 </FieldGroup>
+                <Field className="">
+                    <FieldLabel>Payment Deadline</FieldLabel>
+                    <div className="flex justify-center items-center">
+                        <Controller
+                            control={control}
+                            name="startDate"
+                            render={({ field }) => (
+                                <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    className="rounded-lg border"
+                                    captionLayout="dropdown"
+                                    showWeekNumber={true}
+                                    disabled={(date) => date < new Date()}
+                                />
+                            )}
+                        />
+                    </div>
+                </Field>
+
                 {error && <FieldError className="mt-4">{error}</FieldError>}
                 <div className="w-full flex justify-end mt-8">
                     <Button type="submit" className="w-60" disabled={isLoading}>

@@ -23,7 +23,7 @@ const ApproveRequisitionButton = ({
     const approveRequisition = async () => {
         setIsLoading(true);
         try {
-            const result = await api.post(
+            await api.post(
                 `project/phase/approveRequisition`,
                 {
                     requisitionId,
@@ -34,7 +34,6 @@ const ApproveRequisitionButton = ({
                     },
                 },
             );
-            console.log(result);
             navigate(`/${membership.slug}/pending-requests`);
         } catch (error) {
             console.log(error);
@@ -45,12 +44,12 @@ const ApproveRequisitionButton = ({
     return (
         <Button onClick={approveRequisition} className="flex items-center gap-2">
             {isLoading ? (
-                <div>
+                <div className="flex items-center gap-x-2 ">
                     <Spinner />
                     <p>Approving Requisition...</p>
                 </div>
             ) : (
-                <div>
+                <div className="flex items-center gap-x-2 ">
                     <Plus />
                     <p>Approve Requisition</p>
                 </div>

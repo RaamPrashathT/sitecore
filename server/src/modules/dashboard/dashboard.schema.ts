@@ -1,0 +1,5 @@
+import z from "zod";
+
+export const getDashboardItemsSchema = z.object({
+    organizationId: z.string().length(36)
+})

@@ -12,7 +12,8 @@ export const createPhaseSchema = z.object({
     name: z.string().min(1),
     description: z.string().min(1),
     budget: z.coerce.number(),
-    paymentDeadline: z.coerce.date()
+    paymentDeadline: z.coerce.date(),
+    startDate: z.coerce.date()
 })
 
 export const createRequisitionSchema = z.object({

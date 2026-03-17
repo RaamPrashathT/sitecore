@@ -36,6 +36,11 @@ enum RequisitionStatus {
     REJECTED
 }
 
+enum RequisitionItemStatus {
+    ORDERED
+    UNORDERED
+}
+
 model Organization {
     id        String   @id @default(uuid())
     name      String
@@ -127,6 +132,7 @@ model Phase {
     description     String?
     budget          Decimal
     paymentDeadline DateTime
+    startDate       DateTime
     isPaid          Boolean     @default(false)
     status          PhaseStatus @default(PLANNING)
     projectId       String
@@ -153,9 +159,10 @@ model Requisition {
 }
 
 model RequisitionItem {
-    id                String  @id @default(uuid())
+    id                String                @id @default(uuid())
     quantity          Decimal
     estimatedUnitCost Decimal
+    status            RequisitionItemStatus @default(UNORDERED)
 
     catalogueId String
     catalogue   Catalogue @relation(fields: [catalogueId], references: [id])

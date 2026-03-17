@@ -136,7 +136,6 @@ const projectController = {
     async createRequisition(request: Request, response: Response) {
         try {
             const userId = request.session!.userId;
-            console.log(request.body)
             const validatedData = createRequisitionSchema.safeParse(request.body);
 
             if(!validatedData.success) {
@@ -173,7 +172,6 @@ const projectController = {
             }
 
             const result = await projectService.postRequisitionItems(validatedData.data)
-            console.log(result)
             return response.status(200).json(result);
         } catch (error) {
             if(error instanceof ValidationError) {
