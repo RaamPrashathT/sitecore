@@ -21,6 +21,7 @@ import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
 import PendingRequestsPage from "./pages/adminPages/pending/PendingRequestsPage";
 import RequisitionCreationPage from "./pages/adminPages/project/RequisitionCreationPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import RequisitionApprovalPage from "./pages/adminPages/pending/RequisitionApprovalPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -99,6 +100,10 @@ function App() {
                                 <Route
                                     path="pending-requests"
                                     element={<PendingRequestsPage />}
+                                />
+                                <Route
+                                    path="pending-requests/:requisitionIdSlug"
+                                    element={<RequisitionApprovalPage />}
                                 />
                                 <Route
                                     path="settings"

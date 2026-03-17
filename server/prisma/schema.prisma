@@ -146,23 +146,23 @@ model Requisition {
     phase       Phase             @relation(fields: [phaseId], references: [id], onDelete: Cascade)
     requestedBy String
     budget      Decimal
-    
-    items       RequisitionItem[]
-    createdAt   DateTime          @default(now())
-    updatedAt   DateTime          @updatedAt
+
+    items     RequisitionItem[]
+    createdAt DateTime          @default(now())
+    updatedAt DateTime          @updatedAt
 }
 
 model RequisitionItem {
     id                String  @id @default(uuid())
     quantity          Decimal
     estimatedUnitCost Decimal
-    catalogueId       String
 
-    catalogue          Catalogue @relation(fields: [catalogueId], references: [id])
+    catalogueId String
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id])
+
     assignedSupplierId String?
+    assignedSupplier   SupplierQuote? @relation(fields: [assignedSupplierId], references: [id])
 
-    assignedSupplier SupplierQuote? @relation(fields: [assignedSupplierId], references: [id])
-    requisitionId    String
-
-    requisition Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+    requisitionId String
+    requisition   Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
 }

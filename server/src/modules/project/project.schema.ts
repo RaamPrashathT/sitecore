@@ -20,15 +20,20 @@ export const createRequisitionSchema = z.object({
     budget: z.coerce.number()
 })
 
-export const RequistionItemSchema = z.object({
-    id: z.string().length(24),
-    quantity: z.coerce.number(),
-    estimatedCost: z.coerce.number(),
+export const RequisitionItemListSchema = z.object({
+    cartItems: z.array(
+        z.object({
+            catalogueId: z.string().length(36),
+            supplierId: z.string().length(36),
+            estimatedCost: z.coerce.number(),
+            quantity: z.coerce.number(),
+        })
+    ),
+    requisitionId: z.string().length(36),
+    totalCost: z.coerce.number()
 })
 
-export const RequistionItemListSchema = z.array(RequistionItemSchema);
-
+export type RequisitionItemListBody = z.infer<typeof RequisitionItemListSchema>;
 export type CreateProjectBody = z.infer<typeof createProjectSchema>;
 export type CreatePhaseBody = z.infer<typeof createPhaseSchema>;
 export type CreateRequisitionBody = z.infer<typeof createRequisitionSchema>;
-export type RequistionItemListBody = z.infer<typeof RequistionItemListSchema>;

@@ -16,7 +16,7 @@ const RequisitionSelectionForm = () => {
 
     return (
         <div className="p-2">
-            <h1 className="text-2xl font-semibold">Select Requisitions:</h1>
+            <h1 className="text-2xl font-semibold mb-2 pl-2">Select Requisitions:</h1>
             <div>
                 <RequisitionDataTable data={catalogue} />
             </div>

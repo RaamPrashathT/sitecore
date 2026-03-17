@@ -31,28 +31,22 @@ const RequisitionDataTable = ({ data }: DataTableProps) => {
         <div>
             <Table>
                 <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="">
-                            {headerGroup.headers.map((header) => (
-                                <TableHead key={header.id} className="text-lg">
-                                    {flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext(),
-                                    )}
+                    {table.getHeaderGroups().map(headerGroup => (
+                        <TableRow key={headerGroup.id} className=''>
+                            {headerGroup.headers.map(header => (
+                                <TableHead key={header.id} className='text-lg'>
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
                                 </TableHead>
                             ))}
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext(),
-                                    )}
+                <TableBody className='p-0'>
+                    {table.getRowModel().rows.map(row => (
+                        <TableRow key={row.id} className='p-0'>
+                            {row.getVisibleCells().map(cell => (
+                                <TableCell key={cell.id} className=' p-0'>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </TableCell>
                             ))}
                         </TableRow>

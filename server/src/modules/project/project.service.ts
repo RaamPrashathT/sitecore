@@ -1,8 +1,9 @@
 import { MissingError } from "../../shared/error/missing.error.js";
+import { ValidationError } from "../../shared/error/validation.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { User } from "../../shared/models/user.js";
 import { slugify } from "../../shared/utils/slugify.js";
-import { type CreatePhaseBody, type RequistionItemListBody } from "./project.schema.js";
+import { type CreatePhaseBody, type RequisitionItemListBody } from "./project.schema.js";
 
 const projectService = {
     async createProject({
@@ -124,6 +125,45 @@ const projectService = {
             where: {
                 projectId: projectId,
             },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                budget: true,
+                isPaid: true,
+                paymentDeadline: true,
+                status: true,
+                requisitions: {
+                    select: {
+                        id: true,
+                        budget: true,
+                        status: true,
+                        requestedBy: true,
+                        createdAt: true,
+                        items: {
+                            select: {
+                                id: true,
+                                quantity: true,
+                                estimatedUnitCost: true,
+                                catalogue: {
+                                    select: {
+                                        name: true,
+                                        unit: true
+                                    }
+                                },
+                                assignedSupplier: {
+                                    select: {
+                                        supplier: true,
+                                        truePrice: true,
+                                        standardRate: true,
+                                        leadTime: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             orderBy: {
                 createdAt: "desc",
             }
@@ -166,45 +206,40 @@ const projectService = {
         }
     },
 
-    async createRequistionItems({
-        requisitionId,
-        phaseId,
-        items
-    }: {
-        readonly requisitionId: string;
-        readonly phaseId: string;
-        readonly items: RequistionItemListBody
-    }) {
-        const itemsToCreate = items.map((item) => ({
-            quantity: item.quantity,
-            estimatedUnitCost: item.estimatedCost,
-            catalogueId: item.id,
-            requisitionId: requisitionId
-        }))
-        await prisma.requisitionItem.createMany({
-            data: itemsToCreate
+    async postRequisitionItems(data: RequisitionItemListBody) {
+        const existingRequisition = await prisma.requisition.findUnique({
+            where: {
+                id: data.requisitionId
+            }
         })
+        if(!existingRequisition) {
+            throw new MissingError("Requisition not found")
+        }
+        if(data.totalCost > existingRequisition.budget.toNumber()) {
+            throw new ValidationError("Total cost exceeds budget")
+        }
 
+        const payload = data.cartItems.map(item => ({
+            catalogueId: item.catalogueId,
+            assignedSupplierId: item.supplierId,
+            estimatedUnitCost: item.estimatedCost,
+            quantity: item.quantity,
+            requisitionId: data.requisitionId
+        }))
+        
+        const result = await prisma.requisitionItem.createMany({
+            data: payload
+        })
         await prisma.requisition.update({
             where: {
-                id: requisitionId
+                id: data.requisitionId
             },
             data: {
                 status: "PENDING_APPROVAL"
             }
         })
-        await prisma.phase.update({
-            where: {
-                id: phaseId
-            },
-            data: {
-                status: "PAYMENT_PENDING"
-            }
-        })
 
-        return {
-            count: items.length,
-        }
+        return result
     },
 
     async getPaymentPendingPhases(organizationId: string) {
@@ -267,6 +302,105 @@ const projectService = {
             }
         })
     },
+
+    async getPendingRequisitions(organizationId: string) {
+        const result = await prisma.requisition.findMany({
+            where: {
+                status: "PENDING_APPROVAL",
+                phase: {
+                    project: {
+                        organizationId: organizationId
+                    }
+                }
+            },
+            select: {
+                id: true,
+                budget: true,
+                status: true,
+                requestedBy: true,
+                phaseId: true,
+                createdAt: true,
+                items: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        estimatedUnitCost: true,
+                        assignedSupplier: {
+                            select: {
+                                id: true,
+                                supplier: true,
+                                truePrice: true,
+                                standardRate: true
+                            }
+                        },
+                        catalogue: {
+                            select: {
+                                name: true,
+                                unit: true,
+                            }
+                        }
+                    }
+                },
+                phase: {
+                    select: {
+                        name: true,
+                        project: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'asc'
+            }
+        });
+    
+        const engineerIds = [...new Set(result.map(req => req.requestedBy))];
+    
+        const users = await User.find({
+            _id: { $in: engineerIds }
+        }).lean();
+    
+        const userMap = new Map(
+            users.map(user => [
+                user._id.toString(),
+                {
+                    id: user._id.toString(),
+                    name: user.username,
+                    image: user.profileImage || null
+                }
+            ])
+        );
+    
+        return result.map(req => ({
+            id: req.id,
+            budget: Number(req.budget),
+            status: req.status as "PENDING_APPROVAL",
+            phaseId: req.phaseId,
+            createdAt: req.createdAt,
+            projectName: req.phase?.project?.name || "",
+            phaseName: req.phase?.name || "",
+            engineer: userMap.get(req.requestedBy) || {
+                id: req.requestedBy,
+                name: "Unknown User",
+                image: null
+            },
+            items: req.items.map(item => ({
+                id: item.id,
+                quantity: Number(item.quantity),
+                estimatedUnitCost: Number(item.estimatedUnitCost),
+                supplierId: item.assignedSupplier?.id,
+                supplierName: item.assignedSupplier?.supplier,
+                truePrice: item.assignedSupplier ? Number(item.assignedSupplier.truePrice) : undefined,
+                standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : undefined,
+                itemName: item.catalogue?.name || "",
+                unit: item.catalogue?.unit || ""
+            }))
+        }));
+    },
+
     async getRequisitionDetails(requisitionId: string) {
         const result = await prisma.requisition.findUnique({
             where: {
@@ -285,7 +419,51 @@ const projectService = {
             requestedBy: result.requestedBy,
             phaseId: result.phaseId,
         }
-    }
+    },
+
+    async approveRequisition(requisitionId: string) {
+        
+        const existingRequisition = await prisma.requisition.findUnique({
+            where: {
+                id: requisitionId
+            }
+        })
+
+        if(!existingRequisition) {
+            throw new MissingError("Requisition not found")
+        }
+        
+        await prisma.requisition.update({
+            where: {
+                id: requisitionId
+            },
+            data: {
+                status: "APPROVED"
+            }
+        })
+    },
+
+    async rejectRequisition(requisitionId: string) {
+        
+        const existingRequisition = await prisma.requisition.findUnique({
+            where: {
+                id: requisitionId
+            }
+        })
+
+        if(!existingRequisition) {
+            throw new MissingError("Requisition not found")
+        }
+        
+        await prisma.requisition.update({
+            where: {
+                id: requisitionId
+            },
+            data: {
+                status: "REJECTED"
+            }
+        })
+    },
 
 };
 

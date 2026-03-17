@@ -6,9 +6,10 @@ import redis from "../../shared/lib/redis.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 
 const authController = {
+
     async register(request: Request, response: Response) {
         try {
-            
+            console.log(request.body)
             const result = await authService.register(request.body);
             if (result.success) {
                 return response.status(200).json({
@@ -66,13 +67,13 @@ const authController = {
                 message: "User logged in successfully",
             });
         } catch (error) {
+            logger.error(error);
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({
                     success: false,
                     message: error.message,
                 });
             }
-            logger.error(error);
             return response.status(500).json({
                 success: false,
                 message: "Internal server error",

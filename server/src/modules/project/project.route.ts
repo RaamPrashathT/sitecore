@@ -7,7 +7,7 @@ import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middl
 
 const projectRouter = Router();
 
-projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.createProject)
+projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), )
 
 projectRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getProjects)
 
@@ -19,11 +19,15 @@ projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRo
 
 projectRouter.post("/phase/requisition", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.createRequisition)
 
-
-
 projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getPaymentPendingPhases)
 
-projectRouter.post("/phase/requisitionItems", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.createRequistionItems)
+projectRouter.get("/pendingRequisitions", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getPendingRequisitions);
+
+projectRouter.post("/phase/approveRequisition", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.approveRequisition);
+
+projectRouter.post("/phase/rejectRequisition", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.rejectRequisition);
+
+projectRouter.post("/phase/requisitionItems", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.postRequisitionItems)
 
 projectRouter.get("/:projectSlug", authorize, orgAuthorize, projectController.getProjectDetails)
 

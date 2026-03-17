@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import projectService from "./project.service.js";
 import { logger } from "../../shared/lib/logger.js";
-import { createPhaseSchema, createProjectSchema, createRequisitionSchema, RequistionItemListSchema } from "./project.schema.js";
+import { createPhaseSchema, createProjectSchema, createRequisitionSchema, RequisitionItemListSchema } from "./project.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 
@@ -164,24 +164,17 @@ const projectController = {
         }
     },
 
-    async createRequistionItems(request: Request, response: Response) {
+    async postRequisitionItems(request: Request, response: Response) {
         try {
-            const requisitionId = request.body.requisitionId;
-            const validatedData = RequistionItemListSchema.safeParse(request.body.items);
-            const phaseId = request.body.phaseId;
-
+            const validatedData = RequisitionItemListSchema.safeParse(request.body);
 
             if(!validatedData.success) {
                 throw new ValidationError(validatedData.error.message)
             }
 
-            const result = await projectService.createRequistionItems({
-                requisitionId,
-                phaseId,
-                items: validatedData.data
-            })
-
-            return response.status(200).json(result)
+            const result = await projectService.postRequisitionItems(validatedData.data)
+            console.log(result)
+            return response.status(200).json(result);
         } catch (error) {
             if(error instanceof ValidationError) {
                 return response.status(400).json({
@@ -210,6 +203,21 @@ const projectController = {
         }
     },
 
+    async getPendingRequisitions(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant!.orgId;
+
+            const result = await projectService.getPendingRequisitions(organizationId);
+            
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+
     async getRequisitionDetails(request: Request, response: Response) {
         try {
             const { requisitionIdSlug } = request.params;
@@ -228,7 +236,54 @@ const projectController = {
                 message: "Internal server error",
             });
         }
-    }
+    },
+
+    async approveRequisition(request: Request, response: Response) {
+        try {
+            const { requisitionId } = request.body;
+
+            await projectService.approveRequisition(requisitionId);
+
+            return response.status(200).json({
+                message: "Requisition approved successfully",
+            });
+
+        } catch (error) {
+            if(error instanceof MissingError) {
+                return response.status(404).json({
+                    message: error.message
+                })
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async rejectRequisition(request: Request, response: Response) {
+        try {
+            const { requisitionId } = request.body;
+
+            await projectService.rejectRequisition(requisitionId);
+
+            return response.status(200).json({
+                message: "Requisition approved successfully",
+            });
+
+        } catch (error) {
+            if(error instanceof MissingError) {
+                return response.status(404).json({
+                    message: error.message
+                })
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+    
 };
 
 export default projectController;
