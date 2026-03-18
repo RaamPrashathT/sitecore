@@ -1,4 +1,5 @@
-import { prisma } from "../../shared/lib/prisma";
+import { prisma } from "../../shared/lib/prisma.js";
+import type { SetDashboardItemsType } from "./dashboard.schema.js";
 
 const dashboardService = {
     async getDashboardItems(organizationId: string) {
@@ -68,6 +69,32 @@ const dashboardService = {
             phaseName: item.requisition.phase.name,
             phaseStartDate: item.requisition.phase.startDate,
         }));
+    },
+    async setDashboardItems({
+        requisitionItemIds,
+        organizationId
+    }: SetDashboardItemsType) {
+        
+        const result = await prisma.requisitionItem.updateMany({
+            where: {
+                id: {
+                    in: requisitionItemIds 
+                },
+                requisition: {
+                    status: "APPROVED",
+                    phase: {
+                        project: {
+                            organizationId
+                        }
+                    }
+                }
+            },
+            data: {
+                status: "ORDERED"
+            }
+        });
+    
+        return result;
     }
 }
 

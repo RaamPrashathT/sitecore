@@ -15,4 +15,34 @@ export const columns = [
             );
         },
     }),
+    columnHelper.accessor("estimatedBudget", {
+        header: "Estimated Budget",
+        cell: (info) => {
+            return (
+                <div className="flex items-center">
+                    {info.getValue()}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("phases", {
+        header: "Phases",
+        cell: (info) => {
+            return (
+                <div className="flex items-center">
+                    {info.getValue()}
+                </div>
+            );
+        },
+    }),
+    columnHelper.accessor("assignments", {
+        header: "No. of Assignments",
+        cell: (info) => {
+            return (
+                <div className="flex items-center">
+                    {info.getValue()}
+                </div>
+            );
+        },
+    }),
 ];

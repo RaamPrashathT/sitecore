@@ -16,7 +16,7 @@ const SelectOrgListItem = ({name, slug, index, id }: SelectOrgListItemProps) => 
             await api.post("/org/signup", {
                 id
             }) 
-            navigate(`/${slug}`)
+            navigate(`/${slug}/projects`)
         } catch (error) {
             if(error instanceof Error) console.log(error.message)
         }
@@ -26,7 +26,7 @@ const SelectOrgListItem = ({name, slug, index, id }: SelectOrgListItemProps) => 
         <li className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
             <button 
                 onClick={() => handleSubmit()}
-                className="flex items-center justify-between px-4 py-3 hover:bg-gray-100 transition-colors "
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-100 transition-colors w-full"
             >
                 <span className="text-sm font-medium text-gray-900">
                     {name}
@@ -34,6 +34,7 @@ const SelectOrgListItem = ({name, slug, index, id }: SelectOrgListItemProps) => 
 
             </button>
         </li>
+        
     );
 };
 

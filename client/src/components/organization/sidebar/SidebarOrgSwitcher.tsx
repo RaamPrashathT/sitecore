@@ -76,7 +76,7 @@ const OrgSwitcher = () => {
                         {orgs.map((org) => (
                             <DropdownMenuItem
                                 key={org.id}
-                                onClick={() => navigate(`/${org.slug}`)}
+                                onClick={() => navigate(`/${org.slug}/projects`)}
                                 className="gap-2 p-2"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-md border">

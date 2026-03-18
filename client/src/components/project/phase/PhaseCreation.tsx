@@ -7,12 +7,19 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useMembership } from "@/hooks/useMembership";
 import { useProjectDetails } from "@/hooks/useProjectDetails";
 import api from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -50,6 +57,7 @@ const PhaseCreationForm = () => {
 
     if (membershipLoading || projectLoading) return <div>Loading...</div>;
     if (!project || !membership || !projectSlug) return <div>No access</div>;
+
     const onSubmit = async (data: CreatePhaseFormSchema) => {
         setIsLoading(true);
         setError(null);
@@ -79,90 +87,149 @@ const PhaseCreationForm = () => {
                 className="w-full max-w-3xl"
             >
                 <h1 className="text-3xl font-semibold my-8">Create Phase</h1>
-                <FieldGroup>
-                    <Field>
-                        <FieldLabel>Phase Name</FieldLabel>
-                        <Input
-                            {...register("name")}
-                            placeholder="Phase Name"
-                            id="name"
-                        />
-                        {errors.name && (
-                            <FieldError>{errors.name.message}</FieldError>
-                        )}
-                    </Field>
-                    <Field>
-                        <FieldLabel>Budget</FieldLabel>
-                        <Input
-                            {...register("budget")}
-                            type="number"
-                            placeholder="Budget"
-                            id="budget"
-                        />
-                        {errors.budget && (
-                            <FieldError>{errors.budget.message}</FieldError>
-                        )}
-                    </Field>
-                </FieldGroup>
-                <FieldGroup className="flex flex-row ">
-                    <Field>
-                        <FieldLabel>Description</FieldLabel>
-                        <Textarea
-                            {...register("description")}
-                            placeholder="Description"
-                            id="description"
-                            className="flex-1"
-                        />
-                        {errors.description && (
-                            <FieldError>
-                                {errors.description.message}
-                            </FieldError>
-                        )}
-                    </Field>
-                    <Field className="">
-                        <FieldLabel>Payment Deadline</FieldLabel>
-                        <div className="flex justify-center items-center">
+
+                <div className="flex flex-col gap-y-8">
+                    <FieldGroup className="flex flex-row gap-4">
+                        <Field className="flex-1">
+                            <FieldLabel>Phase Name</FieldLabel>
+                            <Input
+                                {...register("name")}
+                                placeholder="Phase Name"
+                                id="name"
+                            />
+                            {errors.name && (
+                                <FieldError>{errors.name.message}</FieldError>
+                            )}
+                        </Field>
+                        <Field className="flex-1">
+                            <FieldLabel>Budget</FieldLabel>
+                            <Input
+                                {...register("budget")}
+                                type="number"
+                                placeholder="Budget"
+                                id="budget"
+                            />
+                            {errors.budget && (
+                                <FieldError>{errors.budget.message}</FieldError>
+                            )}
+                        </Field>
+                    </FieldGroup>
+
+                    <FieldGroup>
+                        <Field>
+                            <FieldLabel>Description</FieldLabel>
+                            <Textarea
+                                {...register("description")}
+                                placeholder="Description"
+                                id="description"
+                            />
+                            {errors.description && (
+                                <FieldError>
+                                    {errors.description.message}
+                                </FieldError>
+                            )}
+                        </Field>
+                    </FieldGroup>
+
+                    <FieldGroup className="flex flex-row gap-4">
+                        <Field className="flex-1">
+                            <FieldLabel>Payment Deadline</FieldLabel>
                             <Controller
                                 control={control}
                                 name="paymentDeadline"
                                 render={({ field }) => (
-                                    <Calendar
-                                        mode="single"
-                                        selected={field.value}
-                                        onSelect={field.onChange}
-                                        className="rounded-lg border"
-                                        captionLayout="dropdown"
-                                        showWeekNumber={true}
-                                        disabled={(date) => date < new Date()}
-                                    />
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full justify-start text-left font-normal"
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? (
+                                                    format(field.value, "PPP")
+                                                ) : (
+                                                    <span className="text-muted-foreground">
+                                                        Pick a date
+                                                    </span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                className="rounded-lg border"
+                                                captionLayout="dropdown"
+                                                showWeekNumber={true}
+                                                disabled={(date) =>
+                                                    date < new Date()
+                                                }
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 )}
                             />
-                        </div>
-                    </Field>
-                </FieldGroup>
-                <Field className="">
-                    <FieldLabel>Payment Deadline</FieldLabel>
-                    <div className="flex justify-center items-center">
-                        <Controller
-                            control={control}
-                            name="startDate"
-                            render={({ field }) => (
-                                <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    className="rounded-lg border"
-                                    captionLayout="dropdown"
-                                    showWeekNumber={true}
-                                    disabled={(date) => date < new Date()}
-                                />
+                            {errors.paymentDeadline && (
+                                <FieldError>
+                                    {errors.paymentDeadline.message}
+                                </FieldError>
                             )}
-                        />
-                    </div>
-                </Field>
-
+                        </Field>
+                        <Field className="flex-1">
+                            <FieldLabel>Start Date</FieldLabel>
+                            <Controller
+                                control={control}
+                                name="startDate"
+                                render={({ field }) => (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full justify-start text-left font-normal"
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? (
+                                                    format(field.value, "PPP")
+                                                ) : (
+                                                    <span className="text-muted-foreground">
+                                                        Pick a date
+                                                    </span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                className="rounded-lg border"
+                                                captionLayout="dropdown"
+                                                showWeekNumber={true}
+                                                disabled={(date) =>
+                                                    date < new Date()
+                                                }
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
+                            />
+                            {errors.startDate && (
+                                <FieldError>
+                                    {errors.startDate.message}
+                                </FieldError>
+                            )}
+                        </Field>
+                    </FieldGroup>
+                </div>
                 {error && <FieldError className="mt-4">{error}</FieldError>}
-                <div className="w-full flex justify-end mt-8">
+                <div className="w-full flex justify-end mt-10">
                     <Button type="submit" className="w-60" disabled={isLoading}>
                         {isLoading && <Spinner className="mr-2" />}
                         Create Project

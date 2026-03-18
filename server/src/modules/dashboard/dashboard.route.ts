@@ -1,11 +1,14 @@
 import { Router } from "express";
-import { authorize } from "../../shared/middleware/authorize.middleware";
-import { requiredRole } from "../../shared/middleware/requireRole.middleware";
-import dashboardController from "./dashboard.controller";
-import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware";
+import { authorize } from "../../shared/middleware/authorize.middleware.js";
+import { requiredRole } from "../../shared/middleware/requireRole.middleware.js";
+import dashboardController from "./dashboard.controller.js";
+import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware.js";
 
 const dashboardRouter = Router();
 
 dashboardRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), dashboardController.getDashboardItems)
+
+dashboardRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), dashboardController.setDashboardItems)
+
 
 export default dashboardRouter;

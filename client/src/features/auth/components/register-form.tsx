@@ -6,10 +6,10 @@ import {
     FieldError,
     FieldGroup,
     FieldLabel,
-    FieldSeparator,
+    // FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { FcGoogle } from "react-icons/fc";
+// import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
 import { registerSchema, type RegisterInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -128,16 +128,16 @@ export function RegisterForm({
                 {apiMessage && 
                     <FieldError className={`text-center ${apiMessage?.success ? 'text-green-500' : 'text-red-500'}`}>{apiMessage.message}</FieldError>
                 }
-                <FieldSeparator>Or continue with</FieldSeparator>
+                {/* <FieldSeparator>Or continue with</FieldSeparator> */}
                 <Field>
-                    <Button
+                    {/* <Button
                         variant="outline"
                         type="button"
                         className="flex items-center"
                     >
                         <FcGoogle className="mt-0.5" />
                         Continue with Google
-                    </Button>
+                    </Button> */}
                     <FieldDescription className="text-center">
                         Already have an account?{" "}
                         <a

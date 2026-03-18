@@ -103,7 +103,7 @@ const PhaseList = ({ phases }: { phases: PhaseListType[] }) => {
                                     </span>
                                 </div>
                             )}
-                            {(phase.status === "ACTIVE" && !phase.requisitions) && (
+                            {(phase.status === "ACTIVE" && phase.requisitions.length === 0) && (
                                 <button
                                     className="flex justify- items-center gap-x-2"
                                     onClick={() =>

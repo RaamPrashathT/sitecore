@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { logger } from "../lib/logger";
-import { ValidationError } from "../error/validation.error";
+import { logger } from "../lib/logger.js";
+import { ValidationError } from "../error/validation.error.js";
 
 export const projectAuthorize = (
     request: Request,

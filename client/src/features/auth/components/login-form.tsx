@@ -6,10 +6,10 @@ import {
     FieldError,
     FieldGroup,
     FieldLabel,
-    FieldSeparator,
+    // FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { FcGoogle } from "react-icons/fc";
+// import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
 import { loginSchema, type LoginInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -134,16 +134,16 @@ export function LoginForm({
                         {apiMessage.message}
                     </FieldError>
                 )}
-                <FieldSeparator>Or continue with</FieldSeparator>
+                {/* <FieldSeparator>Or continue with</FieldSeparator> */}
                 <Field>
-                    <Button
+                    {/* <Button
                         variant="outline"
                         type="button"
                         className="flex items-center"
                     >
                         <FcGoogle className="mt-0.5" />
                         Login with Google
-                    </Button>
+                    </Button> */}
                     <FieldDescription className="text-center">
                         Don&apos;t have an account?{" "}
                         <a

@@ -9,7 +9,7 @@ const projectRouter = Router();
 
 projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), )
 
-projectRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.getProjects)
+projectRouter.get("/", authorize, orgAuthorize, projectController.getProjects)
 
 projectRouter.post("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]),projectAuthorize, projectController.createPhase)
 

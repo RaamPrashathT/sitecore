@@ -1,3 +1,4 @@
+import EmptyOrganizationList from "./EmptyOrganization";
 import OrgListItem from "./OrgListItem";
 import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 
@@ -13,7 +14,11 @@ const OrgList = () => {
     }
 
     if (!organizations || organizations.length === 0) {
-        return <p className="text-sm text-gray-400">No organizations found.</p>;
+        return (
+            <div className="h-full">
+                <EmptyOrganizationList />
+            </div>
+        )
     }
 
     return (

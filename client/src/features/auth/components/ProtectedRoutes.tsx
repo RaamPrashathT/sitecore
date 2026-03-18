@@ -3,9 +3,10 @@ import { Navigate, Outlet } from "react-router-dom";
 
 const PrivateRoutes = () => {
     const { isLoading, isError, user } = useSession();
-    if (isLoading) return <div></div>;
+    if (isLoading) return null;
 
     if (isError || !user) return <Navigate to="/login" />;
+
     return <Outlet />;
 };
 

@@ -11,6 +11,7 @@ export const useSession = () => {
         queryKey: ['session'],
         queryFn: async () => {
             const response = await api.get("/auth/me");
+            
             return response.data.data;
         },
         retry: false,
@@ -24,6 +25,7 @@ export const useSession = () => {
 
     return {
         isLoading: query.isLoading,
+        isFetching: query.isFetching,
         isError: query.isError,
         user: query.data,
     };

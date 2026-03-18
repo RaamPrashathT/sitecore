@@ -1,6 +1,6 @@
 import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
-import type { createCatalogueFormSchema, deleteCatalogueFormSchema, editCatalogueFormSchema } from "./catalogue.schema";
+import type { createCatalogueFormSchema, deleteCatalogueFormSchema, editCatalogueFormSchema } from "./catalogue.schema.js";
 
 const catalogueService = {
     async getCatalogue(orgId: string) {

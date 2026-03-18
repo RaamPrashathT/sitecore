@@ -22,14 +22,6 @@ export const columns = [
         )
     }),
 
-    columnHelper.accessor('standardRate', {
-        header: "Standard Rate",
-        cell: info => (
-            <div className='font-medium flex items-center h-12 px-4 capitalize'>
-                {info.getValue()}
-            </div>
-        )
-    }),
 
     columnHelper.accessor('standardRate', {
         header: "Standard Rate",

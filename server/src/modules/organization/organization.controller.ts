@@ -100,7 +100,7 @@ const orgController = {
 
     async getAllOrg(request: Request, response: Response) {
         try {
-           const query = request.params.query as string || "";
+            const query = request.query.query as string || "";
             const page = Number(request.query.page) || 1;
             const limit = Number(request.query.limit) || 10;
             const result = await orgService.getAllOrgs({

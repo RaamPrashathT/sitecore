@@ -70,6 +70,10 @@ const projectService = {
             where: {
                 organizationId: organizationId,
             },
+            include: {
+                assignments: true,
+                phases: true
+            },
             orderBy: {
                 slug: "desc",
             },
@@ -79,6 +83,10 @@ const projectService = {
             id: project.id,
             name: project.name,
             slug: project.slug,
+            estimatedBudget: project.estimatedBudget,
+            phases: project.phases.length,
+            assignments: project.assignments.length,
+            
         }));
     },
 

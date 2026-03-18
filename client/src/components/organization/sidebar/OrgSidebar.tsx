@@ -6,7 +6,8 @@ import {
     ChartNoAxesGantt,
     SquareTerminal,
     Users,
-    ClipboardClock
+    ClipboardClock,
+    ClipboardPlus
 } from "lucide-react";
 
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -24,7 +25,7 @@ import { useMembership } from "@/hooks/useMembership";
 
 
 
-const data = {
+const adminData = {
     sidebarContents: [
         {
             title: "Dashboard",
@@ -57,9 +58,14 @@ const data = {
             icon: ChartNoAxesGantt,
         },
         {
-            title: "Pending Requests",
-            url: "/pending-requests",
+            title: "Pending Payments",
+            url: "/pending-payments",
             icon: ClipboardClock,
+        },
+        {
+            title: "Pending Requests",
+            url: "/pending-requisitions",
+            icon: ClipboardPlus,
         },
         {
             title: "Settings",
@@ -67,11 +73,27 @@ const data = {
             icon: Settings2,
         },
     ],
-
-    engineerSidebarContents: [
-        
-    ]
 };
+
+const engineerData = {
+    sidebarContents: [
+        {
+            title: "Projects",
+            url: "/projects",
+            icon: ChartNoAxesGantt,
+        },
+    ]
+}
+
+const clientData = {
+    sidebarContents: [
+        {
+            title: "Projects",
+            url: "/projects",
+            icon: ChartNoAxesGantt,
+        },
+    ]
+}
 
 const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
     const { orgSlug } = useParams<{ orgSlug: string }>();
@@ -92,10 +114,24 @@ const OrgSidebar = ({...props }: React.ComponentProps<typeof Sidebar>) => {
                 <OrgSwitcher/>
             </SidebarHeader>
             <SidebarContent>
-                <SidebarContents items={data.sidebarContents.map((item) => ({
-                    ...item,
-                    url: `/${orgSlug}${item.url}`,
-                }))}/>
+                {membership.role === "ADMIN" && (
+                    <SidebarContents items={adminData.sidebarContents.map((item) => ({
+                        ...item,
+                        url: `/${orgSlug}${item.url}`,
+                    }))}/>
+                )}
+                {membership.role === "ENGINEER" && (
+                    <SidebarContents items={engineerData.sidebarContents.map((item) => ({
+                        ...item,
+                        url: `/${orgSlug}${item.url}`,
+                    }))}/>
+                )}
+                {membership.role === "CLIENT" && (
+                    <SidebarContents items={clientData.sidebarContents.map((item) => ({
+                        ...item,
+                        url: `/${orgSlug}${item.url}`,
+                    }))}/>
+                )}
             </SidebarContent>
             <SidebarFooter>
                 <SidebarUser/>

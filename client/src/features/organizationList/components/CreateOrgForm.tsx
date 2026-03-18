@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export const CreateOrgForm = ({ onSuccess }: { onSuccess: (slug: string) => void }) => {
     const [name, setName] = useState("");
-    const { mutate, isPending, error } = useCreateOrganization(); // Logic moved to a hook
+    const { mutate, isPending, error } = useCreateOrganization();
 
     const handleSubmit = (e: React.SubmitEvent) => {
         e.preventDefault();

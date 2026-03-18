@@ -9,10 +9,11 @@ import {
 import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useMembership } from "@/hooks/useMembership";
 
 const MainOrganizationPage = () => {
     const [currentLocation, setCurrentLocation] = React.useState("");
-
+    const { data: membership, isLoading: membershipLoading } = useMembership();
     const { orgSlug } = useParams<{ orgSlug: string }>();
     const location = useLocation();
     const segments = location.pathname.split("/");
@@ -24,6 +25,13 @@ const MainOrganizationPage = () => {
     if (!orgSlug) {
         return <div>invalid organization</div>;
     }
+    if (!membership) {
+        return <div>No membership data</div>;
+    }
+    if (membershipLoading) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <SidebarProvider>
             <OrgSidebar />
@@ -41,30 +49,38 @@ const MainOrganizationPage = () => {
                             </p>
                         </div>
                         <div>
-                            {currentLocation === "catalogue" &&
-                                segments.length === 3 && (
-                                    <Button>
-                                        <Link
-                                            to={`/${orgSlug}/catalogue/create`}
-                                            className="flex items-center gap-x-1"
-                                        >
-                                            <Plus />
-                                            <p className="mb-px">Add Item</p>
-                                        </Link>
-                                    </Button>
-                                )}
-                            {currentLocation === "projects" &&
-                                segments.length === 3 && (
-                                    <Button className="p-0">
-                                        <Link
-                                            to={`/${orgSlug}/projects/create`}
-                                            className="flex items-center gap-x-1 p-3"
-                                        >
-                                            <Plus />
-                                            <p className="mb-px">Add Project</p>
-                                        </Link>
-                                    </Button>
-                                )}
+                            {membership.role === "ADMIN" && (
+                                <div>
+                                    {currentLocation === "catalogue" &&
+                                        segments.length === 3 && (
+                                            <Button>
+                                                <Link
+                                                    to={`/${orgSlug}/catalogue/create`}
+                                                    className="flex items-center gap-x-1"
+                                                >
+                                                    <Plus />
+                                                    <p className="mb-px">
+                                                        Add Item
+                                                    </p>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    {currentLocation === "projects" &&
+                                        segments.length === 3 && (
+                                            <Button className="p-0">
+                                                <Link
+                                                    to={`/${orgSlug}/projects/create`}
+                                                    className="flex items-center gap-x-1 p-3"
+                                                >
+                                                    <Plus />
+                                                    <p className="mb-px">
+                                                        Add Project
+                                                    </p>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>

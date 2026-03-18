@@ -5,7 +5,7 @@ import PrivateRoutes from "./features/auth/components/ProtectedRoutes";
 import OrganizationListPage from "./pages/organization/orgList/OrgListPage";
 import CreateOrgPage from "./pages/organization/orgList/CreateOrgPage";
 import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
-import DashboardPage from "./pages/adminPages/DashboardPage";
+import DashboardPage from "./pages/adminPages/dashboard/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import ClientPage from "./pages/adminPages/clients/ClientPage";
@@ -22,12 +22,15 @@ import PendingRequestsPage from "./pages/adminPages/pending/PendingRequestsPage"
 import RequisitionCreationPage from "./pages/adminPages/project/RequisitionCreationPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import RequisitionApprovalPage from "./pages/adminPages/pending/RequisitionApprovalPage";
+import PendingRequisitionPage from "./pages/adminPages/pending/PendingRequisitionPage";
+import PhasePaymentApprovalPage from "./pages/adminPages/pending/PhasePaymentApprovalPage";
+import AdminGuard from "./features/auth/components/AdminGuard";
 
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             retry: false,
-            staleTime: 0, 
+            staleTime: 5 * 60 * 1000,
         },
     },
 });
@@ -56,58 +59,71 @@ function App() {
 
                         <Route path="/:orgSlug" element={<OrgGuard />}>
                             <Route element={<MainOrganizationPage />}>
-                                <Route index element={<DashboardPage />} />
-                                <Route
-                                    path="catalogue"
-                                    element={<CataloguePage />}
-                                />
-                                <Route
-                                    path="catalogue/create"
-                                    element={<CreateCataloguePage />}
-                                />
-                                <Route
-                                    path="catalogue/edit/:catalogueId/:quoteId"
-                                    element={<EditCataloguePage />}
-                                />
-                                <Route
-                                    path="engineers"
-                                    element={<EngineerPage />}
-                                />
-                                <Route
-                                    path="clients"
-                                    element={<ClientPage />}
-                                />
+                                    <Route index element={<DashboardPage />} />
+                                    <Route
+                                        path="catalogue"
+                                        element={<CataloguePage />}
+                                    />
+                                    <Route
+                                        path="catalogue/create"
+                                        element={<CreateCataloguePage />}
+                                    />
+                                    <Route
+                                        path="catalogue/edit/:catalogueId/:quoteId"
+                                        element={<EditCataloguePage />}
+                                    />
+                                    <Route
+                                        path="engineers"
+                                        element={<EngineerPage />}
+                                    />
+                                    <Route
+                                        path="clients"
+                                        element={<ClientPage />}
+                                    />
+                                    <Route
+                                        path="projects/create"
+                                        element={<CreateProjectPage />}
+                                    />
+                                    <Route
+                                        path="pending-requests"
+                                        element={<PendingRequestsPage />}
+                                    />
+                                    <Route
+                                        path="pending-requests/:requisitionIdSlug"
+                                        element={<RequisitionApprovalPage />}
+                                    />
+                                    <Route
+                                        path="pending-requisitions"
+                                        element={<PendingRequisitionPage />}
+                                    />
+                                    <Route
+                                        path="pending-payments"
+                                        element={<PhasePaymentApprovalPage />}
+                                    />
+                                    <Route
+                                        path="settings"
+                                        element={<SettingsPage />}
+                                    />
+
                                 <Route
                                     path="projects"
                                     element={<ProjectListPage />}
                                 />
+
+                                <Route element={<AdminGuard />}>
+                                    <Route
+                                        path=":projectSlug/create-phase"
+                                        element={<PhaseCreationPage />}
+                                    />
+                                    <Route
+                                        path=":projectSlug/requisition/:requisitionIdSlug"
+                                        element={<RequisitionCreationPage />}
+                                    />
+                                </Route>
+
                                 <Route
                                     path=":projectSlug"
                                     element={<ProjectPage />}
-                                />
-                                <Route
-                                    path=":projectSlug/create-phase"
-                                    element={<PhaseCreationPage />}
-                                />
-                                <Route
-                                    path=":projectSlug/requisition/:requisitionIdSlug"
-                                    element={<RequisitionCreationPage/>}
-                                />
-                                <Route
-                                    path="projects/create"
-                                    element={<CreateProjectPage />}
-                                />
-                                <Route
-                                    path="pending-requests"
-                                    element={<PendingRequestsPage />}
-                                />
-                                <Route
-                                    path="pending-requests/:requisitionIdSlug"
-                                    element={<RequisitionApprovalPage />}
-                                />
-                                <Route
-                                    path="settings"
-                                    element={<SettingsPage />}
                                 />
                             </Route>
                         </Route>

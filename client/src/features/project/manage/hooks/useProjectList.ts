@@ -5,6 +5,9 @@ export interface ProjectListType {
     id: string;
     name: string;
     slug: string 
+    estimatedBudget: number;
+    phases: number;
+    assignments: number;
 }
 
 const getAllProjects = async (organizationId: string | undefined) => {

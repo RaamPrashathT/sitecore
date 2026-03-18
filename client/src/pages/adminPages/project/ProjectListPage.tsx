@@ -1,7 +1,8 @@
 import ProjectListTable from "@/components/project/manage/ProjectListTable";
 import { useMembership } from "@/hooks/useMembership";
 import { useProjectList } from "@/features/project/manage/hooks/useProjectList";
-import ProjectManage from "@/features/project/manage/projectManage";
+// import ProjectManage from "@/features/project/manage/projectManage";
+import EmptyProjectList from "@/features/project/manage/components/EmptyProjectList";
 
 const ProjectListPage = () => {
     const { data: membership, isLoading: membershipLoading } = useMembership();
@@ -13,8 +14,12 @@ const ProjectListPage = () => {
         return <div>Loading...</div>;
     }
 
-    if (!membership || !projects) {
+    if (!membership) {
         return <div>No access</div>;
+    }
+
+    if(!projects || projects.length === 0) {
+        return <EmptyProjectList/>;
     }
 
     return (

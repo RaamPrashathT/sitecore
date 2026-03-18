@@ -47,7 +47,6 @@ const authController = {
                 `session:${sessionId}`,
                 JSON.stringify({
                     userId: userId,
-                    userAgent: request.headers["user-agent"],
                     email: email,
                     username: username,
                 }),

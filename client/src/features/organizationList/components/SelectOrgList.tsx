@@ -10,7 +10,7 @@ const SelectOrgList = () => {
     const [query, setQuery] = useState("");
     const [page, setPage] = useState(1);
 
-    const debouncedQuery = useDebounce(query, 400);
+    const debouncedQuery = useDebounce(query, 200);
 
     const { data, isLoading, error } = useAllOrganizations(
         debouncedQuery,
@@ -33,23 +33,23 @@ const SelectOrgList = () => {
                     setPage(1);
                 }}
             />
-
-            {isLoading ? (
-                <p className="text-sm text-gray-400">Loading...</p>
-            ) : (
-                <ul className="border  divide-y">
-                    {data?.items.map((org, index) => (
-                        <SelectOrgListItem
-                            key={org.id}
-                            index={index}
-                            name={org.name}
-                            slug={org.slug}
-                            id={org.id}
-                        />
-                    ))}
-                </ul>
-            )}
-
+            <div className="rounded-lg overflow-hidden border mt-2">
+                {isLoading ? (
+                    <p className="text-sm text-gray-400">Loading...</p>
+                ) : (
+                    <ul className="border  divide-y">
+                        {data?.items.map((org, index) => (
+                            <SelectOrgListItem
+                                key={org.id}
+                                index={index}
+                                name={org.name}
+                                slug={org.slug}
+                                id={org.id}
+                            />
+                        ))}
+                    </ul>
+                )}
+            </div>
             <div className="flex items-center justify-between pt-2">
                 <Button
                     variant="outline"

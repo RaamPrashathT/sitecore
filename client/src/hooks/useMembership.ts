@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useParams } from "react-router-dom";
 
-interface MembershipType {
+export interface MembershipType {
     id: string;
     name: string;
     slug: string;
