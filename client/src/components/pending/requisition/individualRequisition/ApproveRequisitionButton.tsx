@@ -34,7 +34,7 @@ const ApproveRequisitionButton = ({
                     },
                 },
             );
-            navigate(`/${membership.slug}/pending-requests`);
+            navigate(`/${membership.slug}/pending-requisitions`);
         } catch (error) {
             console.log(error);
         } finally {

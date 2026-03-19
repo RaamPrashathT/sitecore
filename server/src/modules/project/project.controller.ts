@@ -37,7 +37,6 @@ const projectController = {
             const organizationId = request.tenant!.orgId;
 
             const result = await projectService.getProjects(organizationId);
-            console.log(result)
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);

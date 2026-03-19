@@ -6,12 +6,12 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { useMembership } from "@/hooks/useMembership";
-import type { PhaseListType } from "@/hooks/usePhaseList";
+import type { PhaseListType } from "@/features/project/phase/hooks/usePhaseList";
 import api from "@/lib/axios";
 import { getDeadlineStatus } from "@/utils/dateConverter";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import DataTable from "./DataTable";
+import DataTable from "../../../../components/project/phase/DataTable";
 const PhaseList = ({ phases }: { phases: PhaseListType[] }) => {
     const navigate = useNavigate();
     const { data: membership, isLoading: membershipLoading } = useMembership();

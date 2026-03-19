@@ -2,8 +2,8 @@ import ProjectDetails from "@/components/project/ProjectDetails";
 import { useMembership } from "@/hooks/useMembership";
 import { useProjectDetails } from "@/hooks/useProjectDetails";
 import { useNavigate, useParams } from "react-router-dom";
-import { usePhaseList } from "@/hooks/usePhaseList";
-import PhaseList from "@/components/project/phase/PhaseList";
+import { usePhaseList } from "@/features/project/phase/hooks/usePhaseList";
+import PhaseList from "@/features/project/phase/components/PhaseList";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 

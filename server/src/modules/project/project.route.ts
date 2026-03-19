@@ -7,7 +7,7 @@ import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middl
 
 const projectRouter = Router();
 
-projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), )
+projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.createProject )
 
 projectRouter.get("/", authorize, orgAuthorize, projectController.getProjects)
 

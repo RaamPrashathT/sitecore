@@ -1,8 +1,8 @@
-import PhaseCreationForm from "@/components/project/phase/PhaseCreation"
+import PhaseCreationForm from "@/features/project/phase/components/PhaseCreation"
 
 const PhaseCreationPage = () => {
   return (
-    <div>
+    <div className="h-full flex justify-center items-center w-full mb-20">
       <PhaseCreationForm/>
     </div>
   )

@@ -8,9 +8,13 @@ const dashboardController = {
     async getDashboardItems(request: Request, response: Response) {
         try {
             const organizationId = request.tenant?.orgId;
+            const index = Number.parseInt(request.query.index as string) ?? 0;
+            const size = Number.parseInt(request.query.size as string) ?? 10;
 
             const validatedData = getDashboardItemsSchema.safeParse({
                 organizationId,
+                pageIndex: index,
+                pageSize: size
             });
 
             if (!validatedData.success) {
@@ -18,7 +22,9 @@ const dashboardController = {
             }
 
             const result = await dashboardService.getDashboardItems(
-                validatedData.data.organizationId
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize
             );
 
             return response.status(200).json(result);

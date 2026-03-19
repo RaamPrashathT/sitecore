@@ -36,7 +36,7 @@ export const columns = [
             const rate = info.getValue();
             return (
                 <div className="flex items-center h-12">
-                    {rate ? `$${rate.toFixed(2)}` : "-"}
+                    ₹{rate ? `${rate.toFixed(2)}` : "-"}
                 </div>
             );
         },
@@ -47,7 +47,7 @@ export const columns = [
             const rate = info.getValue();
             return (
                 <div className="flex items-center h-12">
-                    {rate ? `$${rate.toFixed(2)}` : "-"}
+                    ₹{rate ? `${rate.toFixed(2)}` : "-"}
                 </div>
             );
         },
@@ -56,7 +56,7 @@ export const columns = [
         header: "Total Cost",
         cell: (info) => (
             <div className="font-semibold text-primary flex items-center h-12">
-                ${info.getValue().toFixed(2)}
+                ₹{info.getValue().toFixed(2)}
             </div>
         ),
     }),
@@ -64,7 +64,7 @@ export const columns = [
         header: "Total Profit",
         cell: (info) => (
             <div className="font-semibold text-primary flex items-center h-12">
-                ${info.getValue() -((info.row.original.truePrice || 0) * info.row.original.quantity)}
+                ₹{info.getValue() -((info.row.original.truePrice || 0) * info.row.original.quantity)}
             </div>  
         ),
     }),

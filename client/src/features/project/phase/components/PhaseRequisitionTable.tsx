@@ -1,7 +1,9 @@
 import {
     flexRender,
+    getCoreRowModel,
+    useReactTable,
 } from "@tanstack/react-table";
-import type { Table as ReactTableType } from "@tanstack/react-table";
+
 import {
     Table,
     TableBody,
@@ -10,25 +12,28 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { DashboardItemType } from "../hooks/useGetDashboardItems";interface AdminDashboardDataTableProps {
-    table: ReactTableType<DashboardItemType>;
+import type { PhaseItem } from "@/features/project/phase/hooks/usePhaseList";
+import { phaseRequisitionColumns } from "./PhaseRequisitionColumns";
+
+interface PhaseRequisitionTableProps {
+    data: PhaseItem[];
 }
 
-const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
+const DataTable = ({ data }: PhaseRequisitionTableProps) => {
+    const table = useReactTable({
+        data,
+        columns: phaseRequisitionColumns,
+        getCoreRowModel: getCoreRowModel(),
+    });
+
     return (
         <div>
             <Table>
-                <TableHeader className="p-0 rounded-lg overflow-hidden">
+                <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow
-                            key={headerGroup.id}
-                            className="p-0 bg-slate-100 "
-                        >
+                        <TableRow key={headerGroup.id} className="">
                             {headerGroup.headers.map((header) => (
-                                <TableHead
-                                    key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600"
-                                >
+                                <TableHead key={header.id} className="text-lg">
                                     {flexRender(
                                         header.column.columnDef.header,
                                         header.getContext(),
@@ -53,9 +58,8 @@ const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
                     ))}
                 </TableBody>
             </Table>
-            
         </div>
     );
 };
 
-export default AdminDashboardDataTable;
+export default DataTable;

@@ -16,14 +16,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useMembership } from "@/hooks/useMembership";
 import { useProjectDetails } from "@/hooks/useProjectDetails";
-import api from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import z from "zod";
+import PhaseCreationFormSkeleton from "./PhaseCreationFormSkeleton";
+import { useCreatePhase } from "../hooks/useCreatePhase";
 
 const formSchema = z.object({
     name: z.string().trim().min(1, "Name is required"),
@@ -45,43 +45,34 @@ const PhaseCreationForm = () => {
         resolver: zodResolver(formSchema),
     });
     const navigate = useNavigate();
-    const { projectSlug } = useParams();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
+    const { projectSlug } = useParams();
     const { data: membership, isLoading: membershipLoading } = useMembership();
     const { data: project, isLoading: projectLoading } = useProjectDetails(
         projectSlug,
         membership?.id,
     );
+    const {mutate, isPending, error} = useCreatePhase({
+        organizationId: membership?.id,
+        projectId: project?.id,
+    })
+    
 
-    if (membershipLoading || projectLoading) return <div>Loading...</div>;
+    if (membershipLoading || projectLoading) return <PhaseCreationFormSkeleton/>;
     if (!project || !membership || !projectSlug) return <div>No access</div>;
 
+    
+
     const onSubmit = async (data: CreatePhaseFormSchema) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            await api.post("/project/phase", data, {
-                headers: {
-                    "x-organization-id": membership.id,
-                    "x-project-id": project.id,
-                },
-            });
-            navigate(`/${membership.slug}/${projectSlug}`);
-        } catch (error) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("An unexpected error occurred.");
+        mutate(data, {
+            onSuccess: () => {
+                navigate(`/${membership.slug}/${projectSlug}`);
             }
-        } finally {
-            setIsLoading(false);
-        }
+        })
     };
 
     return (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center w-full">
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-3xl"
@@ -91,7 +82,7 @@ const PhaseCreationForm = () => {
                 <div className="flex flex-col gap-y-8">
                     <FieldGroup className="flex flex-row gap-4">
                         <Field className="flex-1">
-                            <FieldLabel>Phase Name</FieldLabel>
+                            <FieldLabel>Phase Name<span className="text-destructive">*</span></FieldLabel>
                             <Input
                                 {...register("name")}
                                 placeholder="Phase Name"
@@ -102,12 +93,13 @@ const PhaseCreationForm = () => {
                             )}
                         </Field>
                         <Field className="flex-1">
-                            <FieldLabel>Budget</FieldLabel>
+                            <FieldLabel>Budget<span className="text-destructive">*</span></FieldLabel>
                             <Input
                                 {...register("budget")}
                                 type="number"
-                                placeholder="Budget"
+                                placeholder="₹-"
                                 id="budget"
+                                required
                             />
                             {errors.budget && (
                                 <FieldError>{errors.budget.message}</FieldError>
@@ -133,7 +125,7 @@ const PhaseCreationForm = () => {
 
                     <FieldGroup className="flex flex-row gap-4">
                         <Field className="flex-1">
-                            <FieldLabel>Payment Deadline</FieldLabel>
+                            <FieldLabel>Payment Deadline<span className="text-destructive">*</span></FieldLabel>
                             <Controller
                                 control={control}
                                 name="paymentDeadline"
@@ -180,7 +172,7 @@ const PhaseCreationForm = () => {
                             )}
                         </Field>
                         <Field className="flex-1">
-                            <FieldLabel>Start Date</FieldLabel>
+                            <FieldLabel>Start Date<span className="text-destructive">*</span></FieldLabel>
                             <Controller
                                 control={control}
                                 name="startDate"
@@ -228,11 +220,11 @@ const PhaseCreationForm = () => {
                         </Field>
                     </FieldGroup>
                 </div>
-                {error && <FieldError className="mt-4">{error}</FieldError>}
+                {error && <FieldError className="mt-4">{error.message}</FieldError>}
                 <div className="w-full flex justify-end mt-10">
-                    <Button type="submit" className="w-60" disabled={isLoading}>
-                        {isLoading && <Spinner className="mr-2" />}
-                        Create Project
+                    <Button type="submit" className="w-60" disabled={isPending}>
+                        {isPending && <Spinner className="mr-2" />}
+                        Create Phase
                     </Button>
                 </div>
             </form>

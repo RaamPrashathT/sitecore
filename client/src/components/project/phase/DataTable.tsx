@@ -7,13 +7,12 @@ import {
   import {
     Table,
     TableBody,
-  //   TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
-import type { PhaseItem } from '@/hooks/usePhaseList';
+import type { PhaseItem } from '@/features/project/phase/hooks/usePhaseList';
   interface DataTableProps {
       data: PhaseItem[];
   }

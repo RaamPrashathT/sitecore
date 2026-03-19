@@ -49,5 +49,6 @@ export const usePhaseList = (projectId: string | undefined, organizationId: stri
         queryKey: ["phaseList", projectId, organizationId],
         queryFn: () => getPhaseList(projectId, organizationId),
         enabled: !!projectId && !!organizationId,
+        staleTime: 5 * 60 * 1000,
     });
 };

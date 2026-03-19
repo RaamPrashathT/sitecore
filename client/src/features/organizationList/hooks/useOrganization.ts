@@ -12,9 +12,10 @@ const getOrganizations = async () => {
     return data;
 };
 
-export const useOrganizations = () => {
+export const useOrganizations = (userId: string) => {
     return useQuery({
-        queryKey: ["organizations"],
+        queryKey: ["organizations", userId],
         queryFn: getOrganizations,
+        
     })
 }

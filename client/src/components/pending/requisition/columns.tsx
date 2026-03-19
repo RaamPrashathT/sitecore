@@ -35,7 +35,7 @@ export const columns = [
         header: "Budget",
         cell: (info) => (
             <div>
-                <p>{info.getValue()}</p>
+                <p>₹{info.getValue()}</p>
             </div>
         ),
     }),

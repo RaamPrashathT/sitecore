@@ -3,7 +3,7 @@ import type { PhaseItem } from '@/features/project/phase/hooks/usePhaseList';
 
 const columnHelper = createColumnHelper<PhaseItem>();
 
-export const columns = [
+export const phaseRequisitionColumns = [
     columnHelper.accessor('itemName', {
         header: "Item Name",
         cell: info => (
