@@ -27,7 +27,6 @@ export const authorize = async (
         if (!session?.userId) throw new UnAuthorizedError();
 
         request.session = session;
-
         return next();
     } catch (error) {
         if(error instanceof UnAuthorizedError) {

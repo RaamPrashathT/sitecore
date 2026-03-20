@@ -31,10 +31,15 @@ const ProjectPage = () => {
             <ProjectDetails projectDetails={project} />
             <div className="flex justify-between items-center px-6">
                 <h1 className="text-2xl font-semibold">Phases:</h1>
-                <Button onClick={() => navigate("create-phase")} className="flex items-center justify-center gap-x-1">
-                    <Plus className="" />
-                    Create Phase
-                </Button>
+                {membership.role !== "CLIENT" && (
+                    <Button
+                        onClick={() => navigate("create-phase")}
+                        className="flex items-center justify-center gap-x-1"
+                    >
+                        <Plus className="" />
+                        Create Phase
+                    </Button>
+                )}
             </div>
             <PhaseList phases={phase} />
         </div>

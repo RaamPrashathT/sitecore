@@ -85,10 +85,8 @@ const dashboardService = {
             id: item.id,
             quantity: Number(item.quantity),
             estimatedUnitCost: Number(item.estimatedUnitCost),
-
             itemName: item.catalogue.name,
             unit: item.catalogue.unit,
-
             supplierName: item.assignedSupplier?.supplier,
             leadTime: item.assignedSupplier?.leadTime ?? 0,
             truePrice: item.assignedSupplier
@@ -97,7 +95,6 @@ const dashboardService = {
             standardRate: item.assignedSupplier
                 ? Number(item.assignedSupplier.standardRate)
                 : undefined,
-
             projectid: item.requisition.phase.project.id,
             projectName: item.requisition.phase.project.name,
             phaseName: item.requisition.phase.name,

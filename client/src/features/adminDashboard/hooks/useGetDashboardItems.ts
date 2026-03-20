@@ -15,6 +15,7 @@ export interface DashboardItemSchema {
     projectName: string;
     phaseName: string;
     phaseStartDate: string;
+
 }
 
 export interface DashboardItemInputSchema {
@@ -25,23 +26,49 @@ export interface DashboardItemInputSchema {
 export interface DashboardItemType extends DashboardItemSchema {
     daysTillOrder: number;
     status: string;
+    statusCount: {
+        urgent: number;
+        due: number;
+        upcoming: number;
+    };
 }
 
-const getDashboardItems = async (organizationId: string, pageIndex: number, pageSize: number) => {
-    const response = await api.get<DashboardItemInputSchema>(`/dashboard?index=${pageIndex}&size=${pageSize}`, {
-        headers: {
-            "x-organization-id": organizationId,
+const getDashboardItems = async (
+    organizationId: string,
+    pageIndex: number,
+    pageSize: number,
+    searchQuery: string = "",
+) => {
+    const response = await api.get<DashboardItemInputSchema>(
+        `/dashboard?index=${pageIndex}&size=${pageSize}&search=${searchQuery}`,
+        {
+            headers: {
+                "x-organization-id": organizationId,
+            },
         },
-    });
+    );
     return response.data;
 };
 
-export const useGetDashboardItems = (organizationId: string | undefined, pageIndex: number = 0, pageSize: number = 10) => {
+export const useGetDashboardItems = (
+    organizationId: string | undefined,
+    pageIndex: number = 0,
+    pageSize: number = 10,
+    searchQuery: string = "",
+) => {
+    console.log(organizationId, pageIndex, pageSize);
     return useQuery({
-        queryKey: ["dashboardItems", organizationId, pageIndex, pageSize],
-        queryFn: () => getDashboardItems(organizationId!, pageIndex, pageSize),
+        queryKey: ["dashboardItems", organizationId, pageIndex, pageSize, searchQuery],
+        queryFn: () =>
+            getDashboardItems(
+                organizationId!,
+                pageIndex,
+                pageSize,
+                searchQuery,
+            ),
         enabled: !!organizationId,
         select: (dashboardItems) => {
+
             const data = dashboardItems.data.map((item) => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -52,25 +79,26 @@ export const useGetDashboardItems = (organizationId: string | undefined, pageInd
                 const diffDate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                 let status: string;
+
                 if (diffDate <= 3) {
                     status = "URGENT";
                 } else if (diffDate <= 7) {
-                    status = "DUE"
+                    status = "DUE";
                 } else {
-                    status = "UPCOMING"
+                    status = "UPCOMING";
                 }
 
                 return {
                     ...item,
                     daysTillOrder: diffDate,
                     status,
-                }
+                };
             });
-
+            
             return {
                 count: dashboardItems.count,
                 data,
-            }
+            };
         },
     });
 };

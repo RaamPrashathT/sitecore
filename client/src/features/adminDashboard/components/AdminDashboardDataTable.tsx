@@ -10,24 +10,26 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { DashboardItemType } from "../hooks/useGetDashboardItems";interface AdminDashboardDataTableProps {
+import type { DashboardItemType } from "../hooks/useGetDashboardItems";
+
+interface AdminDashboardDataTableProps {
     table: ReactTableType<DashboardItemType>;
 }
 
 const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
     return (
         <div>
-            <Table>
-                <TableHeader className="p-0 rounded-lg overflow-hidden">
+            <Table className="">
+                <TableHeader className="p-0">
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow
                             key={headerGroup.id}
-                            className="p-0 bg-slate-100 "
+                            className="p-0 bg-slate-100 border-none"
                         >
                             {headerGroup.headers.map((header) => (
                                 <TableHead
                                     key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600"
+                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl last:rounded-r-xl "
                                 >
                                     {flexRender(
                                         header.column.columnDef.header,
@@ -40,9 +42,9 @@ const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
                 </TableHeader>
                 <TableBody className="p-0">
                     {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="p-0">
+                        <TableRow key={row.id} className="p-0 hover:bg-green-50">
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} className=" p-0">
+                                <TableCell key={cell.id} className="p-0  first:rounded-l-xl last:rounded-r-xl ">
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),

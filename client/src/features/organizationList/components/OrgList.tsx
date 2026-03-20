@@ -1,16 +1,18 @@
+import { useSession } from "@/features/auth/hooks/useSession";
 import EmptyOrganizationList from "./EmptyOrganization";
 import OrgListItem from "./OrgListItem";
 import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 
 const OrgList = () => {
-    const { data: organizations, isLoading, error } = useOrganizations()
+    const {user, isLoading: userLoading, isError: userError} = useSession()
+    const { data: organizations, isLoading, error } = useOrganizations(user?.id)
     
-    if (isLoading) {
+    if (isLoading || userLoading) {
         return <p className="text-sm text-gray-400">Loading...</p>;
     }
 
-    if (error instanceof Error) {
-        return <p className="text-sm text-red-500">{error.message}</p>;
+    if (error instanceof Error || userError) {
+        return <p className="text-sm text-red-500">{error?.message}</p>;
     }
 
     if (!organizations || organizations.length === 0) {

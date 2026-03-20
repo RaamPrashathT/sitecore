@@ -69,7 +69,6 @@ export const useCartData = create<CartStore>((set, get) => ({
                     item.supplierId !== supplierId,
             ),
         })),
-
     updateQuantity: ({ catalogueId, supplierId, quantity }) =>
         set((state) => ({
             items: state.items.map((item) =>
@@ -79,7 +78,6 @@ export const useCartData = create<CartStore>((set, get) => ({
                     : item,
             ),
         })),
-
     clearCart: () => set({ items: [] }),
     getTotalCost: () => {
         return get().items.reduce(

@@ -18,14 +18,15 @@ import { useMembership } from "@/hooks/useMembership";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { AvatarFallback, Avatar } from "@/components/ui/avatar";
 import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
+import { useSession } from "@/features/auth/hooks/useSession";
 
 const OrgSwitcher = () => {
     const { isMobile } = useSidebar();
-
+    const { user, isLoading: userLoading } = useSession();
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { data: orgs, isLoading: orgsLoading } = useOrganizations();
+    const { data: orgs, isLoading: orgsLoading } = useOrganizations(user?.id);
     const navigate = useNavigate();
-    if (membershipLoading || orgsLoading) {
+    if (membershipLoading || orgsLoading || userLoading) {
         return <div>Loading...</div>;
     }
 

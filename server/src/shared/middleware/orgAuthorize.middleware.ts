@@ -20,7 +20,6 @@ export const orgAuthorize = async (
         if (!sessionId) {
             throw new UnAuthorizedError("Unauthorized");
         }
-
         const sessionStr = await redis.get(`session:${sessionId}`);
 
         if (!sessionStr) {
@@ -34,12 +33,10 @@ export const orgAuthorize = async (
         } catch {
             throw new UnAuthorizedError("Unauthorized");
         }
-
         const context = sessionObj.contexts?.[incomingOrgId];
         if (!context) {
             throw new UnAuthorizedError("Unauthorized");
         }
-
         request.tenant = {
             orgId: incomingOrgId,
             role: context.role,

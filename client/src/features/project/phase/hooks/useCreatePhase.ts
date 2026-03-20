@@ -70,7 +70,7 @@ export const useCreatePhase = ({
 
             return { previousPhases };
         },
-        onError: (error, newPhase, context) => {
+        onError: (_error, _newPhase, context) => {
             if (context?.previousPhases !== undefined) {
                 queryClient.setQueryData(
                     ["phaseList", projectId, organizationId],

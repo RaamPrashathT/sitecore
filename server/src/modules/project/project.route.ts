@@ -13,7 +13,7 @@ projectRouter.get("/", authorize, orgAuthorize, projectController.getProjects)
 
 projectRouter.post("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]),projectAuthorize, projectController.createPhase)
 
-projectRouter.get("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, projectController.getPhases) 
+projectRouter.get("/phase", authorize, orgAuthorize, projectAuthorize, projectController.getPhases) 
 
 projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRole("ADMIN"), projectController.paymentApproval)
 

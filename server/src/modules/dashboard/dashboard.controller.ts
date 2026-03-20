@@ -10,11 +10,13 @@ const dashboardController = {
             const organizationId = request.tenant?.orgId;
             const index = Number.parseInt(request.query.index as string) ?? 0;
             const size = Number.parseInt(request.query.size as string) ?? 10;
+            const searchQuery = request.query.search as string && "";
 
             const validatedData = getDashboardItemsSchema.safeParse({
                 organizationId,
                 pageIndex: index,
-                pageSize: size
+                pageSize: size,
+                searchQuery,
             });
 
             if (!validatedData.success) {

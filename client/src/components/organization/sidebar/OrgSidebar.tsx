@@ -2,7 +2,6 @@ import * as React from "react";
 import {
     UserRoundCheck,
     ScrollText,
-    Settings2,
     ChartNoAxesGantt,
     SquareTerminal,
     Users,
@@ -66,11 +65,6 @@ const adminData = {
             title: "Pending Requests",
             url: "/pending-requisitions",
             icon: ClipboardPlus,
-        },
-        {
-            title: "Settings",
-            url: "/settings",
-            icon: Settings2,
         },
     ],
 };
