@@ -137,7 +137,7 @@ model Phase {
     status          PhaseStatus @default(PLANNING)
     projectId       String
     project         Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
+    
     requisitions Requisition[]
     createdAt    DateTime      @default(now())
     updatedAt    DateTime      @updatedAt

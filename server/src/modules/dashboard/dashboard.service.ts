@@ -6,21 +6,55 @@ const dashboardService = {
         organizationId: string,
         pageIndex: number,
         pageSize: number,
+        searchQuery: string, 
     ) {
         const skip = pageIndex * pageSize;
-        const [result, count] = await Promise.all([
-            prisma.requisitionItem.findMany({
-                where: {
-                    status: "UNORDERED",
+
+        const whereClause: any = {
+            status: "UNORDERED",
+            requisition: {
+                status: "APPROVED",
+                phase: {
+                    project: {
+                        organizationId,
+                    },
+                },
+            },
+        };
+
+        if (searchQuery) {
+            whereClause.OR = [
+                {
+                    catalogue: {
+                        name: { contains: searchQuery, mode: "insensitive" },
+                    },
+                },
+                {
                     requisition: {
-                        status: "APPROVED",
                         phase: {
                             project: {
-                                organizationId,
+                                name: {
+                                    contains: searchQuery,
+                                    mode: "insensitive",
+                                },
                             },
                         },
                     },
                 },
+                {
+                    assignedSupplier: {
+                        supplier: {
+                            contains: searchQuery,
+                            mode: "insensitive",
+                        },
+                    },
+                },
+            ];
+        }
+
+        const [result, count] = await Promise.all([
+            prisma.requisitionItem.findMany({
+                where: whereClause,
                 select: {
                     id: true,
                     quantity: true,
@@ -67,17 +101,7 @@ const dashboardService = {
                 },
             }),
             prisma.requisitionItem.count({
-                where: {
-                    status: "UNORDERED",
-                    requisition: {
-                        status: "APPROVED",
-                        phase: {
-                            project: {
-                                organizationId,
-                            },
-                        },
-                    },
-                },
+                where: whereClause,
             }),
         ]);
 
@@ -103,9 +127,10 @@ const dashboardService = {
 
         return {
             data,
-            count
-        }
+            count,
+        };
     },
+
     async setDashboardItems({
         requisitionItemIds,
         organizationId,

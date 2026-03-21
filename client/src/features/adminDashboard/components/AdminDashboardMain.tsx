@@ -14,16 +14,19 @@ import SearchTableControl from "./SearchTableControl";
 import AdminDashboardPagination from "./AdminDashboardPagination";
 import AdminDashboardSkeleton from "./AdminDashboardSkeleton";
 import { useDebounce } from "@/hooks/useDebounce";
-import AdminDashboardInfo from "./AdminDashboardInfo";
 
 const AdminDashboardMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
-    const debouncedSearch = useDebounce(globalFilter, 250);
+    const debouncedSearch = useDebounce(globalFilter, 200);
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 24,
     });
+    
+    // 1. Add the state for row selection
+    const [rowSelection, setRowSelection] = useState({});
+
     const { data: membership, isLoading: membershipLoading } = useMembership();
     const { data: dashboardItems, isLoading: dashboardItemsLoading } =
         useGetDashboardItems(
@@ -44,29 +47,34 @@ const AdminDashboardMain = () => {
         onGlobalFilterChange: setGlobalFilter,
         manualFiltering: true,
         manualSorting: true,
-        // onRowSelectionChange: setRowSelection,
         manualPagination: true,
+        onRowSelectionChange: setRowSelection, 
+        getRowId: (row) => row.id,
         state: {
             globalFilter,
             pagination,
+            rowSelection, // 3. Add to state
         },
     });
 
-    // const selectedRows = table.getSelectedRowModel().rows.map(r => r.original);
+    // 4. Extract just the IDs of the selected rows
+    const selectedIds = table.getSelectedRowModel().rows.map(r => r.original.id);
 
     const isInitialLoading =
         membershipLoading || (dashboardItemsLoading && !dashboardItems);
 
     if (isInitialLoading) return <AdminDashboardSkeleton />;
     if (!membership || !dashboardItems) return <div>No access</div>;
+    
     return (
         <div className="px-4">
             <div className="flex flex-row justify-between items-center py-2">
-                <OrderButton />
+                {/* 5. Pass the IDs and a clear function to the button */}
+                <OrderButton 
+                    selectedIds={selectedIds} 
+                    clearSelection={() => table.resetRowSelection()} 
+                />
                 <SearchTableControl table={table} />
-            </div>
-            <div>
-                <AdminDashboardInfo data={dashboardItems.data} />
             </div>
             <div>
                 <AdminDashboardDataTable table={table} />

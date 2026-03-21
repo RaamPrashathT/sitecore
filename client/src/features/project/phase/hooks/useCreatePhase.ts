@@ -13,6 +13,7 @@ type CreatePhaseSchema = {
     budget: string;
     paymentDeadline: Date;
     startDate: Date;
+    order?: number
 }
 
 export const useCreatePhase = ({

@@ -10,7 +10,7 @@ const dashboardController = {
             const organizationId = request.tenant?.orgId;
             const index = Number.parseInt(request.query.index as string) ?? 0;
             const size = Number.parseInt(request.query.size as string) ?? 10;
-            const searchQuery = request.query.search as string && "";
+            const searchQuery = request.query.search as string || "";
 
             const validatedData = getDashboardItemsSchema.safeParse({
                 organizationId,
@@ -26,7 +26,8 @@ const dashboardController = {
             const result = await dashboardService.getDashboardItems(
                 validatedData.data.organizationId,
                 validatedData.data.pageIndex,
-                validatedData.data.pageSize
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery
             );
 
             return response.status(200).json(result);

@@ -61,8 +61,6 @@ const PhaseCreationForm = () => {
     if (membershipLoading || projectLoading) return <PhaseCreationFormSkeleton/>;
     if (!project || !membership || !projectSlug) return <div>No access</div>;
 
-    
-
     const onSubmit = async (data: CreatePhaseFormSchema) => {
         mutate(data, {
             onSuccess: () => {

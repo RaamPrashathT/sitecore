@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 export interface DashboardItemSchema {
     id: string;
@@ -26,11 +26,6 @@ export interface DashboardItemInputSchema {
 export interface DashboardItemType extends DashboardItemSchema {
     daysTillOrder: number;
     status: string;
-    statusCount: {
-        urgent: number;
-        due: number;
-        upcoming: number;
-    };
 }
 
 const getDashboardItems = async (
@@ -56,7 +51,6 @@ export const useGetDashboardItems = (
     pageSize: number = 10,
     searchQuery: string = "",
 ) => {
-    console.log(organizationId, pageIndex, pageSize);
     return useQuery({
         queryKey: ["dashboardItems", organizationId, pageIndex, pageSize, searchQuery],
         queryFn: () =>
@@ -67,6 +61,7 @@ export const useGetDashboardItems = (
                 searchQuery,
             ),
         enabled: !!organizationId,
+        placeholderData: keepPreviousData,
         select: (dashboardItems) => {
 
             const data = dashboardItems.data.map((item) => {

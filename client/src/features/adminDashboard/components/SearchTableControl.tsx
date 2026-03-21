@@ -8,9 +8,18 @@ interface AdminDashboardPaginationProps {
 
 const SearchTableControl = ({ table }: AdminDashboardPaginationProps) => {
     return (
-        <div className="relative">
+        <div className="relative w-[250px]">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search for items..." className="rounded-full pl-7"  onChange={e => table.setGlobalFilter(String(e.target.value))} />
+            <Input
+                placeholder="Search for items..."
+                value={(table.getState().globalFilter as string) ?? ""}
+                className="rounded-full pl-7"
+                onChange={(e) => {
+                    const value = String(e.target.value);
+                    table.setGlobalFilter(value);
+                    table.setPageIndex(0); 
+                }}
+            />
         </div>
     );
 };
