@@ -3,13 +3,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ProjectListType>();
 
-export const columns = [
+export const ProjectColumns = [
     columnHelper.accessor("name", {
         header: "Project Name",
         cell: (info) => {
             const projectName = info.row.original.name;
             return (
-                <div className="flex items-center">
+                <div className='font-medium flex items-center h-12 px-4'>
                     {projectName}
                 </div>
             );
@@ -19,7 +19,7 @@ export const columns = [
         header: "Estimated Budget",
         cell: (info) => {
             return (
-                <div className="flex items-center">
+                <div className='font-medium flex items-center h-12 px-4'>
                     {info.getValue()}
                 </div>
             );
@@ -29,7 +29,7 @@ export const columns = [
         header: "Phases",
         cell: (info) => {
             return (
-                <div className="flex items-center">
+                <div className='font-medium flex items-center h-12 px-4'>
                     {info.getValue()}
                 </div>
             );
@@ -39,7 +39,7 @@ export const columns = [
         header: "No. of Assignments",
         cell: (info) => {
             return (
-                <div className="flex items-center">
+                <div className='font-medium flex items-center h-12 px-4'>
                     {info.getValue()}
                 </div>
             );

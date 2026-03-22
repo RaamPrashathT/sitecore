@@ -6,9 +6,7 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Link, Outlet, useLocation, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Outlet, useLocation, useParams } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 
 const MainOrganizationPage = () => {
@@ -37,7 +35,7 @@ const MainOrganizationPage = () => {
             <OrgSidebar />
             <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b">
-                    <div className="flex justify-between px-4 w-full">
+                    <div className="flex justify-start px-4 w-full">
                         <div className="flex items-center gap-2">
                             <SidebarTrigger className="-ml-1" />
                             <Separator
@@ -47,26 +45,6 @@ const MainOrganizationPage = () => {
                             <p className="text-xl capitalize font-medium mb-0.5">
                                 {currentLocation}
                             </p>
-                        </div>
-                        <div>
-                            {membership.role === "ADMIN" && (
-                                <div>
-                                    {currentLocation === "projects" &&
-                                        segments.length === 3 && (
-                                            <Button className="p-0">
-                                                <Link
-                                                    to={`/${orgSlug}/projects/create`}
-                                                    className="flex items-center gap-x-1 p-3"
-                                                >
-                                                    <Plus />
-                                                    <p className="mb-px">
-                                                        Add Project
-                                                    </p>
-                                                </Link>
-                                            </Button>
-                                        )}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </header>

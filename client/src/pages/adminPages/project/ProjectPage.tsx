@@ -1,4 +1,4 @@
-import ProjectDetails from "@/components/project/ProjectDetails";
+import ProjectDetails from "@/features/project/ProjectMain";
 import { useMembership } from "@/hooks/useMembership";
 import { useProjectDetails } from "@/hooks/useProjectDetails";
 import { useNavigate, useParams } from "react-router-dom";

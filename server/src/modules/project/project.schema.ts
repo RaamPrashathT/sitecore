@@ -16,6 +16,13 @@ export const createPhaseSchema = z.object({
     startDate: z.coerce.date()
 })
 
+export const getProjectListSchema = z.object({
+    organizationId: z.string().length(36),
+    pageIndex: z.number().min(0),
+    pageSize: z.number().min(1),
+    searchQuery: z.string().max(500)
+})
+
 export const createRequisitionSchema = z.object({
     phaseId: z.string().length(36),
     budget: z.coerce.number()

@@ -1,4 +1,4 @@
-import CreateProjectForm from "@/components/project/manage/CreateProjectForm";
+import CreateProjectForm from "@/features/project/manage/components/CreateProjectForm";
 import { useMembership } from "@/hooks/useMembership";
 
 const CreateProjectPage = () => {

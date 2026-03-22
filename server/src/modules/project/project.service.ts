@@ -3,7 +3,10 @@ import { ValidationError } from "../../shared/error/validation.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { User } from "../../shared/models/user.js";
 import { slugify } from "../../shared/utils/slugify.js";
-import { type CreatePhaseBody, type RequisitionItemListBody } from "./project.schema.js";
+import {
+    type CreatePhaseBody,
+    type RequisitionItemListBody,
+} from "./project.schema.js";
 
 const projectService = {
     async createProject({
@@ -65,29 +68,51 @@ const projectService = {
         };
     },
 
-    async getProjects(organizationId: string) {
-        const result = await prisma.project.findMany({
-            where: {
-                organizationId: organizationId,
-            },
-            include: {
-                assignments: true,
-                phases: true
-            },
-            orderBy: {
-                slug: "desc",
-            },
-        });
+    async getProjects(
+        organizationId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+        const whereClause: any = {
+            organizationId: organizationId,
+        };
+        if (searchQuery) {
+            whereClause.OR = [
+                { name: { contains: searchQuery, mode: "insensitive" } },
+            ];
+        }
+        const [data, count] = await Promise.all([
+            prisma.project.findMany({
+                where: whereClause,
+                include: {
+                    assignments: true,
+                    phases: true,
+                },
+                take: pageSize,
+                skip: skip,
+                orderBy: {
+                    name: "asc",
+                },
+            }),
+            prisma.project.count({
+                where: whereClause,
+            }),
+        ]);
 
-        return result.map((project) => ({
+        const flattened = data.map((project) => ({
             id: project.id,
             name: project.name,
             slug: project.slug,
             estimatedBudget: project.estimatedBudget,
             phases: project.phases.length,
             assignments: project.assignments.length,
-            
         }));
+        return {
+            data: flattened,
+            count,
+        };
     },
 
     async getProjectDetails(projectSlug: string, organizationId: string) {
@@ -97,8 +122,8 @@ const projectService = {
                     slug: projectSlug,
                     organizationId: organizationId,
                 },
-            }
-        })
+            },
+        });
 
         return {
             id: result?.id,
@@ -106,15 +131,15 @@ const projectService = {
             slug: result?.slug,
             address: result?.address,
             estimatedBudget: result?.estimatedBudget,
-        }
+        };
     },
 
     async createPhase({
         projectId,
-        data
+        data,
     }: {
         readonly projectId: string;
-        readonly data: CreatePhaseBody
+        readonly data: CreatePhaseBody;
     }) {
         await prisma.phase.create({
             data: {
@@ -124,9 +149,9 @@ const projectService = {
                 paymentDeadline: data.paymentDeadline,
                 projectId: projectId,
                 status: "PAYMENT_PENDING",
-                startDate: data.startDate
-            }
-        })
+                startDate: data.startDate,
+            },
+        });
     },
 
     async getPhases(projectId: string) {
@@ -145,7 +170,7 @@ const projectService = {
                 projectId: true,
                 requisitions: {
                     where: {
-                        status: "APPROVED" 
+                        status: "APPROVED",
                     },
                     select: {
                         id: true,
@@ -161,27 +186,27 @@ const projectService = {
                                 catalogue: {
                                     select: {
                                         name: true,
-                                        unit: true
-                                    }
+                                        unit: true,
+                                    },
                                 },
                                 assignedSupplier: {
                                     select: {
                                         supplier: true,
                                         standardRate: true,
                                         leadTime: true,
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
             orderBy: {
                 createdAt: "desc",
-            }
+            },
         });
-        
-        return result.map(phase => ({
+
+        return result.map((phase) => ({
             id: phase.id,
             name: phase.name,
             description: phase.description,
@@ -190,25 +215,27 @@ const projectService = {
             paymentDeadline: phase.paymentDeadline,
             status: phase.status,
             projectId: phase.projectId,
-            requisitions: phase.requisitions.map(req => ({
+            requisitions: phase.requisitions.map((req) => ({
                 id: req.id,
                 budget: Number(req.budget),
                 status: req.status,
                 requestedBy: req.requestedBy,
                 createdAt: req.createdAt,
-                items: req.items.map(item => ({
+                items: req.items.map((item) => ({
                     id: item.id,
                     quantity: Number(item.quantity),
                     estimatedUnitCost: Number(item.estimatedUnitCost),
-                    
+
                     itemName: item.catalogue?.name,
                     unit: item.catalogue?.unit,
-                    
+
                     supplierName: item.assignedSupplier?.supplier,
-                    standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : undefined,
-                    leadTime: item.assignedSupplier?.leadTime ?? undefined
-                }))
-            }))
+                    standardRate: item.assignedSupplier
+                        ? Number(item.assignedSupplier.standardRate)
+                        : undefined,
+                    leadTime: item.assignedSupplier?.leadTime ?? undefined,
+                })),
+            })),
         }));
     },
 
@@ -216,70 +243,70 @@ const projectService = {
         await prisma.phase.update({
             where: {
                 id: phaseId,
-                status: "PAYMENT_PENDING"
+                status: "PAYMENT_PENDING",
             },
             data: {
-                status: "ACTIVE"
-            }
-        })
+                status: "ACTIVE",
+            },
+        });
     },
 
     async createRequisition({
         userId,
         phaseId,
-        budget
+        budget,
     }: {
         readonly userId: string;
-        readonly phaseId: string
-        readonly budget: number
+        readonly phaseId: string;
+        readonly budget: number;
     }) {
         const result = await prisma.requisition.create({
             data: {
                 phaseId: phaseId,
                 requestedBy: userId,
                 budget: budget,
-            }
-        })
+            },
+        });
 
         return {
             id: result.id,
-        }
+        };
     },
 
     async postRequisitionItems(data: RequisitionItemListBody) {
         const existingRequisition = await prisma.requisition.findUnique({
             where: {
-                id: data.requisitionId
-            }
-        })
-        if(!existingRequisition) {
-            throw new MissingError("Requisition not found")
+                id: data.requisitionId,
+            },
+        });
+        if (!existingRequisition) {
+            throw new MissingError("Requisition not found");
         }
-        if(data.totalCost > existingRequisition.budget.toNumber()) {
-            throw new ValidationError("Total cost exceeds budget")
+        if (data.totalCost > existingRequisition.budget.toNumber()) {
+            throw new ValidationError("Total cost exceeds budget");
         }
 
-        const payload = data.cartItems.map(item => ({
+        const payload = data.cartItems.map((item) => ({
             catalogueId: item.catalogueId,
             assignedSupplierId: item.supplierId,
             estimatedUnitCost: item.estimatedCost,
             quantity: item.quantity,
-            requisitionId: data.requisitionId
-        }))
-        
+            requisitionId: data.requisitionId,
+        }));
+
         const result = await prisma.requisitionItem.createMany({
-            data: payload
-        })
+            data: payload,
+        });
         await prisma.requisition.update({
             where: {
-                id: data.requisitionId
+                id: data.requisitionId,
             },
             data: {
-                status: "PENDING_APPROVAL"
-            }
-        })
+                status: "PENDING_APPROVAL",
+            },
+        });
 
-        return result
+        return result;
     },
 
     async getPaymentPendingPhases(organizationId: string) {
@@ -288,8 +315,8 @@ const projectService = {
                 status: "PAYMENT_PENDING",
                 isPaid: false,
                 project: {
-                    organizationId: organizationId
-                }
+                    organizationId: organizationId,
+                },
             },
             select: {
                 id: true,
@@ -303,44 +330,52 @@ const projectService = {
 
                         assignments: {
                             where: {
-                                role: "CLIENT"
+                                role: "CLIENT",
                             },
                             select: {
                                 userId: true,
-                            }
-                        }
-
-                    }
-                }
+                            },
+                        },
+                    },
+                },
             },
             orderBy: {
-                paymentDeadline: "asc"
-            }
-        })
-        const userIds = [...new Set(
-            result.flatMap(phase => 
-                phase.project.assignments.map(assignment => assignment.userId)
-            )
-        )];
+                paymentDeadline: "asc",
+            },
+        });
+        const userIds = [
+            ...new Set(
+                result.flatMap((phase) =>
+                    phase.project.assignments.map(
+                        (assignment) => assignment.userId,
+                    ),
+                ),
+            ),
+        ];
         const clients = await User.find({
             _id: {
-                $in: userIds
-            }
-        })
+                $in: userIds,
+            },
+        });
 
-        const clientMap = new Map(clients.map(client => [client._id.toString(), client.username]))
-        
-        return result.map(phase => {
-            const firstClientId = phase.project.assignments[0]?.userId?.toString();
+        const clientMap = new Map(
+            clients.map((client) => [client._id.toString(), client.username]),
+        );
+
+        return result.map((phase) => {
+            const firstClientId =
+                phase.project.assignments[0]?.userId?.toString();
             return {
                 id: phase.id,
                 phaseName: phase.name,
                 projectName: phase.name,
                 budget: phase.budget,
                 paymentDeadline: phase.paymentDeadline,
-                client: (firstClientId ? clientMap.get(firstClientId) : null) || "Unknown Client"
-            }
-        })
+                client:
+                    (firstClientId ? clientMap.get(firstClientId) : null) ||
+                    "Unknown Client",
+            };
+        });
     },
 
     async getPendingRequisitions(organizationId: string) {
@@ -349,9 +384,9 @@ const projectService = {
                 status: "PENDING_APPROVAL",
                 phase: {
                     project: {
-                        organizationId: organizationId
-                    }
-                }
+                        organizationId: organizationId,
+                    },
+                },
             },
             select: {
                 id: true,
@@ -370,51 +405,51 @@ const projectService = {
                                 id: true,
                                 supplier: true,
                                 truePrice: true,
-                                standardRate: true
-                            }
+                                standardRate: true,
+                            },
                         },
                         catalogue: {
                             select: {
                                 name: true,
                                 unit: true,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 },
                 phase: {
                     select: {
                         name: true,
                         project: {
                             select: {
-                                name: true
-                            }
-                        }
-                    }
-                }
+                                name: true,
+                            },
+                        },
+                    },
+                },
             },
             orderBy: {
-                createdAt: 'asc'
-            }
+                createdAt: "asc",
+            },
         });
-    
-        const engineerIds = [...new Set(result.map(req => req.requestedBy))];
-    
+
+        const engineerIds = [...new Set(result.map((req) => req.requestedBy))];
+
         const users = await User.find({
-            _id: { $in: engineerIds }
+            _id: { $in: engineerIds },
         }).lean();
-    
+
         const userMap = new Map(
-            users.map(user => [
+            users.map((user) => [
                 user._id.toString(),
                 {
                     id: user._id.toString(),
                     name: user.username,
-                    image: user.profileImage || null
-                }
-            ])
+                    image: user.profileImage || null,
+                },
+            ]),
         );
-    
-        return result.map(req => ({
+
+        return result.map((req) => ({
             id: req.id,
             budget: Number(req.budget),
             status: req.status as "PENDING_APPROVAL",
@@ -425,31 +460,35 @@ const projectService = {
             engineer: userMap.get(req.requestedBy) || {
                 id: req.requestedBy,
                 name: "Unknown User",
-                image: null
+                image: null,
             },
-            items: req.items.map(item => ({
+            items: req.items.map((item) => ({
                 id: item.id,
                 quantity: Number(item.quantity),
                 estimatedUnitCost: Number(item.estimatedUnitCost),
                 supplierId: item.assignedSupplier?.id,
                 supplierName: item.assignedSupplier?.supplier,
-                truePrice: item.assignedSupplier ? Number(item.assignedSupplier.truePrice) : undefined,
-                standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : undefined,
+                truePrice: item.assignedSupplier
+                    ? Number(item.assignedSupplier.truePrice)
+                    : undefined,
+                standardRate: item.assignedSupplier
+                    ? Number(item.assignedSupplier.standardRate)
+                    : undefined,
                 itemName: item.catalogue?.name || "",
-                unit: item.catalogue?.unit || ""
-            }))
+                unit: item.catalogue?.unit || "",
+            })),
         }));
     },
 
     async getRequisitionDetails(requisitionId: string) {
         const result = await prisma.requisition.findUnique({
             where: {
-                id: requisitionId
-            }
-        })
+                id: requisitionId,
+            },
+        });
 
-        if(result === null) {
-            throw new MissingError("Requisition not found")
+        if (result === null) {
+            throw new MissingError("Requisition not found");
         }
 
         return {
@@ -458,53 +497,50 @@ const projectService = {
             status: result.status,
             requestedBy: result.requestedBy,
             phaseId: result.phaseId,
-        }
+        };
     },
 
     async approveRequisition(requisitionId: string) {
-        
         const existingRequisition = await prisma.requisition.findUnique({
             where: {
-                id: requisitionId
-            }
-        })
+                id: requisitionId,
+            },
+        });
 
-        if(!existingRequisition) {
-            throw new MissingError("Requisition not found")
+        if (!existingRequisition) {
+            throw new MissingError("Requisition not found");
         }
-        
+
         await prisma.requisition.update({
             where: {
-                id: requisitionId
+                id: requisitionId,
             },
             data: {
-                status: "APPROVED"
-            }
-        })
+                status: "APPROVED",
+            },
+        });
     },
 
     async rejectRequisition(requisitionId: string) {
-        
         const existingRequisition = await prisma.requisition.findUnique({
             where: {
-                id: requisitionId
-            }
-        })
+                id: requisitionId,
+            },
+        });
 
-        if(!existingRequisition) {
-            throw new MissingError("Requisition not found")
+        if (!existingRequisition) {
+            throw new MissingError("Requisition not found");
         }
-        
+
         await prisma.requisition.update({
             where: {
-                id: requisitionId
+                id: requisitionId,
             },
             data: {
-                status: "REJECTED"
-            }
-        })
+                status: "REJECTED",
+            },
+        });
     },
-
 };
 
 export default projectService;

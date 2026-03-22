@@ -30,6 +30,7 @@ const ProjectDetails = ({ projectDetails }: ProjectDetailsProps) => {
                 </div>
             </CardContent>
         </Card>
+        
     );
 };
 
