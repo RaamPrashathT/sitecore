@@ -2,7 +2,7 @@ import CatalogueMain from "@/features/catalogue/components/CatalogueMain"
 
 const CataloguePage = () => {
     return (
-        <div>
+        <div className="h-full">
             <CatalogueMain/>
         </div>
     )

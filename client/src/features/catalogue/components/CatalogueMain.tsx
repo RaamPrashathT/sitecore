@@ -61,7 +61,7 @@ const CatalogueMain = () => {
     if (!membership || !catalogueItems) return <div>No access</div>;
 
     return (
-        <div className="px-4">
+        <div className="px-4 flex flex-col h-full">
             <div className="flex flex-row justify-between items-center py-2">
                 <Button>
                     <Link
@@ -77,7 +77,7 @@ const CatalogueMain = () => {
             <div>
                 <CatalogueDataTable table={table} />
             </div>
-            <div>
+            <div className="mt-auto mb-4">
                 <CataloguePagination table={table} />
             </div>
         </div>

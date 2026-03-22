@@ -60,7 +60,7 @@ const ProjectManageMain = () => {
     if (!membership || !projectList) return <div>No access</div>;
 
     return (
-        <div className=" px-4">
+        <div className=" px-4 flex flex-col h-full">
             <div className="flex flex-row justify-between items-center py-2">
                 <Button>
                     <Link
@@ -76,7 +76,7 @@ const ProjectManageMain = () => {
             <div className="h-full flex flex-col">
                 <ProjectListDataTable table={table} slug={membership.slug} />
             </div>
-            <div>
+            <div className="mt-auto mb-4">
                 <ProjectListPagination table={table} />
             </div>
         </div>

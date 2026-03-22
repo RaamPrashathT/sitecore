@@ -31,7 +31,6 @@ const adminData = {
             url: "/",
             icon: SquareTerminal,
             isActive: true,
-            
         },
         {
             title: "Catalogue",
@@ -71,6 +70,13 @@ const adminData = {
 
 const engineerData = {
     sidebarContents: [
+        {
+            title: "Dashboard",
+            url: "/",
+            icon: SquareTerminal,
+            isActive: true,
+            
+        },
         {
             title: "Projects",
             url: "/projects",

@@ -1,21 +1,14 @@
-import { useMembership } from "@/hooks/useMembership";
-import { useGetDashboardItems } from "../hooks/useGetDashboardItems";
-import AdminDashboardDataTable from "./AdminDashboardDataTable";
-import {
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    useReactTable,
-} from "@tanstack/react-table";
 import { useState } from "react";
-import { columns } from "./AdminDashboardColumns";
-import OrderButton from "./OrderButton";
-import SearchTableControl from "./SearchTableControl";
-import AdminDashboardPagination from "./AdminDashboardPagination";
-import AdminDashboardSkeleton from "./AdminDashboardSkeleton";
+import { EngineerColumns as columns } from "./EngineerDashboardColumns";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useGetEngineerDashboardItems } from "../hooks/useEngineerDashboardItem";
+import { useMembership } from "@/hooks/useMembership";
+import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import EngineerDashboardDataTable from "./EngineerDashboardTable";
+import EngineerSearch from "./EngineerDashboardSearch";
+import EngineerDashboardPagination from "./EngineerDashboardPagination";
 
-const AdminDashboardMain = () => {
+const EngineerDashboard = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
     const debouncedSearch = useDebounce(globalFilter, 200);
 
@@ -23,12 +16,10 @@ const AdminDashboardMain = () => {
         pageIndex: 0,
         pageSize: 24,
     });
-    
-    const [rowSelection, setRowSelection] = useState({});
 
     const { data: membership, isLoading: membershipLoading } = useMembership();
     const { data: dashboardItems, isLoading: dashboardItemsLoading } =
-        useGetDashboardItems(
+        useGetEngineerDashboardItems(
             membership?.id,
             pagination.pageIndex,
             pagination.pageSize,
@@ -47,40 +38,32 @@ const AdminDashboardMain = () => {
         manualFiltering: true,
         manualSorting: true,
         manualPagination: true,
-        onRowSelectionChange: setRowSelection, 
         getRowId: (row) => row.id,
         state: {
             globalFilter,
             pagination,
-            rowSelection, 
         },
     });
-
-    const selectedIds = table.getSelectedRowModel().rows.map(r => r.original.id);
 
     const isInitialLoading =
         membershipLoading || (dashboardItemsLoading && !dashboardItems);
 
-    if (isInitialLoading) return <AdminDashboardSkeleton />;
+    if (isInitialLoading) return <>Loading...</>;
     if (!membership || !dashboardItems) return <div>No access</div>;
-    
+
     return (
         <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-between items-center py-2">
-                <OrderButton 
-                    selectedIds={selectedIds} 
-                    clearSelection={() => table.resetRowSelection()} 
-                />
-                <SearchTableControl table={table} />
+            <div className=" py-2 flex justify-end">
+                <EngineerSearch table={table} />
             </div>
             <div>
-                <AdminDashboardDataTable table={table} />
+                <EngineerDashboardDataTable table={table} />
             </div>
             <div className="mt-auto mb-4">
-                <AdminDashboardPagination table={table} />
+                <EngineerDashboardPagination table={table} />
             </div>
         </div>
     );
 };
 
-export default AdminDashboardMain;
+export default EngineerDashboard;

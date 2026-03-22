@@ -6,7 +6,7 @@ const dashboardService = {
         organizationId: string,
         pageIndex: number,
         pageSize: number,
-        searchQuery: string, 
+        searchQuery: string,
     ) {
         const skip = pageIndex * pageSize;
 
@@ -156,6 +156,111 @@ const dashboardService = {
 
         return result;
     },
+
+    async getEngineerDashboardItems(
+        engineerId: string,
+        organizationId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+        
+        const whereClause: any = {
+            status: "ACTIVE",
+            project: {
+                organizationId: organizationId,
+                assignments: {
+                    some: {
+                        userId: engineerId 
+                    }
+                }
+            }
+        };
+
+        if (searchQuery) {
+            whereClause.name = { contains: searchQuery, mode: "insensitive" };
+        }
+
+        const [result, count] = await Promise.all([
+            prisma.phase.findMany({
+                where: whereClause,
+                take: pageSize,
+                skip: skip,
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    budget: true,
+                    project: {
+                        select: {
+                            name: true,
+                        }
+                    },
+                    requisitions: {
+                        where: {
+                            status: "APPROVED"
+                        },
+                        select: {
+                            items: {
+                                select: {
+                                    id: true,
+                                    quantity: true,
+                                    estimatedUnitCost: true,
+                                    status: true, 
+                                    catalogue: {
+                                        select: {
+                                            name: true,
+                                            unit: true,
+                                        }
+                                    },
+                                    assignedSupplier: {
+                                        select: {
+                                            supplier: true,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: "desc"
+                }
+            }),
+            prisma.phase.count({
+                where: whereClause,
+            }),
+        ]);
+
+        const flattenedPhases = result.map(phase => {
+            const flatItems = phase.requisitions.flatMap(req => 
+                req.items.map(item => ({
+                    id: item.id,
+                    quantity: Number(item.quantity),
+                    estimatedUnitCost: Number(item.estimatedUnitCost),
+                    status: item.status as "ORDERED" | "UNORDERED",
+                    itemName: item.catalogue.name,
+                    unit: item.catalogue.unit,
+                    supplierName: item.assignedSupplier?.supplier || "Pending Assignment"
+                }))
+            );
+
+            return {
+                id: phase.id,
+                name: phase.name,
+                description: phase.description,
+                budget: Number(phase.budget),
+                projectName: phase.project.name,
+                items: flatItems
+            };
+        });
+
+        return {
+            data: flattenedPhases,
+            count,
+        };
+    }
 };
 
 export default dashboardService;
