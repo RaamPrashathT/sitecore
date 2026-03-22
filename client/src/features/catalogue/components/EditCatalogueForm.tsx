@@ -6,23 +6,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
 import {
     Field,
     FieldError,
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "../ui/input";
+import { Input } from "@/components/ui/input";
 import { Controller, useForm } from "react-hook-form";
-import { Button } from "../ui/button";
-import { useState } from "react";
-import { Spinner } from "../ui/spinner";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/lib/axios";
 import { useNavigate } from "react-router-dom";
-import { useGetCatalogue } from "@/hooks/useGetCatalogs";
+import { useGetCatalogueById } from "../hooks/useGetCatalogueById";
 
 const formSchema = z.object({
     name: z.string().min(1, "Item Name is required"),
@@ -56,36 +55,54 @@ const EditCatalogueForm = ({
     catalogueId,
     quoteId,
 }: EditCatalogueFormProps) => {
-    const { data: catalogueItems, isLoading } = useGetCatalogue(id);
-    const selectedCatalogueItem = catalogueItems?.find(
-        (item) => item.id === catalogueId,
+    const { data: catalogueItem, isLoading } = useGetCatalogueById(
+        id,
+        catalogueId,
+        quoteId
     );
 
-    const selectedQuote = selectedCatalogueItem?.supplierQuotes.find(
-        (quote) => quote.id === quoteId,
-    );  
-    
     const {
         register,
         control,
         handleSubmit,
+        reset,
         formState: { errors },
-    } = useForm({
-        resolver: zodResolver(formSchema),
-        values: {
-            name: selectedCatalogueItem?.name || "",
-            supplier: selectedQuote?.supplier || "",
-            unit: selectedCatalogueItem?.unit || "",
-            category: selectedCatalogueItem?.category || "MATERIALS",
-            truePrice: selectedQuote?.truePrice || 0,
-            standardRate: selectedQuote?.standardRate || 0,
-            leadTime: selectedQuote?.leadTime ?? selectedCatalogueItem?.defaultLeadTime ?? 0,
+    } = useForm<createCatalogueFormSchema>({
+        resolver: zodResolver(formSchema) as any,
+        defaultValues: {
+            name: "",
+            supplier: "",
+            unit: "",
+            category: "MATERIALS",
+            truePrice: 0,
+            standardRate: 0,
+            leadTime: 0,
         },
     });
+
+    
+    useEffect(() => {
+        if (catalogueItem) {
+            const selectedQuote = catalogueItem.supplierQuotes?.find(
+                (quote) => quote.id === quoteId
+            );
+
+            reset({
+                name: catalogueItem.name || "",
+                supplier: selectedQuote?.supplier || "",
+                unit: catalogueItem.unit || "",
+                category: catalogueItem.category || "MATERIALS",
+                truePrice: selectedQuote?.truePrice || 0,
+                standardRate: selectedQuote?.standardRate || 0,
+                leadTime: selectedQuote?.leadTime ?? catalogueItem.defaultLeadTime ?? 0,
+            });
+        }
+    }, [catalogueItem, quoteId, reset]);
 
     const navigate = useNavigate();
     const [isLoadingState, setIsLoadingState] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
     const onSubmit = async (data: createCatalogueFormSchema) => {
         setIsLoadingState(true);
         setError(null);
@@ -101,7 +118,7 @@ const EditCatalogueForm = ({
                     headers: {
                         "x-organization-id": id,
                     },
-                },
+                }
             );
             if (!response.data.success) {
                 setError(response.data.message);
@@ -115,7 +132,13 @@ const EditCatalogueForm = ({
             setIsLoadingState(false);
         }
     };
+
     if (isLoading) return <div>Loading...</div>;
+
+    if (!catalogueItem && !isLoading) {
+        return <div className="text-center py-10 text-xl font-semibold">Catalogue Item not found!</div>;
+    }
+
     return (
         <div className="flex items-center justify-center ">
             <form
@@ -156,31 +179,17 @@ const EditCatalogueForm = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectItem value="MATERIALS">
-                                                Materials
-                                            </SelectItem>
-                                            <SelectItem value="SERVICES">
-                                                Services
-                                            </SelectItem>
-                                            <SelectItem value="EQUIPMENT">
-                                                Equipment
-                                            </SelectItem>
-                                            <SelectItem value="SUBCONTRACTORS">
-                                                Subcontractors
-                                            </SelectItem>
-                                            <SelectItem value="TRANSPORT">
-                                                Transport
-                                            </SelectItem>
-
-                                            <SelectItem value="OVERHEAD">
-                                                Overhead
-                                            </SelectItem>
+                                            <SelectItem value="MATERIALS">Materials</SelectItem>
+                                            <SelectItem value="LABOUR">Labour</SelectItem>
+                                            <SelectItem value="EQUIPMENT">Equipment</SelectItem>
+                                            <SelectItem value="SUBCONTRACTORS">Subcontractors</SelectItem>
+                                            <SelectItem value="TRANSPORT">Transport</SelectItem>
+                                            <SelectItem value="OVERHEAD">Overhead</SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
                             )}
                         />
-
                         {errors.category && (
                             <FieldError>{errors.category.message}</FieldError>
                         )}
@@ -213,17 +222,17 @@ const EditCatalogueForm = ({
                     </Field>
                 </FieldGroup>
                 <Field className="mt-4">
-                        <FieldLabel>Lead Time</FieldLabel>
-                        <Input {...register("leadTime")} />
-                        {errors.leadTime && (
-                            <FieldError className="">
-                                {errors.leadTime.message}
-                            </FieldError>
-                        )}
-                    </Field>
+                    <FieldLabel>Lead Time</FieldLabel>
+                    <Input {...register("leadTime")} />
+                    {errors.leadTime && (
+                        <FieldError className="">
+                            {errors.leadTime.message}
+                        </FieldError>
+                    )}
+                </Field>
                 {error && <p className="text-red-500 py-2">{error}</p>}
                 <div className="flex justify-end mt-8">
-                    <Button type="submit" className="w-60">
+                    <Button type="submit" className="w-60" disabled={isLoadingState}>
                         {isLoadingState && <Spinner />}
                         <p>Edit Item</p>
                     </Button>

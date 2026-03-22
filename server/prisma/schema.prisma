@@ -165,7 +165,7 @@ model RequisitionItem {
     status            RequisitionItemStatus @default(UNORDERED)
 
     catalogueId String
-    catalogue   Catalogue @relation(fields: [catalogueId], references: [id])
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
 
     assignedSupplierId String?
     assignedSupplier   SupplierQuote? @relation(fields: [assignedSupplierId], references: [id])

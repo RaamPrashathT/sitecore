@@ -51,20 +51,6 @@ const MainOrganizationPage = () => {
                         <div>
                             {membership.role === "ADMIN" && (
                                 <div>
-                                    {currentLocation === "catalogue" &&
-                                        segments.length === 3 && (
-                                            <Button>
-                                                <Link
-                                                    to={`/${orgSlug}/catalogue/create`}
-                                                    className="flex items-center gap-x-1"
-                                                >
-                                                    <Plus />
-                                                    <p className="mb-px">
-                                                        Add Item
-                                                    </p>
-                                                </Link>
-                                            </Button>
-                                        )}
                                     {currentLocation === "projects" &&
                                         segments.length === 3 && (
                                             <Button className="p-0">

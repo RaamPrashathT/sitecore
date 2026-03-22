@@ -3,7 +3,7 @@ import AdminDashboardMain from "@/features/adminDashboard/components/AdminDashbo
 const DashboardPage = () => {
 
     return (
-        <div className="flex flex-col gap-y-2">
+        <div>
             <AdminDashboardMain />
         </div>
     );

@@ -13,11 +13,11 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "../ui/input";
+import { Input } from "../../../components/ui/input";
 import { Controller, useForm } from "react-hook-form";
-import { Button } from "../ui/button";
+import { Button } from "../../../components/ui/button";
 import { useState } from "react";
-import { Spinner } from "../ui/spinner";
+import { Spinner } from "../../../components/ui/spinner";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/lib/axios";

@@ -1,4 +1,4 @@
-import CreateCatalogueForm from "@/components/catalogue/CreateCatalogueForm"
+import CreateCatalogueForm from "@/features/catalogue/components/CreateCatalogueForm"
 import { useMembership } from "@/hooks/useMembership";
 
 const CreateCataloguePage = () => {

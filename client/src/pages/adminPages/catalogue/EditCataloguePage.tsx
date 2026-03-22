@@ -1,4 +1,4 @@
-import EditCatalogueForm from "@/components/catalogue/EditCatalogueForm"
+import EditCatalogueForm from "@/features/catalogue/components/EditCatalogueForm"
 import { useMembership } from "@/hooks/useMembership";
 
 import { useParams } from "react-router-dom";

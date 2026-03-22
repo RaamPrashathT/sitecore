@@ -3,7 +3,7 @@ import {
   getCoreRowModel, 
   useReactTable 
 } from '@tanstack/react-table';
-import { columns } from './columns';
+import { columns } from '../../features/catalogue/components/CatalogueColumns';
 import type { CatalogueWithQuotes } from '@/hooks/useGetCatalogs';
 import {
   Table,

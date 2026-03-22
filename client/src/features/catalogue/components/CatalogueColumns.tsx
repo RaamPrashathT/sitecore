@@ -4,7 +4,7 @@ import CatalogueActionButton from './CatalogueActionButton';
 
 const columnHelper = createColumnHelper<CatalogueWithQuotes>();
 
-export const columns = [
+export const CatalogueColumns = [
     columnHelper.accessor('name', {
         header: "Item Name",
         cell: info => (

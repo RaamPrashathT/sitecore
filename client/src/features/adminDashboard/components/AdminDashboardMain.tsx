@@ -24,7 +24,6 @@ const AdminDashboardMain = () => {
         pageSize: 24,
     });
     
-    // 1. Add the state for row selection
     const [rowSelection, setRowSelection] = useState({});
 
     const { data: membership, isLoading: membershipLoading } = useMembership();
@@ -53,11 +52,10 @@ const AdminDashboardMain = () => {
         state: {
             globalFilter,
             pagination,
-            rowSelection, // 3. Add to state
+            rowSelection, 
         },
     });
 
-    // 4. Extract just the IDs of the selected rows
     const selectedIds = table.getSelectedRowModel().rows.map(r => r.original.id);
 
     const isInitialLoading =
@@ -69,7 +67,6 @@ const AdminDashboardMain = () => {
     return (
         <div className="px-4">
             <div className="flex flex-row justify-between items-center py-2">
-                {/* 5. Pass the IDs and a clear function to the button */}
                 <OrderButton 
                     selectedIds={selectedIds} 
                     clearSelection={() => table.resetRowSelection()} 

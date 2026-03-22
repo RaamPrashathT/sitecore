@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { logger } from "../../shared/lib/logger.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import catalogueService from "./catalogue.service.js";
-import { deleteFormSchema, editFormSchema, formSchema } from "./catalogue.schema.js";
+import { deleteFormSchema, editFormSchema, formSchema, getCatalogueByIdSchema, getCatalogueSchema } from "./catalogue.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 
@@ -10,10 +10,27 @@ const catalogueController = {
     async getCatalogue(request: Request, response: Response) {
 
         try {
-            if(request.tenant?.role !== "ADMIN") {
-                throw new UnAuthorizedError("Unauthorized");
+            const organizationId = request.tenant?.orgId;
+            const index = Number.parseInt(request.query.index as string) || 0;
+            const size = Number.parseInt(request.query.size as string) || 10;
+            const searchQuery = (request.query.search as string) || "";
+
+            const validatedData = getCatalogueSchema.safeParse({
+                organizationId,
+                pageIndex: index,
+                pageSize: size,
+                searchQuery,
+            });
+
+            if (!validatedData.success) {
+                throw new ValidationError("Invalid Request Parameters");
             }
-            const result = await catalogueService.getCatalogue(request.tenant.orgId)
+            const result = await catalogueService.getCatalogue(
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery
+            );
             return response.status(200).json(result)
         } catch (error) {
             if(error instanceof UnAuthorizedError) {
@@ -27,6 +44,38 @@ const catalogueController = {
                 success: false,
                 message: "Internal server error",
             });
+        }
+    },
+
+    async getCatalogueById(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant?.orgId;
+            const catalogueId = request.params.catalogueId;
+            const quoteId = request.params.quoteId;
+
+            const validatedData = getCatalogueByIdSchema.safeParse({
+                catalogueId,
+                quoteId
+            })
+            if(!validatedData.success) {
+                throw new ValidationError("Invalid Request Parameters");
+            }
+            const result = await catalogueService.getCatalogueById(
+                validatedData.data.catalogueId,
+                validatedData.data.quoteId,
+                organizationId as string
+            );
+            return response.status(200).json(result)
+        } catch (error) {
+            if(error instanceof ValidationError) {
+                return response.status(400).json({
+                    message: error.message
+                })
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            })
         }
     },
 

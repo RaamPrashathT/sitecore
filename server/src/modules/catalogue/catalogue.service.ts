@@ -1,22 +1,79 @@
 import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
-import type { createCatalogueFormSchema, deleteCatalogueFormSchema, editCatalogueFormSchema } from "./catalogue.schema.js";
+import type {
+    createCatalogueFormSchema,
+    deleteCatalogueFormSchema,
+    editCatalogueFormSchema,
+} from "./catalogue.schema.js";
 
 const catalogueService = {
-    async getCatalogue(orgId: string) {
-        const data = await prisma.catalogue.findMany({
+    async getCatalogue(
+        orgId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+        const whereClause: any = {
+            organizationId: orgId,
+        };
+
+        if (searchQuery) {
+            whereClause.OR = [
+                { name: { contains: searchQuery, mode: "insensitive" } },
+                {
+                    supplierQuotes: {
+                        some: {
+                            supplier: {
+                                contains: searchQuery,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                },
+            ];
+        }
+
+        const [data, count] = await Promise.all([
+            prisma.catalogue.findMany({
+                where: whereClause,
+                include: {
+                    supplierQuotes: true,
+                },
+                take: pageSize,
+                skip: skip,
+                orderBy: {
+                    name: "asc",
+                },
+            }),
+            prisma.catalogue.count({
+                where: whereClause,
+            }),
+        ]);
+
+        return { data, count };
+    },
+
+    async getCatalogueById(catalogueId: string, quoteId: string, organizationId: string) {
+        const catalogue = await prisma.catalogue.findUnique({
             where: {
-                organizationId: orgId
+                id: catalogueId,
+                organizationId,
+                supplierQuotes: {
+                    some: {
+                        id: quoteId,
+                    },
+                }
             },
             include: {
-                supplierQuotes: true
+                supplierQuotes: {
+                    where: {
+                        id: quoteId,
+                    }
+                },
             },
-            orderBy: {
-                name: "asc"
-            }
-        })
-        
-        return data;
+        });
+        return catalogue;
     },
 
     async createCatalogue(data: createCatalogueFormSchema, orgId: string) {
@@ -24,16 +81,16 @@ const catalogueService = {
             where: {
                 name_organizationId: {
                     name: data.name,
-                    organizationId: orgId
-                }
-            }
-        })
+                    organizationId: orgId,
+                },
+            },
+        });
 
-        if(!catalogue) {
+        if (!catalogue) {
             return prisma.catalogue.create({
                 data: {
                     name: data.name,
-                    category: data.category ,
+                    category: data.category,
                     unit: data.unit,
                     organizationId: orgId,
                     supplierQuotes: {
@@ -42,10 +99,10 @@ const catalogueService = {
                             truePrice: data.truePrice,
                             standardRate: data.standardRate,
                             leadTime: data.leadTime,
-                        }
-                    }
-                }
-            })
+                        },
+                    },
+                },
+            });
         }
         return prisma.supplierQuote.create({
             data: {
@@ -53,9 +110,9 @@ const catalogueService = {
                 truePrice: data.truePrice,
                 standardRate: data.standardRate,
                 leadTime: data.leadTime,
-                catalogueId: catalogue.id
-            }
-        })
+                catalogueId: catalogue.id,
+            },
+        });
     },
 
     async editCatalogue(data: editCatalogueFormSchema, orgId: string) {
@@ -64,60 +121,59 @@ const catalogueService = {
                 id: data.catalogueId,
             },
             include: {
-                supplierQuotes: true
-            }  
-        })
+                supplierQuotes: true,
+            },
+        });
 
-        if(!existingCatalogue) {
-            throw new MissingError("Catalogue not found")
+        if (!existingCatalogue) {
+            throw new MissingError("Catalogue not found");
         }
 
-        if(data.name === existingCatalogue.name) {
+        if (data.name === existingCatalogue.name) {
             await prisma.supplierQuote.update({
                 where: {
-                    id: data.quoteId
+                    id: data.quoteId,
                 },
                 data: {
                     truePrice: data.truePrice,
                     supplier: data.supplier,
                     standardRate: data.standardRate,
-                    leadTime: data.leadTime
-                }
-            })
-            
+                    leadTime: data.leadTime,
+                },
+            });
         } else {
-            if(existingCatalogue.supplierQuotes.length >= 2) {
+            if (existingCatalogue.supplierQuotes.length >= 2) {
                 await prisma.supplierQuote.delete({
                     where: {
-                        id: data.quoteId
-                    }
-                })
+                        id: data.quoteId,
+                    },
+                });
             } else {
                 await prisma.catalogue.delete({
                     where: {
-                        id: data.catalogueId
-                    }
-                })
+                        id: data.catalogueId,
+                    },
+                });
             }
 
             const catalogue = await prisma.catalogue.findUnique({
                 where: {
                     name_organizationId: {
                         name: data.name,
-                        organizationId: orgId
-                    }         
-                }
-            })
-            if(catalogue) {
+                        organizationId: orgId,
+                    },
+                },
+            });
+            if (catalogue) {
                 await prisma.supplierQuote.create({
                     data: {
                         truePrice: data.truePrice,
                         supplier: data.supplier,
                         standardRate: data.standardRate,
                         leadTime: data.leadTime,
-                        catalogueId: catalogue.id
-                    }
-                })
+                        catalogueId: catalogue.id,
+                    },
+                });
             } else {
                 await prisma.catalogue.create({
                     data: {
@@ -130,11 +186,11 @@ const catalogueService = {
                                 truePrice: data.truePrice,
                                 supplier: data.supplier,
                                 standardRate: data.standardRate,
-                                leadTime: data.leadTime
-                            }
-                        }
-                    }
-                })
+                                leadTime: data.leadTime,
+                            },
+                        },
+                    },
+                });
             }
         }
     },
@@ -145,26 +201,26 @@ const catalogueService = {
                 id: data.catalogueId,
             },
             include: {
-                supplierQuotes: true
-            }  
-        })
-        if(!existingCatalogue) {
-            throw new MissingError("Catalogue not found")
+                supplierQuotes: true,
+            },
+        });
+        if (!existingCatalogue) {
+            throw new MissingError("Catalogue not found");
         }
-        if(existingCatalogue.supplierQuotes.length >= 2) {
+        if (existingCatalogue.supplierQuotes.length >= 2) {
             await prisma.supplierQuote.delete({
                 where: {
-                    id: data.quoteId
-                }
-            })
+                    id: data.quoteId,
+                },
+            });
         } else {
             await prisma.catalogue.delete({
                 where: {
-                    id: data.catalogueId
-                }
-            })
+                    id: data.catalogueId,
+                },
+            });
         }
-    }   
-}
+    },
+};
 
 export default catalogueService;
