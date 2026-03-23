@@ -8,7 +8,7 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("projectName", {
         header: "Project",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
+            <div className="font-medium flex items-center h-12 px-4">
                 <p>{info.getValue()}</p>
             </div>
         ),
@@ -17,7 +17,7 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("phaseName", {
         header: "Phase",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
+            <div className="font-medium flex items-center h-12 px-4">
                 <p>{info.getValue()}</p>
             </div>
         ),
@@ -26,7 +26,7 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("client", {
         header: "Client",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
+            <div className="font-medium flex items-center h-12 px-4">
                 <p>{info.getValue()}</p>
             </div>
         ),
@@ -35,7 +35,7 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("budget", {
         header: "Amount Due",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
+            <div className="font-medium flex items-center h-12 px-4">
                 <p>₹{info.getValue()}</p>
             </div>
         ),
@@ -84,7 +84,7 @@ export const PendingPaymentColumns = [
         cell: (info) => {
             const phaseId = info.row.original.id;
             return (
-                <div className='font-medium flex items-center h-12 px-4'>
+                <div className="font-medium flex items-center h-12 px-4">
                     <ApprovePhasePaymentButton id={phaseId} />
                 </div>
             )

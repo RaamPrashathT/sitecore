@@ -13,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { PendingRequisitionListType } from "@/hooks/usePendingRequisitionList";
+import type { PendingRequisitionListType } from "@/features/pending/requisitions/hooks/usePendingRequisition";
 import { useMembership } from "@/hooks/useMembership";
 import { useNavigate } from "react-router-dom";
 interface DataTableProps {

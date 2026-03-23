@@ -248,12 +248,34 @@ const projectController = {
     async getPendingRequisitions(request: Request, response: Response) {
         try {
             const organizationId = request.tenant!.orgId;
+            const index = Number.parseInt(request.query.index as string) ?? 0;
+            const size = Number.parseInt(request.query.size as string) ?? 10;
+            const searchQuery = (request.query.search as string) || "";
+            
+            const validatedData = getPaymentPendingSchema.safeParse({
+                organizationId,
+                pageIndex: index,
+                pageSize: size,
+                searchQuery,
+            });
 
-            const result = await projectService.getPendingRequisitions(organizationId);
+            if (!validatedData.success) {
+                throw new ValidationError("Invalid Organization ID");
+            }
+
+            const result = await projectService.getPendingRequisitions(
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery,
+            );
             
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
+            }
             return response.status(500).json({
                 message: "Internal server error",
             });
@@ -283,7 +305,7 @@ const projectController = {
     async approveRequisition(request: Request, response: Response) {
         try {
             const { requisitionId } = request.body;
-
+            console.log(requisitionId)
             await projectService.approveRequisition(requisitionId);
 
             return response.status(200).json({
@@ -291,12 +313,12 @@ const projectController = {
             });
 
         } catch (error) {
+            logger.error(error);
             if(error instanceof MissingError) {
                 return response.status(404).json({
                     message: error.message
                 })
             }
-            logger.error(error);
             return response.status(500).json({
                 message: "Internal server error",
             });

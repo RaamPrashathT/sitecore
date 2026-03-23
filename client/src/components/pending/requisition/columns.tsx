@@ -1,4 +1,4 @@
-import type { PendingRequisitionListType } from "@/hooks/usePendingRequisitionList";
+import type { PendingRequisitionListType } from "@/features/pending/requisitions/hooks/usePendingRequisition";
 import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<PendingRequisitionListType>();

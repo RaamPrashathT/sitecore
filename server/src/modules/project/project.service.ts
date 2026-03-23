@@ -408,59 +408,89 @@ const projectService = {
         };
     },
 
-    async getPendingRequisitions(organizationId: string) {
-        const result = await prisma.requisition.findMany({
-            where: {
-                status: "PENDING_APPROVAL",
-                phase: {
-                    project: {
-                        organizationId: organizationId,
-                    },
+    async getPendingRequisitions(
+        organizationId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+        const whereClause: any = {
+            status: "PENDING_APPROVAL",
+            phase: {
+                project: {
+                    organizationId: organizationId,
                 },
             },
-            select: {
-                id: true,
-                budget: true,
-                status: true,
-                requestedBy: true,
-                phaseId: true,
-                createdAt: true,
-                items: {
-                    select: {
-                        id: true,
-                        quantity: true,
-                        estimatedUnitCost: true,
-                        assignedSupplier: {
-                            select: {
-                                id: true,
-                                supplier: true,
-                                truePrice: true,
-                                standardRate: true,
-                            },
-                        },
-                        catalogue: {
-                            select: {
-                                name: true,
-                                unit: true,
-                            },
-                        },
+        };
+        if (searchQuery) {
+            whereClause.OR = [
+                {
+                    phase: {
+                        name: { contains: searchQuery, mode: "insensitive" },
                     },
                 },
-                phase: {
-                    select: {
-                        name: true,
+                {
+                    phase: {
                         project: {
-                            select: {
-                                name: true,
+                            name: { contains: searchQuery, mode: "insensitive" },
+                        },
+                    }
+                }
+            ]
+        }
+            
+
+        const [result, count] = await Promise.all([
+            prisma.requisition.findMany({
+                where: whereClause,
+                select: {
+                    id: true,
+                    budget: true,
+                    status: true,
+                    requestedBy: true,
+                    phaseId: true,
+                    createdAt: true,
+                    items: {
+                        select: {
+                            id: true,
+                            quantity: true,
+                            estimatedUnitCost: true,
+                            assignedSupplier: {
+                                select: {
+                                    id: true,
+                                    supplier: true,
+                                    truePrice: true,
+                                    standardRate: true,
+                                },
+                            },
+                            catalogue: {
+                                select: {
+                                    name: true,
+                                    unit: true,
+                                },
+                            },
+                        },
+                    },
+                    phase: {
+                        select: {
+                            name: true,
+                            project: {
+                                select: {
+                                    name: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            orderBy: {
-                createdAt: "asc",
-            },
-        });
+                orderBy: {
+                    createdAt: "asc",
+                },
+            }),
+            prisma.requisition.count({
+                where: whereClause,
+            }),
+        ])
 
         const engineerIds = [...new Set(result.map((req) => req.requestedBy))];
 
@@ -479,7 +509,7 @@ const projectService = {
             ]),
         );
 
-        return result.map((req) => ({
+        const data =  result.map((req) => ({
             id: req.id,
             budget: Number(req.budget),
             status: req.status as "PENDING_APPROVAL",
@@ -508,6 +538,10 @@ const projectService = {
                 unit: item.catalogue?.unit || "",
             })),
         }));
+        return {
+            data,
+            count,
+        };
     },
 
     async getRequisitionDetails(requisitionId: string) {

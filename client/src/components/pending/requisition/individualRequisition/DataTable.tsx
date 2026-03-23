@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { PendingRequisitionListType } from "@/hooks/usePendingRequisitionList";
+import type { PendingRequisitionListType } from "@/features/pending/requisitions/hooks/usePendingRequisition";
 
 interface DataTableProps {
     data: PendingRequisitionListType["items"];

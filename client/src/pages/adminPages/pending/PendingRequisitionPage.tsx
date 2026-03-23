@@ -1,9 +1,9 @@
-import PendingRequisitionApprovalForm from "@/components/pending/requisition/RequisitionApprovalForm";
+import PendingRequisitionMain from "@/features/pending/requisitions/components/PendingRequisitionsMain";
 
 const PendingRequisitionPage = () => {
     return (
-        <div>
-            <PendingRequisitionApprovalForm />
+        <div className="h-full">
+            <PendingRequisitionMain />
         </div>
     );
 };

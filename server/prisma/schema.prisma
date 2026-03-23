@@ -168,7 +168,7 @@ model RequisitionItem {
     catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
 
     assignedSupplierId String?
-    assignedSupplier   SupplierQuote? @relation(fields: [assignedSupplierId], references: [id])
+    assignedSupplier   SupplierQuote? @relation(fields: [assignedSupplierId], references: [id], onDelete: Cascade)
 
     requisitionId String
     requisition   Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)

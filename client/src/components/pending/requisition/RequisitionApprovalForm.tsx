@@ -1,5 +1,5 @@
 import { useMembership } from "@/hooks/useMembership";
-import { usePendingRequisitionList } from "@/hooks/usePendingRequisitionList";
+import { usePendingRequisitionList } from "@/features/pending/requisitions/hooks/usePendingRequisition";
 import DataTable from "./DataTable";
 import EmptyPendingRequisitionApproval from "./EmptyPendingRequisitionApproval";
 

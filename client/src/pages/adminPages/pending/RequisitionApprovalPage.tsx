@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { usePendingRequisitionList } from "@/hooks/usePendingRequisitionList";
+import { usePendingRequisitionList } from "@/features/pending/requisitions/hooks/usePendingRequisition";
 import { useMembership } from "@/hooks/useMembership";
 import DataTable from "@/components/pending/requisition/individualRequisition/DataTable";
 import ApproveRequisitionButton from "@/components/pending/requisition/individualRequisition/ApproveRequisitionButton";

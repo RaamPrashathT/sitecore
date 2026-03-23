@@ -1,11 +1,9 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import type { PendingRequisitionListType } from "@/features/pending/requisitions/hooks/usePendingRequisition";
+import type { PendingRequisitionItemType } from "../hooks/usePendingRequisition";
 
-type RequisitionItem = PendingRequisitionListType["items"][0];
+const columnHelper = createColumnHelper<PendingRequisitionItemType>();
 
-const columnHelper = createColumnHelper<RequisitionItem>();
-
-export const columns = [
+export const PendingRequisitionItemColumns = [
     columnHelper.accessor("itemName", {
         header: "Item Name",
         cell: (info) => (
