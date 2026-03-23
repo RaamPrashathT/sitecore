@@ -22,9 +22,9 @@ export default function RegisterPage() {
             </div>
             <div className="bg-muted relative hidden lg:block">
                 <img
-                    src="/placeholder.svg"
+                    src="https://res.cloudinary.com/datgb606y/image/upload/v1774244857/authImg_bjuho3.png"
                     alt="placeholder"
-                    className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                    className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale p"
                 />
             </div>
         </div>

@@ -165,17 +165,17 @@ const dashboardService = {
         searchQuery: string,
     ) {
         const skip = pageIndex * pageSize;
-        
+
         const whereClause: any = {
             status: "ACTIVE",
             project: {
                 organizationId: organizationId,
                 assignments: {
                     some: {
-                        userId: engineerId 
-                    }
-                }
-            }
+                        userId: engineerId,
+                    },
+                },
+            },
         };
 
         if (searchQuery) {
@@ -195,11 +195,11 @@ const dashboardService = {
                     project: {
                         select: {
                             name: true,
-                        }
+                        },
                     },
                     requisitions: {
                         where: {
-                            status: "APPROVED"
+                            status: "APPROVED",
                         },
                         select: {
                             items: {
@@ -207,43 +207,44 @@ const dashboardService = {
                                     id: true,
                                     quantity: true,
                                     estimatedUnitCost: true,
-                                    status: true, 
+                                    status: true,
                                     catalogue: {
                                         select: {
                                             name: true,
                                             unit: true,
-                                        }
+                                        },
                                     },
                                     assignedSupplier: {
                                         select: {
                                             supplier: true,
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
                 orderBy: {
-                    createdAt: "desc"
-                }
+                    createdAt: "desc",
+                },
             }),
             prisma.phase.count({
                 where: whereClause,
             }),
         ]);
 
-        const flattenedPhases = result.map(phase => {
-            const flatItems = phase.requisitions.flatMap(req => 
-                req.items.map(item => ({
+        const flattenedPhases = result.map((phase) => {
+            const flatItems = phase.requisitions.flatMap((req) =>
+                req.items.map((item) => ({
                     id: item.id,
                     quantity: Number(item.quantity),
                     estimatedUnitCost: Number(item.estimatedUnitCost),
                     status: item.status as "ORDERED" | "UNORDERED",
                     itemName: item.catalogue.name,
                     unit: item.catalogue.unit,
-                    supplierName: item.assignedSupplier?.supplier || "Pending Assignment"
-                }))
+                    supplierName:
+                        item.assignedSupplier?.supplier || "Pending Assignment",
+                })),
             );
 
             return {
@@ -252,7 +253,7 @@ const dashboardService = {
                 description: phase.description,
                 budget: Number(phase.budget),
                 projectName: phase.project.name,
-                items: flatItems
+                items: flatItems,
             };
         });
 
@@ -260,7 +261,70 @@ const dashboardService = {
             data: flattenedPhases,
             count,
         };
-    }
+    },
+
+    async getClientDashboardItems(
+        clientId: string,
+        organizationId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+
+        const whereClause: any = {
+            status: "PAYMENT_PENDING",
+            isPaid: false,
+            project: {
+                organizationId: organizationId,
+                assignments: {
+                    some: {
+                        userId: clientId,
+                    },
+                },
+            },
+        };
+
+        if (searchQuery) {
+            whereClause.name = { contains: searchQuery, mode: "insensitive" };
+        }
+
+        const [result, count] = await Promise.all([
+            prisma.phase.findMany({
+                where: whereClause,
+                select: {
+                    id: true,
+                    name: true,
+                    budget: true,
+                    project: {
+                        select: {
+                            name: true,
+                            estimatedBudget: true,
+                        },
+                    },
+                    paymentDeadline: true,
+                },
+                take: pageSize,
+                skip: skip,
+            }),
+            prisma.phase.count({
+                where: whereClause,
+            })
+        ]);
+
+        const items = result.map((phase) => ({
+            id: phase.id,
+            name: phase.name,
+            budget: Number(phase.budget),
+            projectName: phase.project.name,
+            estimatedBudget: Number(phase.project.estimatedBudget),
+            paymentDeadline: phase.paymentDeadline,
+        }));
+        return {
+            data: items,
+            count,
+        };
+    },
 };
 
 export default dashboardService;

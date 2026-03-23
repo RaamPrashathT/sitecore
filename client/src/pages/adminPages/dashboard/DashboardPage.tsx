@@ -1,4 +1,5 @@
 import AdminDashboardMain from "@/features/adminDashboard/components/AdminDashboardMain";
+import ClientDashboard from "@/features/clientDashboard/components/ClientDashboardMain";
 import EngineerDashboard from "@/features/engineerDashboard/components/EngineerDashboardMain";
 import { useMembership } from "@/hooks/useMembership";
 
@@ -21,6 +22,11 @@ const DashboardPage = () => {
     else if(membership.role === "ENGINEER") return (
         <div className="h-full ">
             <EngineerDashboard />
+        </div>
+    )
+    else return(
+        <div className="h-full ">
+            <ClientDashboard />
         </div>
     )
     

@@ -88,6 +88,12 @@ const engineerData = {
 const clientData = {
     sidebarContents: [
         {
+            title: "Dashboard",
+            url: "/",
+            icon: SquareTerminal,
+            isActive: true,
+        },
+        {
             title: "Projects",
             url: "/projects",
             icon: ChartNoAxesGantt,

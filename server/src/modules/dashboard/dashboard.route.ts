@@ -12,4 +12,6 @@ dashboardRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), dashbo
 
 dashboardRouter.get("/engineer", authorize, orgAuthorize, requiredRole("ENGINEER"), dashboardController.getEngineerDashboardItems)
 
+dashboardRouter.get("/client", authorize, orgAuthorize, dashboardController.getClientDashboardItems)
+
 export default dashboardRouter;

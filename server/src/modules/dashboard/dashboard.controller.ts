@@ -109,6 +109,45 @@ const dashboardController = {
                 .json({ message: "Something went wrong" });
         }
     },
+
+    async getClientDashboardItems(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant?.orgId;
+            const clientId = request.session?.userId;
+            const index = Number.parseInt(request.query.index as string) ?? 0;
+            const size = Number.parseInt(request.query.size as string) ?? 10;
+            const searchQuery = (request.query.search as string) || "";
+
+            const validatedData = getDashboardItemsSchema.safeParse({
+                organizationId,
+                pageIndex: index,
+                pageSize: size,
+                searchQuery,
+            });
+
+            if (!validatedData.success) {
+                throw new ValidationError("Invalid Organization ID");
+            }
+
+            const result = await dashboardService.getClientDashboardItems(
+                clientId!,
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery,
+            );
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
+            }
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Something went wrong" });
+        }
+    },
 };
 
 export default dashboardController;
