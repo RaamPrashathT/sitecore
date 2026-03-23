@@ -29,7 +29,7 @@ export const useSetDashboardItems = (organizationId: string | undefined) => {
         onMutate: async ({ requisitionItemIds }) => {
             await queryClient.cancelQueries({ queryKey: ['dashboardItems', organizationId] });
 
-            queryClient.setQueriesData<DashboardQueryData>(
+            queryClient.setQueryData<DashboardQueryData>(
                 { queryKey: ['dashboardItems', organizationId] },
                 (oldData) => {
                     if (!oldData) return undefined; 

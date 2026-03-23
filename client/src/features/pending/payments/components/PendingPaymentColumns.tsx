@@ -1,14 +1,14 @@
 import type { PendingPhaseListType } from "@/features/pending/payments/hooks/usePendingPhaseList";
 import { createColumnHelper } from "@tanstack/react-table";
-import ApprovePhasePaymentButton from "./ApprovePhasePaymentButton";
+import ApprovePhasePaymentButton from "./PendingPaymentApprove";
 
 const columnHelper = createColumnHelper<PendingPhaseListType>();
 
-export const columns = [
+export const PendingPaymentColumns = [
     columnHelper.accessor("projectName", {
         header: "Project",
         cell: (info) => (
-            <div>
+            <div className='font-medium flex items-center h-12 px-4'>
                 <p>{info.getValue()}</p>
             </div>
         ),
@@ -17,7 +17,7 @@ export const columns = [
     columnHelper.accessor("phaseName", {
         header: "Phase",
         cell: (info) => (
-            <div>
+            <div className='font-medium flex items-center h-12 px-4'>
                 <p>{info.getValue()}</p>
             </div>
         ),
@@ -26,7 +26,7 @@ export const columns = [
     columnHelper.accessor("client", {
         header: "Client",
         cell: (info) => (
-            <div>
+            <div className='font-medium flex items-center h-12 px-4'>
                 <p>{info.getValue()}</p>
             </div>
         ),
@@ -35,7 +35,7 @@ export const columns = [
     columnHelper.accessor("budget", {
         header: "Amount Due",
         cell: (info) => (
-            <div>
+            <div className='font-medium flex items-center h-12 px-4'>
                 <p>₹{info.getValue()}</p>
             </div>
         ),
@@ -84,7 +84,7 @@ export const columns = [
         cell: (info) => {
             const phaseId = info.row.original.id;
             return (
-                <div>
+                <div className='font-medium flex items-center h-12 px-4'>
                     <ApprovePhasePaymentButton id={phaseId} />
                 </div>
             )

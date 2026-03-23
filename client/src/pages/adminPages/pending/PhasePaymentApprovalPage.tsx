@@ -1,9 +1,9 @@
-import PhasePaymentApprovalForm from "@/components/pending/phase/PhasePaymentApprovalForm";
+import PendingPaymentMain from "@/features/pending/payments/components/PendingPaymentMain";
 
 const PhasePaymentApprovalPage = () => {
     return (
-        <div>
-                <PhasePaymentApprovalForm/>
+        <div className="h-full">
+                <PendingPaymentMain/>
 
         </div>
     );

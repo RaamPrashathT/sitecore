@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import projectService from "./project.service.js";
 import { logger } from "../../shared/lib/logger.js";
-import { createPhaseSchema, createProjectSchema, createRequisitionSchema, getProjectListSchema, RequisitionItemListSchema } from "./project.schema.js";
+import { createPhaseSchema, createProjectSchema, createRequisitionSchema, getPaymentPendingSchema, getProjectListSchema, RequisitionItemListSchema } from "./project.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 
@@ -210,11 +210,34 @@ const projectController = {
     async getPaymentPendingPhases(request: Request, response: Response) {
         try {
             const organizationId = request.tenant!.orgId;
+            const index = Number.parseInt(request.query.index as string) ?? 0;
+            const size = Number.parseInt(request.query.size as string) ?? 10;
+            const searchQuery = (request.query.search as string) || "";
+            
+            const validatedData = getPaymentPendingSchema.safeParse({
+                organizationId,
+                pageIndex: index,
+                pageSize: size,
+                searchQuery,
+            });
 
-            const result = await projectService.getPaymentPendingPhases(organizationId);
+            if (!validatedData.success) {
+                throw new ValidationError("Invalid Organization ID");
+            }
+
+
+            const result = await projectService.getPaymentPendingPhases(
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery,
+            );
 
             return response.status(200).json(result);
         } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
+            }
             logger.error(error);
             return response
                 .status(500)

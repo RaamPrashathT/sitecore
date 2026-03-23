@@ -309,40 +309,66 @@ const projectService = {
         return result;
     },
 
-    async getPaymentPendingPhases(organizationId: string) {
-        const result = await prisma.phase.findMany({
-            where: {
-                status: "PAYMENT_PENDING",
-                isPaid: false,
-                project: {
-                    organizationId: organizationId,
-                },
+    async getPaymentPendingPhases(
+        organizationId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+        const whereClause: any = {
+            status: "PAYMENT_PENDING",
+            isPaid: false,
+            project: {
+                organizationId: organizationId,
             },
-            select: {
-                id: true,
-                name: true,
-                budget: true,
-                paymentDeadline: true,
+        };
+        if (searchQuery) {
+            whereClause.OR = [
+                {
+                    name: { contains: searchQuery, mode: "insensitive" },
+                },
+                {
+                    project: {
+                        name: { contains: searchQuery, mode: "insensitive" },
+                    },
+                },
+            ];
+        }
+        const [result, count] = await Promise.all([
+            prisma.phase.findMany({
+                where: whereClause,
+                select: {
+                    id: true,
+                    name: true,
+                    budget: true,
+                    paymentDeadline: true,
 
-                project: {
-                    select: {
-                        name: true,
+                    project: {
+                        select: {
+                            name: true,
 
-                        assignments: {
-                            where: {
-                                role: "CLIENT",
-                            },
-                            select: {
-                                userId: true,
+                            assignments: {
+                                where: {
+                                    role: "CLIENT",
+                                },
+                                select: {
+                                    userId: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            orderBy: {
-                paymentDeadline: "asc",
-            },
-        });
+                take: pageSize,
+                skip: skip,
+                orderBy: {
+                    paymentDeadline: "asc",
+                },
+            }),
+            prisma.phase.count({
+                where: whereClause,
+            }),
+        ]);
         const userIds = [
             ...new Set(
                 result.flatMap((phase) =>
@@ -362,7 +388,7 @@ const projectService = {
             clients.map((client) => [client._id.toString(), client.username]),
         );
 
-        return result.map((phase) => {
+        const data = result.map((phase) => {
             const firstClientId =
                 phase.project.assignments[0]?.userId?.toString();
             return {
@@ -376,6 +402,10 @@ const projectService = {
                     "Unknown Client",
             };
         });
+        return {
+            data,
+            count,
+        };
     },
 
     async getPendingRequisitions(organizationId: string) {

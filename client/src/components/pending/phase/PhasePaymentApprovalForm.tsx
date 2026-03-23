@@ -1,4 +1,4 @@
-import { usePendingPhaseList } from "@/hooks/usePendingPhaseList";
+import { usePendingPhaseList } from "@/features/pending/payments/hooks/usePendingPhaseList";
 import DataTable from "./DataTable";
 import { useMembership } from "@/hooks/useMembership";
 
