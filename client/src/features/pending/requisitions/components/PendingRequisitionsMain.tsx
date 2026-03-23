@@ -12,6 +12,7 @@ import { PendingRequisitionsColumn as columns } from "./PendingRequisitionsColum
 import PendingRequisitionSearch from "./PendingRequisitionsSearch";
 import PendingRequisitionTable from "./PendingRequisitionsTable";
 import PendingRequisitionPagination from "./PendingRequisitionsPagination";
+import PendingRequisitionEmpty from "./PendingRequisitionEmpty";
 
 const PendingRequisitionMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
@@ -23,13 +24,16 @@ const PendingRequisitionMain = () => {
     });
 
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { data: pendingPayments, isLoading: pendingPaymentsLoading } =
-        usePendingRequisitionList(
-            membership?.id,
-            pagination.pageIndex,
-            pagination.pageSize,
-            debouncedSearch,
-        );
+    const {
+        data: pendingPayments,
+        isLoading: pendingPaymentsLoading,
+        isError,
+    } = usePendingRequisitionList(
+        membership?.id,
+        pagination.pageIndex,
+        pagination.pageSize,
+        debouncedSearch,
+    );
 
     const table = useReactTable({
         data: pendingPayments?.data ?? [],
@@ -54,8 +58,11 @@ const PendingRequisitionMain = () => {
         membershipLoading || (pendingPaymentsLoading && !pendingPayments);
 
     if (isInitialLoading) return <></>;
-    if (!membership || !pendingPayments) return <div>No access</div>;
-
+    if (!membership || isError) return <div>No access</div>;
+    
+    if (!pendingPayments || pendingPayments.count === 0) {
+        return <PendingRequisitionEmpty slug={membership.slug} />;
+    }
     return (
         <div className="px-4 flex flex-col h-full">
             <div className="flex flex-row justify-end items-center py-2">
