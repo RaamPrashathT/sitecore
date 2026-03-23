@@ -20,7 +20,6 @@ import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
 import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
 import RequisitionCreationPage from "./pages/adminPages/project/RequisitionCreationPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import RequisitionApprovalPage from "./pages/adminPages/pending/RequisitionApprovalPage";
 import PendingRequisitionPage from "./pages/adminPages/pending/PendingRequisitionPage";
 import PhasePaymentApprovalPage from "./pages/adminPages/pending/PhasePaymentApprovalPage";
 const queryClient = new QueryClient({
@@ -80,10 +79,6 @@ function App() {
                                 <Route
                                     path="projects/create"
                                     element={<CreateProjectPage />}
-                                />
-                                <Route
-                                    path="pending-requisitions/:requisitionIdSlug"
-                                    element={<RequisitionApprovalPage />}
                                 />
                                 <Route
                                     path="pending-requisitions"

@@ -2,8 +2,8 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import type { PendingRequisitionItemType } from "../hooks/usePendingRequisition";
 import { PendingRequisitionItemColumns as columns } from "./PendingRequisitionItemColumns";
 import PendingRequisitionItemTable from "./PendingRequisitionItemTable";
-import RejectRequisitionButton from "@/components/pending/requisition/individualRequisition/RejectRequisitionButton";
 import ApproveRequisitionButton from "./RequisitionApprovalButton";
+import RequisitionRejectionButton from "./RequisitionRejectionButton";
 
 interface PendingRequisitionItemProps {
     pendingRequisitionItems: PendingRequisitionItemType[];
@@ -24,7 +24,7 @@ const PendingRequisitionItemMain = ({ pendingRequisitionItems, requisitionId } :
                 <PendingRequisitionItemTable table={table} />
             </div>
             <div className="mt-2 flex flex-row justify-between">
-                <RejectRequisitionButton requisitionId={requisitionId} />
+                <RequisitionRejectionButton requisitionId={requisitionId} />
                 <ApproveRequisitionButton requisitionId={requisitionId} />
             </div>
         </div>

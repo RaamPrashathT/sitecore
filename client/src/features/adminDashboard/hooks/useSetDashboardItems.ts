@@ -30,7 +30,7 @@ export const useSetDashboardItems = (organizationId: string | undefined) => {
             await queryClient.cancelQueries({ queryKey: ['dashboardItems', organizationId] });
 
             queryClient.setQueryData<DashboardQueryData>(
-                { queryKey: ['dashboardItems', organizationId] },
+                ['dashboardItems', organizationId],
                 (oldData) => {
                     if (!oldData) return undefined; 
                     

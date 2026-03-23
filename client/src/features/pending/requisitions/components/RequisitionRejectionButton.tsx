@@ -8,7 +8,7 @@ interface RequisitionRejectionButton {
     requisitionId: string;
 }
 
-const ApproveRequisitionButton = ({
+const RequisitionRejectionButton = ({
     requisitionId,
 }: RequisitionRejectionButton) => {
 
@@ -46,4 +46,4 @@ const ApproveRequisitionButton = ({
     );
 };
 
-export default ApproveRequisitionButton;
+export default RequisitionRejectionButton;
