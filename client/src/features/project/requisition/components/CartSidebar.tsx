@@ -50,7 +50,7 @@ const CartSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         return <div>No access</div>;
     }
 
-    const handleSubmit =async () => {
+    const handleSubmit = async () => {
         setError(null);
         setIsLoading(true);
         if (getTotalCost > RequisitionDetails?.budget) {
@@ -80,9 +80,9 @@ const CartSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                 headers: {
                     "x-organization-id": membership?.id,
                     "x-project-id": projectDetails?.id,
-                }
-            })
-            navigate(`/${membership.slug}/${projectSlug}/`)
+                },
+            });
+            navigate(`/${membership.slug}/${projectSlug}/`);
         } catch (error) {
             console.log(error);
             setError("Something went wrong");
