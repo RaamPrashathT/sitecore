@@ -14,4 +14,5 @@ orgRouter.get("/all", authorize, orgController.getAllOrg)
 
 orgRouter.post("/identity", authorize, orgController.identity);
 
+
 export default orgRouter

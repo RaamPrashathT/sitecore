@@ -16,6 +16,6 @@ export const useOrganizations = (userId: string) => {
     return useQuery({
         queryKey: ["organizations", userId],
         queryFn: getOrganizations,
-        
+        staleTime: 0
     })
 }

@@ -1,8 +1,8 @@
 import { prisma } from "../../shared/lib/prisma.js";
-import { User } from "../../shared/models/user.js";
+import { User } from "../../shared/models/user.js"
 
-const clientService = {
-    async getClients(
+const pendingService = {
+    async getInvitations(
         organizationId: string,
         pageIndex: number,
         pageSize: number,
@@ -13,7 +13,7 @@ const clientService = {
         const pendingMemberships = await prisma.membership.findMany({
             where: {
                 organizationId: organizationId,
-                role: "CLIENT",
+                role: "IDLE",
             },
             select: {
                 userId: true,
@@ -46,15 +46,15 @@ const clientService = {
 
         const data = users.map((user) => {
             const membership = pendingMemberships.find(
-                (m) => m.userId === user._id.toString(),
+                (m) => m.userId === user._id.toString()
             );
 
             return {
-                id: user._id.toString(),
+                userId: user._id.toString(),
                 username: user.username,
                 email: user.email,
                 profileImage: user.profileImage,
-                role: membership?.role || "CLIENT",
+                role: membership?.role || "IDLE",
             };
         });
 
@@ -64,6 +64,34 @@ const clientService = {
             totalPages: Math.ceil(totalCount / pageSize),
         };
     },
+
+    async assignClient(organizationId: string, userId: string) {
+        await prisma.membership.update({
+            where: {
+                userId_organizationId: {
+                    userId: userId,
+                    organizationId: organizationId,
+                },
+            },
+            data: {
+                role: "CLIENT",
+            },
+        });
+    },
+
+    async assignEngineer(organizationId: string, userId: string) {  
+        await prisma.membership.update({
+            where: {
+                userId_organizationId: {
+                    userId: userId,
+                    organizationId: organizationId,
+                },
+            },
+            data: {
+                role: "ENGINEER",
+            }
+        })
+    }
 };
 
-export default clientService;
+export default pendingService;

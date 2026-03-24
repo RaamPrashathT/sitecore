@@ -2,28 +2,45 @@ import { ValidationError } from "../../shared/error/validation.error.js";
 import { logger } from "../../shared/lib/logger.js";
 import type { Request, Response } from "express";
 import clientService from "./clients.service.js";
-
+import { getFormSchema } from "./clients.schema.js";
 
 const clientController = {
     async getClients(request: Request, response: Response) {
         try {
-            const orgId = request.tenant!.orgId
+            const organizationId = request.tenant?.orgId;
+            const index = Number.parseInt(request.query.index as string) || 0;
+            const size = Number.parseInt(request.query.size as string) || 10;
+            const searchQuery = (request.query.search as string) || "";
 
-            if(typeof orgId !== 'string') {
-                throw new ValidationError('Organization ID missing')
+            const validatedData = getFormSchema.safeParse({
+                organizationId,
+                pageIndex: index,
+                pageSize: size,
+                searchQuery,
+            });
+
+            if (!validatedData.success) {
+                throw new ValidationError("Invalid Organization ID");
             }
 
-            const clients = await clientService.getClients(orgId)
-
-            return response.status(200).json(clients)
-        } catch(error) {
-            logger.error(error)
+            const clients = await clientService.getClients(
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery,
+            );
+            return response.status(200).json(clients);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
+            }
+            logger.error(error);
             return response.status(500).json({
                 success: false,
-                message: "Internal server error"
-            })
+                message: "Internal server error",
+            });
         }
-    }
-}
+    },
+};
 
 export default clientController;

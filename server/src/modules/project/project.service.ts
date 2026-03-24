@@ -394,7 +394,7 @@ const projectService = {
             return {
                 id: phase.id,
                 phaseName: phase.name,
-                projectName: phase.name,
+                projectName: phase.project.name,
                 budget: phase.budget,
                 paymentDeadline: phase.paymentDeadline,
                 client:

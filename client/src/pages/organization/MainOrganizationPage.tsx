@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Outlet, useLocation, useParams } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
+import IdlePage from "@/components/IdlePage";
 
 const MainOrganizationPage = () => {
     const [currentLocation, setCurrentLocation] = React.useState("");
@@ -28,6 +29,14 @@ const MainOrganizationPage = () => {
     }
     if (membershipLoading) {
         return <div>Loading...</div>;
+    }
+
+    if (membership.role === "IDLE") {
+        return (
+            <div className="h-[100vh]">
+                <IdlePage />
+            </div>
+        );
     }
 
     return (

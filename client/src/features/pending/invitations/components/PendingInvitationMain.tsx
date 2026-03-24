@@ -1,15 +1,22 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useMembership } from "@/hooks/useMembership";
-import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import {
+    getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
+    useReactTable,
+} from "@tanstack/react-table";
 import { useState } from "react";
-import PendingPaymentSearch from "./PendingPaymentSearch";
-import PendingPaymentPagination from "./PendingPaymentPagination";
-import PendingPaymentTable from "./PendingPaymentTable";
-import { usePendingPhaseList } from "../hooks/usePendingPhaseList";
-import { PendingPaymentColumns as columns } from "./PendingPaymentColumns";
-import PendingPaymentEmpty from "./PendingPaymentEmpty";
+import PendingInvitationSearch from "./PendingInvitationSearch";
+import PendingInvitationPagination from "./PendingInvitationPagination";
+import PendingInvitationTable from "./PendingInvitationTable";
+import {
+    usePendingInvitations,
+} from "../hooks/usePendingInvitations";
+import { PendingInvitationColumns as columns } from "./PendingInvitationColumns";
+import PendingInvitationsEmpty from "./PendingInvitationsEmpty";
 
-const PendingPaymentMain = () => {
+const PendingInvitationMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
     const debouncedSearch = useDebounce(globalFilter, 200);
 
@@ -17,11 +24,10 @@ const PendingPaymentMain = () => {
         pageIndex: 0,
         pageSize: 24,
     });
-    
 
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { data: pendingPayments, isLoading: pendingPaymentsLoading } =
-        usePendingPhaseList(
+    const { data: PendingInvitations, isLoading: PendingInvitationsLoading } =
+        usePendingInvitations(
             membership?.id,
             pagination.pageIndex,
             pagination.pageSize,
@@ -29,8 +35,8 @@ const PendingPaymentMain = () => {
         );
 
     const table = useReactTable({
-        data: pendingPayments?.data ?? [],
-        rowCount: pendingPayments?.count ?? 0,
+        data: PendingInvitations?.data ?? [],
+        rowCount: PendingInvitations?.totalCount ?? 0,
         columns,
         getCoreRowModel: getCoreRowModel(),
         onPaginationChange: setPagination,
@@ -40,7 +46,7 @@ const PendingPaymentMain = () => {
         manualFiltering: true,
         manualSorting: true,
         manualPagination: true,
-        getRowId: (row) => row.id,
+        getRowId: (row) => row.userId,
         state: {
             globalFilter,
             pagination,
@@ -48,25 +54,25 @@ const PendingPaymentMain = () => {
     });
 
     const isInitialLoading =
-        membershipLoading || (pendingPaymentsLoading && !pendingPayments);
+        membershipLoading || (PendingInvitationsLoading && !PendingInvitations);
 
     if (isInitialLoading) return <></>;
     if (!membership) return <div>No access</div>;
-    if (!pendingPayments || pendingPayments.count === 0) return <PendingPaymentEmpty slug={membership.slug}/>;
-    
+    if(!PendingInvitations || PendingInvitations.totalCount === 0) return <PendingInvitationsEmpty slug={membership.slug}/>;
+
     return (
         <div className="px-4 flex flex-col h-full">
             <div className="flex flex-row justify-end items-center py-2">
-                <PendingPaymentSearch table={table} />
+                <PendingInvitationSearch table={table} />
             </div>
             <div>
-                <PendingPaymentTable table={table} />
+                <PendingInvitationTable table={table} />
             </div>
             <div className="mt-auto mb-4">
-                <PendingPaymentPagination table={table} />
+                <PendingInvitationPagination table={table} />
             </div>
         </div>
     );
 };
 
-export default PendingPaymentMain;
+export default PendingInvitationMain;

@@ -69,7 +69,7 @@ const authController = {
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({
                     success: false,
-                    message: error.message,
+                    message: "Invalid email or password",
                 });
             }
             return response.status(500).json({

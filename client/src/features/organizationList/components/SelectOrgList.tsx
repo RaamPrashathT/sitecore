@@ -43,7 +43,6 @@ const SelectOrgList = () => {
                                 key={org.id}
                                 index={index}
                                 name={org.name}
-                                slug={org.slug}
                                 id={org.id}
                             />
                         ))}

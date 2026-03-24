@@ -6,7 +6,7 @@ export interface MembershipType {
     id: string;
     name: string;
     slug: string;
-    role: "ADMIN" | "ENGINEER" | "CLIENT";
+    role: "ADMIN" | "ENGINEER" | "CLIENT" | "IDLE";
 }
 
 export const useMembership = () => {

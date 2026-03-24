@@ -4,13 +4,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<EngineerType>();
 
-export const columns = [
+export const EngineerColumns = [
     columnHelper.accessor("username", {
         header: "Username",
         cell: (info) => {
             const username = info.row.original.username || "A"
             return (
-                <div className="flex items-center gap-x-2 ">
+                <div className="font-medium flex items-center h-12 px-4 gap-x-2">
                     <Avatar>
                         <AvatarFallback>
                             {username[0].toUpperCase()}
@@ -25,7 +25,7 @@ export const columns = [
     columnHelper.accessor("email", {
         header: "Email",
         cell: (info) => (
-            <div className="flex">
+            <div className="font-medium flex items-center h-12 px-4">
                 <p>{info.getValue()}</p>
             </div>
         ),

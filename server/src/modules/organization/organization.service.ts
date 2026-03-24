@@ -11,7 +11,7 @@ type OrgIdentity = {
     id: string;
     name: string;
     slug: string;
-    role: "ADMIN" | "ENGINEER" | "CLIENT";
+    role: "ADMIN" | "ENGINEER" | "CLIENT" | "IDLE";
 };
 
 const orgService = {
@@ -52,7 +52,7 @@ const orgService = {
         return prisma.membership.create({
             data: {
                 userId: userId,
-                role: "ENGINEER",
+                role: "IDLE",
                 organizationId: orgId
             }
         })

@@ -6,7 +6,8 @@ import {
     SquareTerminal,
     Users,
     ClipboardClock,
-    ClipboardPlus
+    ClipboardPlus,
+    Mail
 } from "lucide-react";
 
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -64,6 +65,11 @@ const adminData = {
             title: "Pending Requests",
             url: "/pending-requisitions",
             icon: ClipboardPlus,
+        },
+        {
+            title: "Pending Invitations",
+            url: "/pending-invitations",
+            icon: Mail,
         },
     ],
 };

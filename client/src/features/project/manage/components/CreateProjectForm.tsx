@@ -55,25 +55,32 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const { data: engineers, isLoading: engineerLoading } = useEngineers(orgId);
-    const { data: clients, isLoading: clientLoading } = useClients(orgId);
+    const { data: engineers, isLoading: engineerLoading } = useEngineers(
+        orgId,
+        0,
+        100,
+    );
+    const { data: clients, isLoading: clientLoading } = useClients(
+        orgId,
+        0,
+        100,
+    );
 
-    if (engineerLoading) return <div>Loading Engineers...</div>;
-    if (clientLoading) return <div>Loading Clients...</div>;
+    const engineersArray = engineers?.data;
+    const clientsArray = clients?.data;
+
+    if (engineerLoading || clientLoading) return <div>Loading...</div>;
 
     const onSubmit = async (data: CreateProjectFormSchema) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await api.post(
-                "/project",
-                data,
-                {
-                    headers: {
-                        "x-organization-id": orgId,
-                    },
+            console.log(data)
+            const response = await api.post("/project", data, {
+                headers: {
+                    "x-organization-id": orgId,
                 },
-            );
+            });
 
             navigate(`/${slug}/${response.data.slug}`);
         } catch (error) {
@@ -132,25 +139,25 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                         )}
                     </Field>
                     <div className="flex gap-x-2">
-                        {/* ENGINEER SELECT */}
                         <Field className="w-full">
                             <FieldLabel>Engineers</FieldLabel>
                             <Controller
                                 name="engineerId"
                                 control={control}
+                                defaultValue=""
                                 render={({ field }) => (
                                     <Select
                                         onValueChange={field.onChange}
-                                        value={field.value}
+                                        value={field.value || undefined}
                                     >
                                         <SelectTrigger className="h-12">
                                             <SelectValue placeholder="Select an Engineer" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                {engineers &&
-                                                engineers.length > 0 ? (
-                                                    engineers.map(
+                                                {engineersArray &&
+                                                engineersArray.length > 0 ? (
+                                                    engineersArray.map(
                                                         (engineer) => (
                                                             <SelectItem
                                                                 key={
@@ -199,35 +206,40 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                                 control={control}
                                 render={({ field }) => (
                                     <Select
+                                    key={clientsArray?.map(e => e.id).join(",")} 
                                         onValueChange={field.onChange}
-                                        value={field.value}
+                                        value={field.value || undefined}
                                     >
                                         <SelectTrigger className="h-12">
                                             <SelectValue placeholder="Select a Client" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                {clients &&
-                                                clients.length > 0 ? (
-                                                    clients.map((client) => (
-                                                        <SelectItem
-                                                            key={client.id}
-                                                            value={client.id}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <Avatar className="h-7 w-7">
-                                                                    <AvatarFallback className="text-xs">
-                                                                        {client.username[0].toUpperCase()}
-                                                                    </AvatarFallback>
-                                                                </Avatar>
-                                                                <span className="text-sm font-medium">
-                                                                    {
-                                                                        client.username
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))
+                                                {clientsArray &&
+                                                clientsArray.length > 0 ? (
+                                                    clientsArray.map(
+                                                        (client) => (
+                                                            <SelectItem
+                                                                key={client.id}
+                                                                value={
+                                                                    client.id
+                                                                }
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <Avatar className="h-7 w-7">
+                                                                        <AvatarFallback className="text-xs">
+                                                                            {client.username[0].toUpperCase()}
+                                                                        </AvatarFallback>
+                                                                    </Avatar>
+                                                                    <span className="text-sm font-medium">
+                                                                        {
+                                                                            client.username
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            </SelectItem>
+                                                        ),
+                                                    )
                                                 ) : (
                                                     <div className="p-2 text-sm text-muted-foreground text-center">
                                                         No clients found

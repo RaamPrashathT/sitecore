@@ -88,7 +88,7 @@ export const useGetDashboardItems = (
                     daysTillOrder: diffDate,
                     status,
                 };
-            });
+            }).sort((a, b) => a.daysTillOrder - b.daysTillOrder);
             
             return {
                 count: dashboardItems.count,

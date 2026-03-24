@@ -1,22 +1,20 @@
 import api from "@/lib/axios";
 import { useNavigate } from "react-router-dom";
-
 interface SelectOrgListItemProps {
     readonly name: string;
-    readonly slug: string;
     readonly index: number;
     readonly id: string;
 }
 
-const SelectOrgListItem = ({name, slug, index, id }: SelectOrgListItemProps) => {
+const SelectOrgListItem = ({name, index, id }: SelectOrgListItemProps) => {
     const navigate = useNavigate();
-    
+
     const handleSubmit = async () => {
         try {
             await api.post("/org/signup", {
                 id
-            }) 
-            navigate(`/${slug}/projects`)
+            })
+            navigate(`/organizations`)
         } catch (error) {
             if(error instanceof Error) console.log(error.message)
         }
@@ -31,7 +29,6 @@ const SelectOrgListItem = ({name, slug, index, id }: SelectOrgListItemProps) => 
                 <span className="text-sm font-medium text-gray-900">
                     {name}
                 </span>
-
             </button>
         </li>
         

@@ -1,38 +1,36 @@
 import {
     flexRender,
-    getCoreRowModel,
-    useReactTable,
 } from "@tanstack/react-table";
-import { columns } from "./columns";
+import type { Table as ReactTableType } from "@tanstack/react-table";
 import {
     Table,
     TableBody,
-    //   TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { EngineerType } from "@/hooks/useEngineers";
-interface DataTableProps {
-    data: EngineerType[];
+import type { ClientType } from "@/hooks/useClients";
+
+interface ClientTableProps {
+    table: ReactTableType<ClientType>;
 }
 
-const DataTable = ({ data }: DataTableProps) => {
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
-
+const ClientTable = ({ table }: ClientTableProps) => {
     return (
         <div>
-            <Table>
-                <TableHeader>
+            <Table className="">
+                <TableHeader className="p-0">
                     {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="">
+                        <TableRow
+                            key={headerGroup.id}
+                            className="p-0 bg-slate-100 border-none"
+                        >
                             {headerGroup.headers.map((header) => (
-                                <TableHead key={header.id} className="text-lg">
+                                <TableHead
+                                    key={header.id}
+                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl last:rounded-r-xl first:pl-4"
+                                >
                                     {flexRender(
                                         header.column.columnDef.header,
                                         header.getContext(),
@@ -42,11 +40,11 @@ const DataTable = ({ data }: DataTableProps) => {
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody>
+                <TableBody className="p-0">
                     {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={row.id} className="p-0 hover:bg-green-50">
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
+                                <TableCell key={cell.id} className="p-0  first:rounded-l-xl last:rounded-r-xl ">
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),
@@ -57,8 +55,9 @@ const DataTable = ({ data }: DataTableProps) => {
                     ))}
                 </TableBody>
             </Table>
+            
         </div>
     );
 };
 
-export default DataTable;
+export default ClientTable;

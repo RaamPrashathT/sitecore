@@ -10,11 +10,11 @@ import {
 import { ClipboardCheckIcon, SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-interface PendingPaymentEmptyProps {
+interface ClientEmptyProps {
     slug: string;
 }
 
-const PendingPaymentEmpty = ({ slug }: PendingPaymentEmptyProps) => {
+const ClientEmpty = ({ slug }: ClientEmptyProps) => {
     return (
         <div className="h-full flex items-center justify-center">
             <Empty>
@@ -22,19 +22,19 @@ const PendingPaymentEmpty = ({ slug }: PendingPaymentEmptyProps) => {
                     <EmptyMedia variant="icon">
                         <ClipboardCheckIcon />
                     </EmptyMedia>
-                    <EmptyTitle>No pending Payments</EmptyTitle>
+                    <EmptyTitle>No Clients</EmptyTitle>
                     <EmptyDescription>
-                        No pending payments yet. 
+                        No pending clients yet. 
                     </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="flex-row justify-center gap-2">
                     <Button className="w-50">
                         <Link
-                            to={`/${slug}/projects`}
+                            to={`/${slug}/pending-invitations`}
                             className="flex items-center gap-x-1 p-3"
                         >
                             <SquareArrowOutUpRight />
-                            <p className="mb-px">Check for Projects</p>
+                            <p className="mb-px">Check for Invitations</p>
                         </Link>
                     </Button>
                 </EmptyContent>
@@ -43,4 +43,4 @@ const PendingPaymentEmpty = ({ slug }: PendingPaymentEmptyProps) => {
     );
 };
 
-export default PendingPaymentEmpty;
+export default ClientEmpty;
