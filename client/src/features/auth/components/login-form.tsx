@@ -18,12 +18,13 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
-import { useAuthStore } from "../stores/authStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"form">) {
+    const queryClient = useQueryClient();
     const [apiMessage, setApiMessage] = useState<{
         success: boolean;
         message: string;
@@ -40,19 +41,17 @@ export function LoginForm({
         },
     });
     const navigate = useNavigate();
-    const login = useAuthStore((s) => s.login);
 
     const onSubmit = async (data: LoginInput) => {
         setApiMessage(null);
         try {
+            queryClient.clear();
             const result = await api.post("/auth/login", data);
             setApiMessage({
                 success: result.data.success,
                 message: result.data.message,
             });
             if (result.data.success) {
-                const userResponse = await api.get("/auth/me");
-                login(userResponse.data.data);
                 navigate("/organizations");
             }
         } catch (error: unknown) {

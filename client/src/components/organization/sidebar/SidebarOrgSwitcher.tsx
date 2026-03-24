@@ -24,8 +24,10 @@ const OrgSwitcher = () => {
     const { isMobile } = useSidebar();
     const { user, isLoading: userLoading } = useSession();
     const { data: membership, isLoading: membershipLoading } = useMembership();
+    
     const { data: orgs, isLoading: orgsLoading } = useOrganizations(user?.id);
     const navigate = useNavigate();
+
     if (membershipLoading || orgsLoading || userLoading) {
         return <div>Loading...</div>;
     }
@@ -38,6 +40,10 @@ const OrgSwitcher = () => {
         return <Navigate to="/organizations" />;
     }
 
+    const activeOrg = orgs.find((org) => org.slug === membership.slug);
+    
+    const displayName = activeOrg?.name || membership.slug;
+
     return (
         <SidebarMenu>
             <SidebarMenuItem>
@@ -47,16 +53,18 @@ const OrgSwitcher = () => {
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
-                            <div >
-                                <Avatar className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground" >
-                                    <AvatarFallback className="rounded-lg bg-purple-500 text-white">
-                                        {membership.name[0].toUpperCase()}
+                            <div>
+                                <Avatar className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground">
+                                    <AvatarFallback className="rounded-lg bg-purple-500 text-white uppercase">
+                                        {/* Use displayName here */}
+                                        {displayName[0]}
                                     </AvatarFallback>
                                 </Avatar>
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">
-                                    {membership.name}
+                                    {/* Use displayName here */}
+                                    {displayName}
                                 </span>
                                 <span className="truncate text-xs capitalize">
                                     {membership.role.toLowerCase()}
@@ -77,13 +85,13 @@ const OrgSwitcher = () => {
                         {orgs.map((org) => (
                             <DropdownMenuItem
                                 key={org.id}
-                                onClick={() => navigate(`/${org.slug}/projects`)}
-                                className="gap-2 p-2"
+                                onClick={() => navigate(`/${org.slug}`)} 
+                                className="gap-2 p-2 cursor-pointer"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-md border">
                                     <Avatar>
-                                        <AvatarFallback>
-                                            {org.name[0].toUpperCase()}
+                                        <AvatarFallback className="uppercase">
+                                            {org.name[0]}
                                         </AvatarFallback>
                                     </Avatar>
                                 </div>
@@ -91,7 +99,7 @@ const OrgSwitcher = () => {
                             </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 p-2">
+                        <DropdownMenuItem className="gap-2 p-2 cursor-pointer" asChild>
                             <Link
                                 to={"/organizations/create"}
                                 className="flex w-full items-center gap-x-2"

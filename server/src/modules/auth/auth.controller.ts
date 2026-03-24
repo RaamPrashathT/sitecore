@@ -41,7 +41,7 @@ const authController = {
 
     async login(request: Request, response: Response) {
         try {
-            const { sessionId, userId, username, email} = await authService.login(request.body);
+            const { sessionId, userId, username, email, tenant } = await authService.login(request.body);
 
             await redis.set(
                 `session:${sessionId}`,
@@ -49,6 +49,7 @@ const authController = {
                     userId: userId,
                     email: email,
                     username: username,
+                    tenant: tenant,
                 }),
                 { EX: 60 * 60 * 24 },
             );
@@ -63,6 +64,7 @@ const authController = {
             return response.status(200).json({
                 success: true,
                 message: "User logged in successfully",
+                tenant
             });
         } catch (error) {
             logger.error(error);

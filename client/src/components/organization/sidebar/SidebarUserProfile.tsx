@@ -1,6 +1,6 @@
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
 
-import { Avatar, AvatarFallback,  } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,14 +16,15 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuthStore } from "@/features/auth/stores/authStore";
+
+import { useSession } from "@/features/auth/hooks/useSession";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
 const SidebarUser = () => {
     const { isMobile } = useSidebar();
 
-    const user = useAuthStore((s) => s.user);
-    const { mutate: logout } = useLogout()
+    const { user } = useSession();
+    const { mutate: logout } = useLogout();
 
     if (!user) {
         return null;
@@ -63,10 +64,6 @@ const SidebarUser = () => {
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    {/* <AvatarImage
-                                        src={user.avatar}
-                                        alt={user.username}
-                                    /> */}
                                     <AvatarFallback className="rounded-lg bg-purple-500 text-white">
                                         {user.username[0].toUpperCase()}
                                     </AvatarFallback>

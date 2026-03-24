@@ -29,18 +29,12 @@ export interface DashboardItemType extends DashboardItemSchema {
 }
 
 const getDashboardItems = async (
-    organizationId: string,
     pageIndex: number,
     pageSize: number,
     searchQuery: string = "",
 ) => {
     const response = await api.get<DashboardItemInputSchema>(
-        `/dashboard?index=${pageIndex}&size=${pageSize}&search=${searchQuery}`,
-        {
-            headers: {
-                "x-organization-id": organizationId,
-            },
-        },
+        `/dashboard?index=${pageIndex}&size=${pageSize}&search=${searchQuery}`
     );
     return response.data;
 };
@@ -55,7 +49,6 @@ export const useGetDashboardItems = (
         queryKey: ["dashboardItems", organizationId, pageIndex, pageSize, searchQuery],
         queryFn: () =>
             getDashboardItems(
-                organizationId!,
                 pageIndex,
                 pageSize,
                 searchQuery,

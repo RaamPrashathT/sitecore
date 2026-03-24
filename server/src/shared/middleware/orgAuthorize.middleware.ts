@@ -10,55 +10,44 @@ export const orgAuthorize = async (
     next: NextFunction,
 ) => {
     try {
-        const incomingOrgId = request.headers["x-organization-id"];
-        if (!incomingOrgId || typeof incomingOrgId !== "string") {
-            throw new ValidationError("Organization ID missing");
+        const incomingSlug = request.headers["x-tenant-slug"];
+        if (!incomingSlug || typeof incomingSlug !== "string") {
+            throw new ValidationError("Tenant slug missing");
         }
 
         const sessionId = request.cookies.session;
+        if (!sessionId) throw new UnAuthorizedError("Unauthorized");
 
-        if (!sessionId) {
-            throw new UnAuthorizedError("Unauthorized");
-        }
         const sessionStr = await redis.get(`session:${sessionId}`);
+        if (!sessionStr) throw new UnAuthorizedError("Unauthorized");
 
-        if (!sessionStr) {
-            throw new UnAuthorizedError("Unauthorized");
-        }
-
-        
         let sessionObj;
         try {
             sessionObj = JSON.parse(sessionStr);
         } catch {
             throw new UnAuthorizedError("Unauthorized");
         }
-        const context = sessionObj.contexts?.[incomingOrgId];
-        if (!context) {
-            throw new UnAuthorizedError("Unauthorized");
+
+        const tenant = sessionObj.tenant?.[incomingSlug];
+        
+        if (!tenant) {
+            throw new UnAuthorizedError("You do not have access to this organization");
         }
+
         request.tenant = {
-            orgId: incomingOrgId,
-            role: context.role,
+            orgId: tenant.id, 
+            role: tenant.role,
         };
+        
         next();
     } catch (error) {
         if(error instanceof ValidationError) {
-            return response.status(400).json({
-                success: false,
-                message: error.message,
-            });
+            return response.status(400).json({ success: false, message: error.message });
         }
         if (error instanceof UnAuthorizedError) {
-            return response.status(401).json({
-                success: false,
-                message: error.message,
-            });
+            return response.status(401).json({ success: false, message: error.message });
         }
         logger.error(error);
-        return response.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
+        return response.status(500).json({ success: false, message: "Internal server error" });
     }
 };

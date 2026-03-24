@@ -1,25 +1,26 @@
-import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
 import { useParams } from "react-router-dom";
+import { useSession } from "@/features/auth/hooks/useSession";
 
 export interface MembershipType {
     id: string;
-    name: string;
     slug: string;
     role: "ADMIN" | "ENGINEER" | "CLIENT" | "IDLE";
 }
 
 export const useMembership = () => {
     const { orgSlug } = useParams();
+    const { user, isLoading: isSessionLoading } = useSession();
 
-    return useQuery({
-        queryKey: ["membership", orgSlug],
-        queryFn: async () => {
-            const response = await api.post("/org/identity", {
-                slug: orgSlug,
-            });
-            return response.data as MembershipType;
-        },
-        enabled: !!orgSlug, 
-    });
+    const tenantConfig = orgSlug && user?.tenant ? user.tenant[orgSlug] : null;
+
+    const membership: MembershipType | null = tenantConfig ? {
+        id: tenantConfig.id,
+        role: tenantConfig.role,
+        slug: orgSlug as string
+    } : null;
+
+    return {
+        data: membership,
+        isLoading: isSessionLoading, 
+    };
 };

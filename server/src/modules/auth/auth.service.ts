@@ -6,6 +6,7 @@ import { ConflictError } from "../../shared/error/conflict.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import crypto from "node:crypto";
 import redis from "../../shared/lib/redis.js";
+import { prisma } from "../../shared/lib/prisma.js";
 
 const authService = {
     async register(data: RegisterInputSchema) {
@@ -14,7 +15,7 @@ const authService = {
             const isCredentialAccount = existingUser.accounts.some(
                 (account) => account.provider === "credentials",
             );
-            
+
             if (isCredentialAccount) {
                 throw new ConflictError("User already exists");
             }
@@ -81,12 +82,52 @@ const authService = {
         }
 
         const sessionId = crypto.randomBytes(32).toString("hex");
-        
+
+        const tenant = await prisma.membership.findMany({
+            where: {
+                userId: existingUser._id.toString(),
+            },
+            select: {
+                role: true,
+                organization: {
+                    select: {
+                        id: true,
+                        slug: true,
+                        projects: {
+                            where: {
+                                assignments: {
+                                    some: {
+                                        userId: existingUser._id.toString(),
+                                        role: { in: ["CLIENT", "ENGINEER"] },
+                                    },
+                                },
+                            },
+                            select: {
+                                id: true,
+                                slug: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        const formattedTenant = tenant.reduce(
+            (acc, item) => {
+                acc[item.organization.slug] = {
+                    id: item.organization.id,
+                    role: item.role,
+                };
+                return acc;
+            },
+            {} as Record<string, { id: string; role: string }>,
+        );
         return {
             sessionId,
             userId: existingUser._id,
             username: existingUser.username,
             email: existingUser.email,
+            tenant: formattedTenant,
         };
     },
 
@@ -99,19 +140,19 @@ const authService = {
             .update(codeVerifier)
             .digest("base64url");
 
-        await redis.set(`oauth_state:${state}`, codeVerifier, { EX : 600 });
+        await redis.set(`oauth_state:${state}`, codeVerifier, { EX: 600 });
 
-        const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+        const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
         const options = {
             redirect_uri: process.env.GOOGLE_REDIRECT_URI as string,
             client_id: process.env.GOOGLE_CLIENT_ID as string,
-            access_type: 'offline',
-            response_type: 'code',
-            prompt: 'consent',
-            scope: ['openid', 'email', 'profile'].join(' '),
+            access_type: "offline",
+            response_type: "code",
+            prompt: "consent",
+            scope: ["openid", "email", "profile"].join(" "),
             state: state,
             code_challenge: codeChallenge,
-            code_challenge_method: 'S256',
+            code_challenge_method: "S256",
         };
 
         const qs = new URLSearchParams(options).toString();

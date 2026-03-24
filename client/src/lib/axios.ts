@@ -8,4 +8,18 @@ const api = axios.create({
     },
 })
 
+api.interceptors.request.use((config) => {
+    const pathname = globalThis.location.pathname;
+    const pathParts = pathname.split("/");
+    const firstPart = pathParts[1];
+
+    const excludedPaths = ["", "login", 'register', "organizations"];
+
+    if (firstPart && !excludedPaths.includes(firstPart)) {
+        config.headers["x-tenant-slug"] = firstPart;
+    }
+
+    return config
+})
+
 export default api;
