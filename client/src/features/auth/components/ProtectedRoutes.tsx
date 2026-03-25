@@ -7,6 +7,8 @@ const PrivateRoutes = () => {
 
     if (isError || !user) return <Navigate to="/login" />;
 
+   
+
     return <Outlet />;
 };
 

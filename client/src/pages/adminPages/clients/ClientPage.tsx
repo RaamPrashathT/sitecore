@@ -1,4 +1,4 @@
-import ClientMain from "@/features/clients/ClientMain";
+import ClientMain from "@/features/clients/components/ClientMain";
 
 const ClientPage = () => {
     

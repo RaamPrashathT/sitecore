@@ -9,7 +9,7 @@ export const getFormSchema = z.object({
 
 export const createInviteBodySchema = z.object({
     email: z.email("Invalid email address"),
-    projectIds: z
+    projects: z
         .array(z.string().length(36, "Invalid project ID"))
         .min(1, "At least one project is required"),
 });

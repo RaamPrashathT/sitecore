@@ -1,5 +1,4 @@
 import { ChevronsUpDown, Plus } from "lucide-react";
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useMembership } from "@/hooks/useMembership";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { AvatarFallback, Avatar } from "@/components/ui/avatar";
 import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 import { useSession } from "@/features/auth/hooks/useSession";
 
@@ -24,24 +22,25 @@ const OrgSwitcher = () => {
     const { isMobile } = useSidebar();
     const { user, isLoading: userLoading } = useSession();
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    
     const { data: orgs, isLoading: orgsLoading } = useOrganizations(user?.id);
     const navigate = useNavigate();
 
     if (membershipLoading || orgsLoading || userLoading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex items-center gap-2.5 px-2.5 py-2">
+                <div className="w-[34px] h-[34px] rounded-[6px] bg-[#e8eaf0] shrink-0" />
+                <div className="flex-1 flex flex-col gap-[5px]">
+                    <div className="h-2.5 rounded bg-[#e8eaf0] w-[70%]" />
+                    <div className="h-2.5 rounded bg-[#e8eaf0] w-[40%]" />
+                </div>
+            </div>
+        );
     }
 
-    if (!membership) {
-        return <Navigate to="/login" />;
-    }
-
-    if (!orgs) {
-        return <Navigate to="/organizations" />;
-    }
+    if (!membership) return <Navigate to="/login" />;
+    if (!orgs) return <Navigate to="/organizations" />;
 
     const activeOrg = orgs.find((org) => org.slug === membership.slug);
-    
     const displayName = activeOrg?.name || membership.slug;
 
     return (
@@ -51,65 +50,57 @@ const OrgSwitcher = () => {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                            className="flex items-center gap-2.5 w-full py-7.5 rounded-none border border-transparent bg-transparent cursor-pointer transition-[background,border-color] duration-150 ease-in-out hover:bg-[#f0f3f9] hover:border-[#e8eaf0]"
                         >
-                            <div>
-                                <Avatar className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground">
-                                    <AvatarFallback className="rounded-lg bg-purple-500 text-white uppercase">
-                                        {/* Use displayName here */}
-                                        {displayName[0]}
-                                    </AvatarFallback>
-                                </Avatar>
+                            <div className="w-[34px] h-[34px] rounded-[6px] bg-[#1e3a8a] text-white text-[13px] font-semibold tracking-[0.02em] flex items-center justify-center shrink-0 font-[DM_Sans,Geist,system-ui,sans-serif]">
+                                {displayName[0].toUpperCase()}
                             </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">
-                                    {/* Use displayName here */}
-                                    {displayName}
-                                </span>
-                                <span className="truncate text-xs capitalize">
-                                    {membership.role.toLowerCase()}
+                            <div className="flex-1 flex flex-col items-start min-w-0">
+                                <span className="text-[13.5px] font-semibold text-[#1a2440] leading-[1.3] truncate max-w-[200px] ">{displayName}</span>
+                                <span className="text-[11px] text-[#8892a4] font-normal mt-px">
+                                    {membership.role.charAt(0) + membership.role.slice(1).toLowerCase()}
                                 </span>
                             </div>
-                            <ChevronsUpDown className="ml-auto" />
+                            <ChevronsUpDown className="w-3.5 h-3.5 text-[#b5bcc9] shrink-0" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                        className="bg-white border border-[#e8eaf0] rounded-[14px] shadow-[0_8px_32px_-4px_rgba(30,58,138,0.10),0_2px_8px_-2px_rgba(0,0,0,0.06)] p-1.5 min-w-[220px]"
                         align="start"
                         side={isMobile ? "bottom" : "right"}
-                        sideOffset={4}
+                        sideOffset={8}
                     >
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            Organizations
+                        <DropdownMenuLabel className="text-[10.5px] font-semibold tracking-[0.08em] uppercase text-[#b5bcc9] px-2.5 pt-1.5 pb-1">
+                            Your organizations
                         </DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
+
                         {orgs.map((org) => (
                             <DropdownMenuItem
                                 key={org.id}
-                                onClick={() => navigate(`/${org.slug}`)} 
-                                className="gap-2 p-2 cursor-pointer"
+                                onClick={() => navigate(`/${org.slug}`)}
+                                className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-[#1a2440] font-[450] transition-colors duration-[120ms] hover:bg-[#f0f3f9]"
                             >
-                                <div className="flex size-6 items-center justify-center rounded-md border">
-                                    <Avatar>
-                                        <AvatarFallback className="uppercase">
-                                            {org.name[0]}
-                                        </AvatarFallback>
-                                    </Avatar>
+                                <div className="w-[26px] h-[26px] rounded-[6px] bg-[#dbeafe] text-[#1e3a8a] text-[11px] font-bold flex items-center justify-center shrink-0">
+                                    {org.name[0].toUpperCase()}
                                 </div>
-                                {org.name}
+                                <span className="flex-1">{org.name}</span>
+                                {org.slug === membership.slug && (
+                                    <span className="text-[10px] font-semibold text-[#1e3a8a] bg-[#dbeafe] rounded-full px-[7px] py-0.5 tracking-[0.02em]">
+                                        Active
+                                    </span>
+                                )}
                             </DropdownMenuItem>
                         ))}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 p-2 cursor-pointer" asChild>
-                            <Link
-                                to={"/organizations/create"}
-                                className="flex w-full items-center gap-x-2"
-                            >
-                                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                                    <Plus className="size-4" />
+
+                        <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
+                        <DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-[#8892a4] font-[450] transition-colors duration-[120ms] hover:bg-[#f0f3f9]" asChild>
+                            <Link to="/organizations/create" className="flex w-full items-center gap-2.5">
+                                <div className="w-[26px] h-[26px] rounded-[6px] border-[1.5px] border-dashed border-[#e8eaf0] flex items-center justify-center text-[#8892a4] shrink-0">
+                                    <Plus className="h-3 w-3" />
                                 </div>
-                                <div className="font-medium text-muted-foreground">
-                                    Add Organization
-                                </div>
+                                <span>New organization</span>
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>

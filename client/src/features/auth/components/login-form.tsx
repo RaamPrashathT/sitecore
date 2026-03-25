@@ -60,6 +60,7 @@ export function LoginForm({
 
             if (result.data.success) {
                 navigate("/organizations");
+                
             }
         } catch (error: unknown) {
             let message = "Something went wrong";

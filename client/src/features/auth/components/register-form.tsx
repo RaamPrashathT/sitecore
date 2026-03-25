@@ -56,7 +56,7 @@ export function RegisterForm({
             })
             
             if (result.data.success) {
-                navigate("/login");
+                navigate(`/verify-email?token=${result.data.token}`);
             }
         } catch (error: unknown) {
             const message = axios.isAxiosError(error)

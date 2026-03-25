@@ -8,7 +8,7 @@ import crypto from "node:crypto";
 import redis from "../../shared/lib/redis.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { generateOTP, hashOTP } from "../../shared/lib/otp.js";
-import { sendVerificationEmail } from "../../shared/lib/sendEmailVerification.js";
+import { sendVerificationEmail } from "../../shared/lib/emails/sendEmailVerification.js";
 import { UnverifiedError } from "../../shared/error/unverified.error.js";
 
 const authService = {
@@ -59,8 +59,26 @@ const authService = {
 
         if (!newUser) throw new Error("Something went wrong");
 
+        const otp = generateOTP();
+        const otpHash = hashOTP(otp);
+        const token = crypto.randomBytes(32).toString("hex");
+
+        await VerificationToken.findOneAndUpdate(
+            { userId: newUser._id },
+            {
+                token,
+                otpHash,
+                email: newUser.email,
+                expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+            },
+            { upsert: true, new: true },
+        );
+
+        await sendVerificationEmail(newUser.email, otp);
+
         return {
             success: true,
+            token,
         };
     },
 
@@ -154,13 +172,14 @@ const authService = {
             userId: existingUser._id,
             username: existingUser.username,
             email: existingUser.email,
+            onboarded: existingUser.onboarded,
             tenant: formattedTenant,
         };
     },
 
     async verifyOtp(token: string, otp: string) {
         const record = await VerificationToken.findOne({ token });
-
+        console.log(token, otp)
         if (!record) {
             throw new UnAuthorizedError("Invalid or expired token");
         }
@@ -217,6 +236,7 @@ const authService = {
             userId: existingUser._id,
             username: existingUser.username,
             email: existingUser.email,
+            onboarded: existingUser.onboarded,
             tenant: formattedTenant,
         };
     },

@@ -10,7 +10,6 @@ export const authorize = async (
 ) => {
     try {  
         const sessionId = request.cookies.session;
-        
         if (!sessionId) throw new UnAuthorizedError();
 
         const raw = await redis.get(`session:${sessionId}`);
@@ -29,13 +28,13 @@ export const authorize = async (
         request.session = session;
         return next();
     } catch (error) {
+        logger.error(error);
         if(error instanceof UnAuthorizedError) {
             return response.status(401).json({
                 success: false,
                 message: error.message,
             });
         }
-        logger.error(error);
         return response.status(500).json({
             success: false,
             message: "Internal server error",

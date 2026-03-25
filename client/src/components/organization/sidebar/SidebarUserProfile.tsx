@@ -1,6 +1,4 @@
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
-
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,88 +14,81 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-
 import { useSession } from "@/features/auth/hooks/useSession";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
 const SidebarUser = () => {
     const { isMobile } = useSidebar();
-
     const { user } = useSession();
     const { mutate: logout } = useLogout();
 
-    if (!user) {
-        return null;
-    }
+    if (!user) return null;
+
+    const initials = user.username
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
 
     return (
-        <SidebarMenu>
+        <SidebarMenu className="m-0">
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                            className="flex items-center gap-2.5 w-full px-2.5 py-8 rounded-none border border-transparent bg-transparent cursor-pointer transition-[background,border-color] duration-150 ease-in-out hover:bg-[#f0f3f9] hover:border-[#e8eaf0]"
                         >
-                            <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarFallback className="rounded-lg bg-purple-500 text-white">
-                                    {user.username[0].toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">
-                                    {user.username}
-                                </span>
-                                <span className="truncate text-xs">
-                                    {user.email}
-                                </span>
+                            <div className="w-8 h-8 rounded-full bg-[#1e3a8a] text-white text-xs font-bold flex items-center justify-center shrink-0 tracking-[0.04em]">
+                                {initials}
                             </div>
-                            <ChevronsUpDown className="ml-auto size-4" />
+                            <div className="flex-1 flex flex-col min-w-0">
+                                <span className="text-[13px] font-semibold text-[#1a2440] truncate">{user.username}</span>
+                                <span className="text-[11px] text-[#8892a4] truncate mt-px">{user.email}</span>
+                            </div>
+                            <ChevronsUpDown className="w-3.5 h-3.5 text-[#b5bcc9] shrink-0" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                        className="bg-white border border-[#e8eaf0] rounded-md mb-2 shadow-[0_8px_32px_-4px_rgba(30,58,138,0.10),0_2px_8px_-2px_rgba(0,0,0,0.06)] p-1.5 min-w-[220px]"
                         side={isMobile ? "bottom" : "right"}
                         align="end"
-                        sideOffset={4}
+                        sideOffset={8}
                     >
-                        <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarFallback className="rounded-lg bg-purple-500 text-white">
-                                        {user.username[0].toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">
-                                        {user.username}
-                                    </span>
-                                    <span className="truncate text-xs">
-                                        {user.email}
-                                    </span>
-                                </div>
+                        {/* Identity block */}
+                        <DropdownMenuLabel className="flex items-center gap-2.5 px-2.5 py-2 font-normal">
+                            <div className="w-[34px] h-[34px] rounded-full bg-[#1e3a8a] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                {initials}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-[13px] font-semibold text-[#1a2440]">{user.username}</span>
+                                <span className="text-[11px] text-[#8892a4] truncate">{user.email}</span>
                             </div>
                         </DropdownMenuLabel>
 
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
+
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <BadgeCheck />
+                            <DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[13px] text-[#1a2440] font-[450] cursor-pointer transition-colors duration-120 hover:bg-[#f0f3f9]">
+                                <BadgeCheck className="w-3.5 h-3.5 shrink-0 opacity-70" />
                                 Account
                             </DropdownMenuItem>
-
-                            <DropdownMenuItem>
-                                <Bell />
+                            <DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[13px] text-[#1a2440] font-[450] cursor-pointer transition-colors duration-120 hover:bg-[#f0f3f9]">
+                                <Bell className="w-3.5 h-3.5 shrink-0 opacity-70" />
                                 Notifications
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                            <button onClick={() => logout()}
-                                className="flex w-full items-center gap-x-2">
-                                <LogOut />
-                                Log out
-                            </button>
+
+                        <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
+
+                        <DropdownMenuItem
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[13px] text-[#dc2626] font-[450] cursor-pointer transition-colors duration-120 hover:bg-[#fef2f2]"
+                            onClick={() => logout()}
+                        >
+                            <LogOut className="w-3.5 h-3.5 shrink-0 opacity-70" />
+                            Sign out
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

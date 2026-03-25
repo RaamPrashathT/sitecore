@@ -1,10 +1,10 @@
-import { resend } from "./resend.js";
-import { logger } from "../lib/logger.js";
+import { resend } from "../resend.js";
+import { logger } from "../logger.js";
 
 export async function sendVerificationEmail(email: string, otp: string) {
     try {
         const fromAddress = process.env.NODE_ENV === "production" 
-            ? "SiteCore <no-reply@yourverifieddomain.com>" 
+            ? "SiteCore <no-reply@sitecore.com>" 
             : "onboarding@resend.dev";
 
         const { data, error } = await resend.emails.send({

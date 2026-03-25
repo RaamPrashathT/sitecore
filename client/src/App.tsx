@@ -33,6 +33,8 @@ import PendingInvitationsPage from "./pages/adminPages/pending/PendingInvitation
 
 import SettingsPage from "./pages/adminPages/SettingsPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
+import ClientInvitePage from "./pages/adminPages/clients/ClientInvitePage";
+import InvitationPage from "./pages/invitation/InvitationPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -53,6 +55,7 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/invitation" element={<InvitationPage />} />
 
                     {/* Protected Routes */}
                     <Route element={<PrivateRoutes />}>
@@ -76,6 +79,7 @@ function App() {
                                 {/* Users */}
                                 <Route path="engineers" element={<EngineerPage />} />
                                 <Route path="clients" element={<ClientPage />} />
+                                <Route path="clients/invite" element={<ClientInvitePage />} />
 
                                 {/* Projects */}
                                 <Route path="projects" element={<ProjectListPage />} />

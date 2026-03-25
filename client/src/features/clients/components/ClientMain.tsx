@@ -8,6 +8,7 @@ import ClientTable from "./ClientTable";
 import { useClients } from "@/hooks/useClients";
 import { ClientColumns as columns } from "./ClientColumns";
 import ClientEmpty from "./ClientEmpty";
+import ClientInviteButton from "./ClientInvite/ClientInviteButton";
 
 const ClientMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
@@ -56,7 +57,8 @@ const ClientMain = () => {
     
     return (
         <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-end items-center py-2">
+            <div className="flex flex-row justify-between items-center py-2">
+                <ClientInviteButton />
                 <ClientSearch table={table} />
             </div>
             <div>

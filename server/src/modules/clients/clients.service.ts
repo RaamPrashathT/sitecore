@@ -3,6 +3,9 @@ import { User } from "../../shared/models/user.js";
 import type { CreateInviteBodySchema } from "./clients.schema.js";
 import crypto from "node:crypto";
 import { Role } from "../../../generated/prisma/client.js";
+import { MissingError } from "../../shared/error/missing.error.js";
+import { Types } from "mongoose";
+import { sendInviteEmail } from "../../shared/lib/emails/sendClientInvitation.js";
 
 const clientService = {
     async getClients(
@@ -69,21 +72,107 @@ const clientService = {
     },
 
     async createInvite(organizationId: string, data: CreateInviteBodySchema) {
-        const { email, projectIds } = data;
+        const { email, projects } = data;
         const token = crypto.randomBytes(32).toString("hex");
-        const invitationArray = projectIds.map((projectId) => ({
-            email,
-            token,
-            projectId,
-            organizationId,
-            role: Role.CLIENT,
-            expiresAt: new Date(Date.now() + 1000 * 60 * 10),
-        }));
+        await prisma.clientInvitation.create({
+            data: {
+                email,
+                token,
+                role: Role.CLIENT,
+                organizationId,
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+                projects: {
+                    create: projects.map((projectId) => ({
+                        projectId,
+                    })),
+                },
+            },
+        });
+        await sendInviteEmail(email, token);
+    },
 
-        await prisma.clientInvitation.createMany({
-            data: invitationArray,
-            skipDuplicates: true,
-        })
+    async getInvitationDetails(token: string) {
+        const invitation = await prisma.clientInvitation.findFirst({
+            where: {
+                token,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+            select: {
+                projects: {
+                    select: {
+                        project: {
+                            select: {
+                                id: true,
+                                name: true,
+                                organization: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        members: {
+                                            where: {
+                                                role: "ADMIN",
+                                            },
+                                            select: {
+                                                userId: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if(!invitation) throw new MissingError("Invitation not found");
+
+        const projects = invitation.projects.map((project) => ({
+            name: project.project.name,
+            id: project.project.id,
+        }))
+
+        const organization = invitation.projects[0]?.project.organization;
+
+        if(!organization) throw new MissingError("Organization not found");
+
+        const adminIds = [
+            ...new Set(
+                organization.members.map((member) => member.userId),
+            )
+        ]
+
+        const objectIds = adminIds.map((id) => new Types.ObjectId(id));
+
+        const admins = await User.find(
+            { _id: { $in: objectIds } },
+            { username: 1, profileImage: 1 } 
+        ).lean();
+
+        const adminMap = new Map(
+            admins.map((admin) => [admin._id.toString(), admin])
+        );
+
+        const adminDetails = adminIds.map((id) => {
+            const admin = adminMap.get(id);
+            return {
+                userId: id,
+                username: admin?.username || null,
+                profileImage: admin?.profileImage || null,
+            };
+        });
+
+        return {
+            organization: {
+                id: organization.id,
+                name: organization.name,
+            },
+            projects,
+            admins: adminDetails,
+        };
+
     },
 };
 

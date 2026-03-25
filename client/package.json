@@ -21,6 +21,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "input-otp": "^1.4.2",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.575.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

@@ -7,9 +7,10 @@ import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { ProfileSchema } from "./auth.schema.js";
 import z from "zod";
 import { User } from "../../shared/models/user.js";
-import crypto, { verify } from "node:crypto";
+import crypto from "node:crypto";
 import { prisma } from "../../shared/lib/prisma.js";
 import { UnverifiedError } from "../../shared/error/unverified.error.js";
+import { env } from "../../shared/config/env.js";
 
 type ProfileSchema = {
     sub: string;
@@ -26,10 +27,7 @@ const authController = {
         try {
             const result = await authService.register(request.body);
             if (result.success) {
-                return response.status(200).json({
-                    success: true,
-                    message: "User created successfully",
-                });
+                return response.status(200).json(result);
             }
             logger.error("Something went wrong");
             return response.status(500).json({
@@ -56,7 +54,8 @@ const authController = {
 
     async login(request: Request, response: Response) {
         try {
-            const { sessionId, userId, username, email, tenant } =
+            console.log(request.body)
+            const { sessionId, userId, username, email, onboarded, tenant } =
                 await authService.login(request.body);
 
             await redis.set(
@@ -65,6 +64,7 @@ const authController = {
                     userId: userId,
                     email: email,
                     username: username,
+                    onboarded: onboarded,
                     tenant: tenant,
                 }),
                 { EX: 60 * 60 * 24 },
@@ -117,7 +117,7 @@ const authController = {
                 throw new UnAuthorizedError("Token and OTP are required");
             }
 
-            const { sessionId, userId, username, email, tenant } = await authService.verifyOtp(token, otp);
+            const { sessionId, userId, username, email, onboarded, tenant } = await authService.verifyOtp(token, otp);
 
             await redis.set(
                 `session:${sessionId}`,
@@ -125,6 +125,7 @@ const authController = {
                     userId: userId,
                     email: email,
                     username: username,
+                    onboarded: onboarded,
                     tenant: tenant,
                 }),
                 { EX: 60 * 60 * 24 },
@@ -132,7 +133,7 @@ const authController = {
 
             response.cookie("session", sessionId, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
@@ -337,6 +338,7 @@ const authController = {
                     userId: user._id,
                     email: user.email,
                     username: user.username,
+                    onboarded: user.onboarded,
                     tenant: formattedTenant,
                 }),
                 { EX: 60 * 60 * 24 },
@@ -344,7 +346,7 @@ const authController = {
 
             response.cookie("session", sessionId, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: true,
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });

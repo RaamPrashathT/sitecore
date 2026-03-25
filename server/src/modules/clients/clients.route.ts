@@ -12,4 +12,6 @@ clientRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), clientCont
 
 clientRouter.post("/invitation", authorize, orgAuthorize, requiredRole("ADMIN"), validate(createInviteBodySchema), clientController.createInvite)
 
+clientRouter.get("/invitation-details", clientController.getInvitationDetails)
+
 export default clientRouter;

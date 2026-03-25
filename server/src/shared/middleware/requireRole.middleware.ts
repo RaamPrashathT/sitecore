@@ -11,7 +11,6 @@ export const requiredRole = (
     try {
         const userRole = request.tenant?.role
         const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-
         if (userRole && allowedRoles.includes(userRole)) {
             return next();
         }

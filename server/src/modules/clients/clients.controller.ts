@@ -3,6 +3,7 @@ import { logger } from "../../shared/lib/logger.js";
 import type { Request, Response } from "express";
 import clientService from "./clients.service.js";
 import { getFormSchema } from "./clients.schema.js";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 
 const clientController = {
     async getClients(request: Request, response: Response) {
@@ -44,18 +45,39 @@ const clientController = {
 
     async createInvite(request: Request, response: Response) {
         try {
-            const result = await clientService.createInvite(
+            await clientService.createInvite(
                 request.tenant!.orgId,
                 request.body,
-            )
-            
+            );
+            return response.status(200).json({
+                message: "Invite sent",
+            });
         } catch (error) {
             logger.error(error);
             return response.status(500).json({
                 message: "Internal server error",
             });
         }
-    }
+    },
+
+    async getInvitationDetails(request: Request, response: Response) {
+        try {
+            const token = request.query.token as string;
+            if (!token) {
+                throw new UnAuthorizedError("Token is required");
+            }
+            const invitation = await clientService.getInvitationDetails(token);
+            return response.status(200).json(invitation);
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
 };
 
 export default clientController;
