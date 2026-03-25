@@ -6,10 +6,10 @@ import {
     FieldError,
     FieldGroup,
     FieldLabel,
-    // FieldSeparator,
+    FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-// import { FcGoogle } from "react-icons/fc";
+import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
 import { loginSchema, type LoginInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,12 @@ import { useState } from "react";
 import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+
+type ApiErrorResponse = {
+    code?: string;
+    message?: string;
+    verificationToken?: string;
+};
 
 export function LoginForm({
     className,
@@ -51,13 +57,42 @@ export function LoginForm({
                 success: result.data.success,
                 message: result.data.message,
             });
+
             if (result.data.success) {
                 navigate("/organizations");
             }
         } catch (error: unknown) {
-            const message = axios.isAxiosError(error)
-                ? (error.response?.data?.message ?? "Login failed")
-                : "An unexpected error occurred";
+            let message = "Something went wrong";
+
+            if (axios.isAxiosError<ApiErrorResponse>(error)) {
+                const data = error.response?.data;
+
+                switch (data?.code) {
+                    case "INVALID_CREDENTIALS":
+                        message = "Invalid email or password";
+                        break;
+
+                    case "EMAIL_NOT_VERIFIED":
+                        message = "OTP sent. Redirecting...";
+
+                        if (data.verificationToken) {
+                            navigate(
+                                `/verify-email?token=${data.verificationToken}`,
+                            );
+                            return;
+                        }
+                        break;
+
+                    case "INTERNAL_ERROR":
+                        message = "Server error. Try again later.";
+                        break;
+
+                    default:
+                        message = data?.message ?? "Login failed";
+                }
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
 
             setApiMessage({
                 success: false,
@@ -111,11 +146,7 @@ export function LoginForm({
                     )}
                 </Field>
                 <Field>
-                    <Button 
-                        type="submit" 
-                        disabled={isSubmitting}
-                        className=""
-                    >
+                    <Button type="submit" disabled={isSubmitting} className="">
                         {isSubmitting ? (
                             <div className="flex items-center gap-x-1.5">
                                 <Spinner />
@@ -133,16 +164,16 @@ export function LoginForm({
                         {apiMessage.message}
                     </FieldError>
                 )}
-                {/* <FieldSeparator>Or continue with</FieldSeparator> */}
+                <FieldSeparator>Or continue with</FieldSeparator>
                 <Field>
-                    {/* <Button
+                    <Button
                         variant="outline"
                         type="button"
                         className="flex items-center"
                     >
                         <FcGoogle className="mt-0.5" />
                         Login with Google
-                    </Button> */}
+                    </Button>
                     <FieldDescription className="text-center">
                         Don&apos;t have an account?{" "}
                         <a

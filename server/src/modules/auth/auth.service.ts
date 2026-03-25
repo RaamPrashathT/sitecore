@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { User } from "../../shared/models/user.js";
+import { User, VerificationToken } from "../../shared/models/user.js";
 import type { RegisterInputSchema, LoginInputSchema } from "./auth.schema.js";
 import generateName from "../../shared/lib/fantastical.js";
 import { ConflictError } from "../../shared/error/conflict.error.js";
@@ -7,6 +7,9 @@ import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import crypto from "node:crypto";
 import redis from "../../shared/lib/redis.js";
 import { prisma } from "../../shared/lib/prisma.js";
+import { generateOTP, hashOTP } from "../../shared/lib/otp.js";
+import { sendVerificationEmail } from "../../shared/lib/sendEmailVerification.js";
+import { UnverifiedError } from "../../shared/error/unverified.error.js";
 
 const authService = {
     async register(data: RegisterInputSchema) {
@@ -42,7 +45,7 @@ const authService = {
         const hashedPassword = await bcrypt.hash(data.password, 10);
         const randomName = generateName();
 
-        await User.create({
+        const newUser = await User.create({
             username: randomName,
             email: data.email,
             accounts: [
@@ -53,6 +56,8 @@ const authService = {
                 },
             ],
         });
+
+        if (!newUser) throw new Error("Something went wrong");
 
         return {
             success: true,
@@ -75,10 +80,32 @@ const authService = {
         if (!password) {
             throw new UnAuthorizedError();
         }
+
         const isPasswordValid = await bcrypt.compare(data.password, password);
 
         if (!isPasswordValid) {
             throw new UnAuthorizedError();
+        }
+
+        if (!existingUser.emailVerified) {
+            const otp = generateOTP();
+            const otpHash = hashOTP(otp);
+            const token = crypto.randomBytes(32).toString("hex");
+
+            await VerificationToken.findOneAndUpdate(
+                { userId: existingUser._id },
+                {
+                    token,
+                    otpHash,
+                    email: existingUser.email,
+                    expiresAt: new Date(Date.now() + 1000 * 60 * 10),
+                },
+                { upsert: true, new: true },
+            );
+
+            await sendVerificationEmail(existingUser.email, otp);
+
+            throw new UnverifiedError(token);
         }
 
         const sessionId = crypto.randomBytes(32).toString("hex");
@@ -122,6 +149,69 @@ const authService = {
             },
             {} as Record<string, { id: string; role: string }>,
         );
+        return {
+            sessionId,
+            userId: existingUser._id,
+            username: existingUser.username,
+            email: existingUser.email,
+            tenant: formattedTenant,
+        };
+    },
+
+    async verifyOtp(token: string, otp: string) {
+        const record = await VerificationToken.findOne({ token });
+
+        if (!record) {
+            throw new UnAuthorizedError("Invalid or expired token");
+        }
+
+        if (record.expiresAt < new Date()) {
+            await VerificationToken.deleteOne({ _id: record._id });
+            throw new UnAuthorizedError("OTP expired");
+        }
+
+        const hashedOtp = hashOTP(otp);
+
+        if (hashedOtp !== record.otpHash) {
+            throw new UnAuthorizedError("Invalid OTP");
+        }
+
+        await User.updateOne(
+            { _id: record.userId },
+            { $set: { emailVerified: true } },
+        );
+
+        await VerificationToken.deleteOne({ _id: record._id });
+
+        const existingUser = await User.findById(record.userId);
+        if (!existingUser) throw new UnAuthorizedError("User not found");
+
+        const tenant = await prisma.membership.findMany({
+            where: { userId: existingUser._id.toString() },
+            select: {
+                role: true,
+                organization: {
+                    select: {
+                        id: true,
+                        slug: true,
+                    },
+                },
+            },
+        });
+
+        const formattedTenant = tenant.reduce(
+            (acc, item) => {
+                acc[item.organization.slug] = {
+                    id: item.organization.id,
+                    role: item.role,
+                };
+                return acc;
+            },
+            {} as Record<string, { id: string; role: string }>,
+        );
+
+        const sessionId = crypto.randomBytes(32).toString("hex");
+
         return {
             sessionId,
             userId: existingUser._id,

@@ -110,8 +110,9 @@ model Project {
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
 
-    assignments Assignment[]
-    phases      Phase[]
+    assignments       Assignment[]
+    phases            Phase[]
+    clientInvitations ClientInvitation[]
 
     @@unique([slug, organizationId])
 }
@@ -173,4 +174,23 @@ model RequisitionItem {
 
     requisitionId String
     requisition   Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+}
+
+model ClientInvitation {
+    id             String @id @default(uuid())
+    token          String
+    email          String
+    
+    role           Role
+    organizationId String
+
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId String
+
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+
+    accepted Boolean @default(false)
+
+    @@unique([email, projectId])
 }

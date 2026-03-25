@@ -32,6 +32,7 @@ import PhasePaymentApprovalPage from "./pages/adminPages/pending/PhasePaymentApp
 import PendingInvitationsPage from "./pages/adminPages/pending/PendingInvitationsPage";
 
 import SettingsPage from "./pages/adminPages/SettingsPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -51,6 +52,7 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
 
                     {/* Protected Routes */}
                     <Route element={<PrivateRoutes />}>

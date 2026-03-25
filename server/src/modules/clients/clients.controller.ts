@@ -41,6 +41,21 @@ const clientController = {
             });
         }
     },
+
+    async createInvite(request: Request, response: Response) {
+        try {
+            const result = await clientService.createInvite(
+                request.tenant!.orgId,
+                request.body,
+            )
+            
+        } catch (error) {
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    }
 };
 
 export default clientController;
