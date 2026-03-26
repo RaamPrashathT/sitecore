@@ -305,7 +305,6 @@ const projectController = {
     async approveRequisition(request: Request, response: Response) {
         try {
             const { requisitionId } = request.body;
-            console.log(requisitionId)
             await projectService.approveRequisition(requisitionId);
 
             return response.status(200).json({

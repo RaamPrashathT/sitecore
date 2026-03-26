@@ -2,7 +2,7 @@ import ClientInviteForm from "@/features/clients/components/ClientInvite/ClientI
 
 const ClientInvitePage = () => {
     return (
-        <div>
+        <div className="h-full flex items-center">
             <ClientInviteForm />
         </div>
     );

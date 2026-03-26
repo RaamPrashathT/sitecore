@@ -1,22 +1,30 @@
 import type { Request, Response } from "express";
 import orgService from "./organization.service.js";
 import { logger } from "../../shared/lib/logger.js";
-import { createOrganizationSchema, orgSlugSchema } from "./organization.schema.js";
+import {
+    createOrganizationSchema,
+    orgSlugSchema,
+} from "./organization.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { ConflictError } from "../../shared/error/conflict.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { ZodError } from "zod";
 import { addOrgContext } from "../../shared/utils/session.js";
+import redis from "../../shared/lib/redis.js";
 
 const orgController = {
     async create(request: Request, response: Response) {
         try {
-            if (!request.session?.userId) {
+            const sessionId = request.cookies.session;
+            if (!request.session) {
                 throw new UnAuthorizedError();
             }
+            const tenants = request.session.tenant;
 
-            const validatedData = createOrganizationSchema.safeParse(request.body);
+            const validatedData = createOrganizationSchema.safeParse(
+                request.body,
+            );
 
             if (!validatedData.success) {
                 throw new ValidationError(validatedData.error.message);
@@ -27,6 +35,32 @@ const orgController = {
                 userId: request.session.userId,
             });
 
+            const newTenants = {
+                ...tenants,
+                [result.slug]: {
+                    id: result.orgId,
+                    role: "ADMIN",
+                },
+            };
+
+            const raw = await redis.get(`session:${sessionId}`);
+            if (!raw) throw new UnAuthorizedError();
+
+            let session;
+
+            try {
+                session = JSON.parse(raw);
+            } catch {
+                logger.error("Invalid session JSON");
+                throw new UnAuthorizedError();
+            }
+            await redis.set(
+                `session:${sessionId}`,
+                JSON.stringify({
+                    ...session,
+                    tenant: newTenants,
+                }),
+            );
             return response.status(201).json(result);
         } catch (error) {
             if (error instanceof UnAuthorizedError) {
@@ -66,7 +100,7 @@ const orgController = {
 
             const result = await orgService.signup(userId, orgId);
 
-            return response.status(200).json({result});
+            return response.status(200).json({ result });
         } catch (error) {
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({
@@ -78,7 +112,7 @@ const orgController = {
             return response.status(500).json({
                 success: false,
                 message: "Something went wrong",
-            })
+            });
         }
     },
 
@@ -100,13 +134,13 @@ const orgController = {
 
     async getAllOrg(request: Request, response: Response) {
         try {
-            const query = request.query.query as string || "";
+            const query = (request.query.query as string) || "";
             const page = Number(request.query.page) || 1;
             const limit = Number(request.query.limit) || 10;
             const result = await orgService.getAllOrgs({
                 query,
                 page,
-                limit
+                limit,
             });
 
             return response.status(200).json(result);
@@ -115,13 +149,13 @@ const orgController = {
             return response.status(500).json({
                 success: false,
                 message: "Something went wrong",
-            })
+            });
         }
     },
 
     async identity(request: Request, response: Response) {
-        try {   
-            const slug = orgSlugSchema.parse(request.body.slug)
+        try {
+            const slug = orgSlugSchema.parse(request.body.slug);
 
             const input = {
                 slug: slug,
@@ -134,17 +168,15 @@ const orgController = {
                 orgId: result.id,
                 slug: result.slug,
                 role: result.role,
-            })
+            });
 
             return response.status(200).json(result);
-
-
         } catch (error) {
-            if(error instanceof ZodError) {
+            if (error instanceof ZodError) {
                 return response.status(400).json({
                     success: false,
                     message: error.issues[0]?.message,
-                })
+                });
             }
             if (error instanceof MissingError) {
                 return response.status(404).json({

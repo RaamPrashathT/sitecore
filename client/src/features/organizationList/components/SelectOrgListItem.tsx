@@ -1,5 +1,4 @@
 import api from "@/lib/axios";
-import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 interface SelectOrgListItemProps {
     readonly name: string;
@@ -9,15 +8,12 @@ interface SelectOrgListItemProps {
 
 const SelectOrgListItem = ({name, index, id }: SelectOrgListItemProps) => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
 
     const handleSubmit = async () => {
         try {
             await api.post("/org/signup", {
                 id
             })
-            await queryClient.invalidateQueries({ queryKey: ['session'] });
-            await queryClient.refetchQueries({ queryKey: ['session'] });
             navigate(`/organizations`)
         } catch (error) {
             if(error instanceof Error) console.log(error.message)

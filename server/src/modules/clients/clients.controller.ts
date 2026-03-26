@@ -5,6 +5,7 @@ import clientService from "./clients.service.js";
 import { getFormSchema } from "./clients.schema.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import redis from "../../shared/lib/redis.js";
+import { User } from "../../shared/models/user.js";
 
 const clientController = {
     async getClients(request: Request, response: Response) {
@@ -69,6 +70,12 @@ const clientController = {
             const invitation = await clientService.getInvitationDetails(token);
             const sessionEmail = request.session?.email;
             let sessionState;
+            
+            const existingUser = await User.findOne(
+                { email: invitation.email }, 
+                { _id: 1 }
+            ).lean();
+
             if (!sessionEmail) {
                 sessionState = "UNAUTHENTICATED";
             } else if (sessionEmail !== invitation.email) {
@@ -76,13 +83,16 @@ const clientController = {
             } else {
                 sessionState = "AUTHENTICATED";
             }
-            return response.status(200).json({
+            const result = {
                 organization: invitation.organization,
                 projects: invitation.projects,
                 admins: invitation.admins,
                 currentUser: sessionEmail ?? null ,
+                userExists: !!existingUser,
                 sessionState,
-            });
+                invitedEmail: invitation.email,
+            };
+            return response.status(200).json(result);
         } catch (error) {
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({ message: error.message });

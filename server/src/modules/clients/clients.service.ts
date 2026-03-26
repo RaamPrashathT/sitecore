@@ -164,6 +164,7 @@ const clientService = {
             };
         });
 
+
         return {
             organization: {
                 id: organization.id,

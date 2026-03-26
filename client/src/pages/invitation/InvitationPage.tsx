@@ -1,4 +1,4 @@
-import ClientInvitation from "@/features/clients/components/ClientInvite/ClientInvititation";
+import ClientInvitation from "@/features/clients/components/ClientInvite/ClientInvitation";
 
 
 const InvitationPage = () => {

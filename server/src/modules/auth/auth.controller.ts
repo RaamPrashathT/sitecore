@@ -24,11 +24,8 @@ type ProfileSchema = {
 
 const authController = {
     async register(request: Request, response: Response) {
-        try {
+        try {   
             const result = await authService.register(request.body);
-            if (result.success) {
-                return response.status(200).json(result);
-            }
             if (result.success && result.frictionlessLogin) {
                 await redis.set(
                     `session:${result.sessionId}`,
@@ -55,6 +52,9 @@ const authController = {
                     redirect: `/invites/accept?token=${request.body.inviteToken}`,
                 });
             }
+            if (result.success) {
+                return response.status(200).json(result);
+            }
             logger.error("Something went wrong");
             return response.status(500).json({
                 success: false,
@@ -80,7 +80,6 @@ const authController = {
 
     async login(request: Request, response: Response) {
         try {
-            console.log(request.body);
             const { sessionId, userId, username, email, onboarded, tenant } =
                 await authService.login(request.body);
 

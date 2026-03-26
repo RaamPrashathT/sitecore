@@ -49,7 +49,6 @@ interface PayloadSchema {
 }
 
 const ClientInviteForm = () => {
-    
     const navigate = useNavigate();
     const { data: membership, isLoading: membershipLoading } = useMembership();
     const { data: projects, isLoading: projectsLoading } = useProjectList(
@@ -162,163 +161,170 @@ const ClientInviteForm = () => {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto">
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <FieldGroup>
-                    <Field>
-                        <FieldLabel>Email</FieldLabel>
-                        <Input
-                            {...register("email")}
-                            id="email"
-                            placeholder="client@example.com"
-                        />
-                        {errors.email && (
-                            <FieldError>{errors.email.message}</FieldError>
-                        )}
-                    </Field>
-
-                    <Field>
-                        <FieldLabel>Projects</FieldLabel>
-
-                        {selectedProjects.length > 0 && (
-                            <div className="mb-3 rounded-md border overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="border-b bg-muted/50">
-                                            <th className="text-left px-3 py-2 font-medium text-muted-foreground">
-                                                Project
-                                            </th>
-                                            <th className="text-left px-3 py-2 font-medium text-muted-foreground">
-                                                Budget
-                                            </th>
-                                            <th className="text-left px-3 py-2 font-medium text-muted-foreground">
-                                                Phases
-                                            </th>
-                                            <th className="text-left px-3 py-2 font-medium text-muted-foreground">
-                                                Assignments
-                                            </th>
-                                            <th className="text-left px-3 py-2 font-medium text-muted-foreground">
-                                                Remove
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {selectedProjects.map(
-                                            (project, index) => (
-                                                <tr
-                                                    key={project.id}
-                                                    className={
-                                                        index !==
-                                                        selectedProjects.length -
-                                                            1
-                                                            ? "border-b"
-                                                            : ""
-                                                    }
-                                                >
-                                                    <td className="px-3 py-2 font-medium">
-                                                        {project.name}
-                                                    </td>
-                                                    <td className="px-3 py-2 text-muted-foreground">
-                                                        $
-                                                        {project.estimatedBudget.toLocaleString()}
-                                                    </td>
-                                                    <td className="px-3 py-2 text-muted-foreground">
-                                                        {project.phases}
-                                                    </td>
-                                                    <td className="px-3 py-2 text-muted-foreground">
-                                                        {project.assignments}
-                                                    </td>
-                                                    <td className="px-3 py-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) =>
-                                                                removeProject(
-                                                                    e,
-                                                                    project.id,
-                                                                )
-                                                            }
-                                                            className="flex items-center justify-center rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
-                                                            aria-label={`Remove ${project.name}`}
-                                                        >
-                                                            <X className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ),
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                        <div className="relative" ref={dropdownRef}>
+        <div className="w-full max-w-xl mx-auto mb-20">
+            <div>
+                <h1 className="text-2xl font-semibold">Invite Clients</h1>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <FieldGroup>
+                        <Field>
+                            <FieldLabel>Email</FieldLabel>
                             <Input
-                                {...register("projectSearch")}
-                                placeholder="Search projects..."
-                                autoComplete="off"
-                                onFocus={() => {
-                                    if (searchTerm) setDropdownOpen(true);
-                                }}
+                                {...register("email")}
+                                id="email"
+                                placeholder="client@example.com"
                             />
+                            {errors.email && (
+                                <FieldError>{errors.email.message}</FieldError>
+                            )}
+                        </Field>
 
-                            {dropdownOpen &&
-                                filteredProjects &&
-                                filteredProjects.length > 0 && (
-                                    <div className="absolute z-50 top-full left-0 right-0 mt-1 border rounded-md bg-popover shadow-md overflow-hidden">
-                                        <Command>
-                                            <CommandList>
-                                                <CommandGroup heading="Projects">
-                                                    {filteredProjects.map(
-                                                        (project) => (
-                                                            <CommandItem
-                                                                key={project.id}
-                                                                onSelect={() =>
-                                                                    handleSelect(
-                                                                        project,
+                        <Field>
+                            <FieldLabel>Projects:</FieldLabel>
+
+                            {selectedProjects.length > 0 && (
+                                <div className="mb-3 rounded-md border max-h-50 overflow-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b bg-muted/50">
+                                                <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                                                    Project
+                                                </th>
+                                                <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                                                    Budget
+                                                </th>
+                                                <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                                                    Phases
+                                                </th>
+                                                <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                                                    Assignments
+                                                </th>
+                                                <th className="text-left px-3 py-2 font-medium text-muted-foreground">
+                                                    Remove
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedProjects.map(
+                                                (project, index) => (
+                                                    <tr
+                                                        key={project.id}
+                                                        className={
+                                                            index !==
+                                                            selectedProjects.length -
+                                                                1
+                                                                ? "border-b"
+                                                                : ""
+                                                        }
+                                                    >
+                                                        <td className="px-2 py-2 font-medium  ">
+                                                            <span className="w-10  ">
+                                                                {project.name}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-3 py-2 text-muted-foreground ">
+                                                            $
+                                                            {project.estimatedBudget.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-muted-foreground ">
+                                                            {project.phases}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-muted-foreground ">
+                                                            {
+                                                                project.assignments
+                                                            }
+                                                        </td>
+                                                        <td className="px-3 py-2 ">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) =>
+                                                                    removeProject(
+                                                                        e,
+                                                                        project.id,
                                                                     )
                                                                 }
-                                                                className="cursor-pointer flex items-center justify-between"
+                                                                className="flex items-center justify-center rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
+                                                                aria-label={`Remove ${project.name}`}
                                                             >
-                                                                <span>
-                                                                    {
-                                                                        project.name
+                                                                <X className="h-3.5 w-3.5" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            <div className="relative" ref={dropdownRef}>
+                                <Input
+                                    {...register("projectSearch")}
+                                    placeholder="Search projects..."
+                                    autoComplete="off"
+                                    onFocus={() => {
+                                        if (searchTerm) setDropdownOpen(true);
+                                    }}
+                                />
+
+                                {dropdownOpen &&
+                                    filteredProjects &&
+                                    filteredProjects.length > 0 && (
+                                        <div className="absolute z-50 top-full left-0 right-0 mt-1 border rounded-md bg-popover shadow-md overflow-hidden">
+                                            <Command>
+                                                <CommandList>
+                                                    <CommandGroup heading="Projects">
+                                                        {filteredProjects.map(
+                                                            (project) => (
+                                                                <CommandItem
+                                                                    key={
+                                                                        project.id
                                                                     }
-                                                                </span>
-                                                                <span className="text-xs text-muted-foreground ml-4">
-                                                                    $
-                                                                    {project.estimatedBudget.toLocaleString()}{" "}
-                                                                    ·{" "}
-                                                                    {
-                                                                        project.phases
-                                                                    }{" "}
-                                                                    phases
-                                                                </span>
-                                                            </CommandItem>
-                                                        ),
-                                                    )}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </div>
-                                )}
-                        </div>
-                    </Field>
-                </FieldGroup>
-                <FieldGroup className="mt-8">
-                    <Button disabled={isPending} type="submit">
-                        {isPending ? (
-                            <div>
-                                <Spinner />
-                                <p>Sending...</p>
+                                                                    onSelect={() =>
+                                                                        handleSelect(
+                                                                            project,
+                                                                        )
+                                                                    }
+                                                                    className="cursor-pointer flex items-center justify-between"
+                                                                >
+                                                                    <span>
+                                                                        {
+                                                                            project.name
+                                                                        }
+                                                                    </span>
+                                                                    <span className="text-xs text-muted-foreground ml-4">
+                                                                        $
+                                                                        {project.estimatedBudget.toLocaleString()}{" "}
+                                                                        ·{" "}
+                                                                        {
+                                                                            project.phases
+                                                                        }{" "}
+                                                                        phases
+                                                                    </span>
+                                                                </CommandItem>
+                                                            ),
+                                                        )}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </div>
+                                    )}
                             </div>
-                        ) : (
-                            <p>Send Invitation Link</p>
-                        )}
-                    </Button>
-                </FieldGroup>
-                {isError && (
-                    <FieldError>{error.message}</FieldError>
-                )}
-            </form>
+                        </Field>
+                    </FieldGroup>
+                    <FieldGroup className="mt-8">
+                        <Button disabled={isPending} type="submit">
+                            {isPending ? (
+                                <div>
+                                    <Spinner />
+                                    <p>Sending...</p>
+                                </div>
+                            ) : (
+                                <p>Send Invitation Link</p>
+                            )}
+                        </Button>
+                    </FieldGroup>
+                    {isError && <FieldError>{error.message}</FieldError>}
+                </form>
+            </div>
         </div>
     );
 };

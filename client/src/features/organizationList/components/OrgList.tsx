@@ -5,7 +5,7 @@ import { useOrganizations } from "@/features/organizationList/hooks/useOrganizat
 
 const OrgList = () => {
     const {user, isLoading: userLoading, isError: userError} = useSession()
-    const { data: organizations, isLoading, error } = useOrganizations(user?.userId)
+    const { data: organizations, isLoading, error } = useOrganizations(user?.id)
     
     if (isLoading || userLoading) {
         return <p className="text-sm text-gray-400">Loading...</p>;

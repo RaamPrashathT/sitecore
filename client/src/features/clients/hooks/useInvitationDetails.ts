@@ -7,14 +7,18 @@ export interface InvitationDetails {
         name: string;
     };
     projects: {
-        id: string;
         name: string;
+        id: string;
     }[];
     admins: {
         userId: string;
         username: string | null;
         profileImage: string | null;
     }[];
+    currentUser: string | null;
+    sessionState: string;
+    userExists: boolean;
+    invitedEmail: string;
 }
 
 export const useInvitationDetails = (token: string | null) => {
