@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import clientService from "./clients.service.js";
 import { getFormSchema } from "./clients.schema.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
+import redis from "../../shared/lib/redis.js";
 
 const clientController = {
     async getClients(request: Request, response: Response) {
@@ -63,11 +64,25 @@ const clientController = {
     async getInvitationDetails(request: Request, response: Response) {
         try {
             const token = request.query.token as string;
-            if (!token) {
-                throw new UnAuthorizedError("Token is required");
-            }
+            if (!token) throw new UnAuthorizedError("Token is required");
+
             const invitation = await clientService.getInvitationDetails(token);
-            return response.status(200).json(invitation);
+            const sessionEmail = request.session?.email;
+            let sessionState;
+            if (!sessionEmail) {
+                sessionState = "UNAUTHENTICATED";
+            } else if (sessionEmail !== invitation.email) {
+                sessionState = "MISMATCH";
+            } else {
+                sessionState = "AUTHENTICATED";
+            }
+            return response.status(200).json({
+                organization: invitation.organization,
+                projects: invitation.projects,
+                admins: invitation.admins,
+                currentUser: sessionEmail ?? null ,
+                sessionState,
+            });
         } catch (error) {
             if (error instanceof UnAuthorizedError) {
                 return response.status(401).json({ message: error.message });

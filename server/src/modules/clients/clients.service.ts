@@ -101,6 +101,7 @@ const clientService = {
                 },
             },
             select: {
+                email: true,
                 projects: {
                     select: {
                         project: {
@@ -170,6 +171,7 @@ const clientService = {
             },
             projects,
             admins: adminDetails,
+            email: invitation.email,
         };
     },
 
