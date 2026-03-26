@@ -11,6 +11,8 @@ import crypto from "node:crypto";
 import { prisma } from "../../shared/lib/prisma.js";
 import { UnverifiedError } from "../../shared/error/unverified.error.js";
 import { env } from "../../shared/config/env.js";
+import { ValidationError } from "../../shared/error/validation.error.js";
+import { TwoFactorRequiredError } from "../../shared/error/twoFactor.error.js";
 
 type ProfileSchema = {
     sub: string;
@@ -24,16 +26,16 @@ type ProfileSchema = {
 
 const authController = {
     async register(request: Request, response: Response) {
-        try {   
+        try {
             const result = await authService.register(request.body);
-            if (result.success && result.frictionlessLogin) {
+            if (result.frictionlessLogin && result.sessionId && result.user) {
                 await redis.set(
                     `session:${result.sessionId}`,
                     JSON.stringify({
-                        userId: result.user!._id,
-                        email: result.user!.email,
-                        username: result.user!.username,
-                        onboarded: result.user!.onboarded,
+                        userId: result.user._id,
+                        email: result.user.email,
+                        username: result.user.username,
+                        onboarded: result.user.onboarded,
                         tenant: {},
                     }),
                     { EX: 60 * 60 * 24 },
@@ -47,89 +49,32 @@ const authController = {
                 });
 
                 return response.status(200).json({
-                    success: true,
                     message: "Registered and auto-verified via invite.",
-                    redirect: `/invites/accept?token=${request.body.inviteToken}`,
+                    frictionlessLogin: true,
                 });
             }
-            if (result.success) {
-                return response.status(200).json(result);
-            }
-            logger.error("Something went wrong");
-            return response.status(500).json({
-                success: false,
-                message: "Internal server error",
+
+            return response.status(200).json({
+                message: "OTP sent to email.",
+                frictionlessLogin: false,
+                token: result.token,
             });
         } catch (error) {
             if (
                 error instanceof ConflictError ||
                 (error as any).code === 11000
             ) {
-                return response.status(400).json({
-                    success: false,
-                    message: "User already exists",
+                return response.status(409).json({
+                    message: "User already exists. Please log in.",
                 });
             }
-            logger.error(error);
-            return response.status(500).json({
-                success: false,
-                message: "Internal server error",
-            });
-        }
-    },
-
-    async login(request: Request, response: Response) {
-        try {
-            const { sessionId, userId, username, email, onboarded, tenant } =
-                await authService.login(request.body);
-
-            await redis.set(
-                `session:${sessionId}`,
-                JSON.stringify({
-                    userId: userId,
-                    email: email,
-                    username: username,
-                    onboarded: onboarded,
-                    tenant: tenant,
-                }),
-                { EX: 60 * 60 * 24 },
-            );
-
-            response.cookie("session", sessionId, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                maxAge: 1000 * 60 * 60 * 24,
-            });
-
-            return response.status(200).json({
-                success: true,
-                message: "User logged in successfully",
-            });
-        } catch (error) {
-            if (error instanceof UnverifiedError) {
-                console.log(error);
-                return response.status(403).json({
-                    success: false,
-                    code: "EMAIL_NOT_VERIFIED",
-                    message: "OTP sent to your email",
-                    verificationToken: error.message,
-                });
-            }
-
             if (error instanceof UnAuthorizedError) {
-                return response.status(401).json({
-                    success: false,
-                    code: "INVALID_CREDENTIALS",
-                    message: "Invalid email or password",
+                return response.status(403).json({
+                    message: error.message,
                 });
             }
-
-            logger.error(error);
-
+            logger.error("Registration Error:", error);
             return response.status(500).json({
-                success: false,
-                code: "INTERNAL_ERROR",
                 message: "Internal server error",
             });
         }
@@ -139,19 +84,63 @@ const authController = {
         try {
             const { token, otp } = request.body;
             if (!token || !otp) {
-                throw new UnAuthorizedError("Token and OTP are required");
+                throw new ValidationError("Token and OTP are required.");
             }
-
-            const { sessionId, userId, username, email, onboarded, tenant } =
-                await authService.verifyOtp(token, otp);
+            const { sessionId, user } = await authService.verifyOtp(token, otp);
 
             await redis.set(
                 `session:${sessionId}`,
                 JSON.stringify({
-                    userId: userId,
-                    email: email,
-                    username: username,
-                    onboarded: onboarded,
+                    userId: user._id,
+                    email: user.email,
+                    username: user.username,
+                    onboarded: user.onboarded,
+                    tenant: {},
+                }),
+                { EX: 60 * 60 * 24 },
+            );
+
+            response.cookie("session", sessionId, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                maxAge: 1000 * 60 * 60 * 24,
+            });
+
+            return response.status(200).json({
+                message: "OTP verified successfully",
+            });
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(400).json({
+                    message: error.message,
+                });
+            }
+            if (error instanceof UnAuthorizedError) {
+                return response.status(400).json({
+                    message: error.message,
+                });
+            }
+            logger.error("OTP Verification Error:", error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async login(request: Request, response: Response) {
+        try {
+            const { sessionId, user, tenant } = await authService.login(
+                request.body,
+            );
+
+            await redis.set(
+                `session:${sessionId}`,
+                JSON.stringify({
+                    userId: user._id,
+                    email: user.email,
+                    username: user.username,
+                    onboarded: user.onboarded,
                     tenant: tenant,
                 }),
                 { EX: 60 * 60 * 24 },
@@ -165,21 +154,55 @@ const authController = {
             });
 
             return response.status(200).json({
-                success: true,
-                message: "Email verified and user logged in securely",
+                message: "User logged in successfully",
             });
         } catch (error) {
-            if (error instanceof UnAuthorizedError) {
-                return response.status(400).json({
-                    success: false,
-                    code: "INVALID_OTP",
-                    message: error.message,
+            if (error instanceof UnverifiedError) {
+                console.log(error);
+                return response.status(403).json({
+                    code: "EMAIL_NOT_VERIFIED",
+                    message: "OTP sent to your email",
+                    verificationToken: error.message,
                 });
             }
+            if (error instanceof TwoFactorRequiredError) {
+                return response.status(403).json({
+                    code: "2FA_REQUIRED",
+                    message: "Two-step verification required.",
+                    tempToken: error.tempToken,
+                });
+            }
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({
+                    code: "INVALID_CREDENTIALS",
+                    message: "Invalid email or password",
+                });
+            }
+
             logger.error(error);
+
             return response.status(500).json({
-                success: false,
                 code: "INTERNAL_ERROR",
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async resendVerification(request: Request, response: Response) {
+        try {
+            const { email } = request.body;
+            if (!email) throw new Error("Email is required");
+
+            const newToken = await authService.resendVerificationOtp(email);
+
+            return response.status(200).json({
+                message:
+                    "If the email is registered and unverified, a new OTP has been sent.",
+                verificationToken: newToken || null,
+            });
+        } catch (error) {
+            logger.error("Resend OTP Error:", error);
+            return response.status(500).json({
                 message: "Internal server error",
             });
         }
@@ -246,10 +269,14 @@ const authController = {
     async googleCallback(request: Request, response: Response) {
         try {
             const { code, state } = request.query;
-            const savedStateData = await redis.get(`oauth_state:${state as string}`);
+            const savedStateData = await redis.get(
+                `oauth_state:${state as string}`,
+            );
 
             if (!savedStateData) {
-                return response.status(400).send("State mismatch or session expired.");
+                return response
+                    .status(400)
+                    .send("State mismatch or session expired.");
             }
             const { codeVerifier, inviteToken } = JSON.parse(savedStateData);
 
@@ -305,11 +332,14 @@ const authController = {
 
             if (inviteToken) {
                 const invite = await prisma.clientInvitation.findFirst({
-                    where: { token: inviteToken, status: "PENDING" }
+                    where: { token: inviteToken, status: "PENDING" },
                 });
                 if (invite && invite.email !== validatedProfile.data.email) {
-                    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-                    return response.redirect(`${frontendUrl}/login?error=account_mismatch&expected=${invite.email}`);
+                    const frontendUrl =
+                        process.env.FRONTEND_URL || "http://localhost:5173";
+                    return response.redirect(
+                        `${frontendUrl}/login?error=account_mismatch&expected=${invite.email}`,
+                    );
                 }
             }
 
@@ -329,6 +359,7 @@ const authController = {
                     email: validatedProfile.data.email,
                     username: validatedProfile.data.name,
                     emailVerified: true,
+                    onboarded: false,
                     accounts: [
                         {
                             provider: "google",
@@ -383,9 +414,12 @@ const authController = {
                 maxAge: 1000 * 60 * 60 * 24,
             });
 
-            const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+            const frontendUrl =
+                process.env.FRONTEND_URL || "http://localhost:5173";
             if (inviteToken) {
-                return response.redirect(`${frontendUrl}/invitation?token=${inviteToken}`);
+                return response.redirect(
+                    `${frontendUrl}/invitation?token=${inviteToken}`,
+                );
             }
             return response.redirect(`${frontendUrl}/organizations`);
         } catch (error) {

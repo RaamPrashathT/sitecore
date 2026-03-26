@@ -13,6 +13,7 @@ export interface IUser extends Document {
     onboarded: boolean;
     phone?: string;
     profileImage?: string;
+    isTwoFactorEnabled: boolean;
     accounts: IAccount[];
     createdAt: Date;
     updatedAt: Date;
@@ -32,14 +33,6 @@ export interface IPasswordResetToken extends Document {
     expiresAt: Date;
 }
 
-export interface ITwoFactorAuth extends Document {
-    userId: Types.ObjectId;
-    secret: string;
-    isEnabled: boolean;
-    backupCodes: string[];
-    createdAt: Date;
-    updatedAt: Date;
-}
 
 const AccountSchema = new Schema<IAccount>(
     {
@@ -72,6 +65,7 @@ const UserSchema = new Schema<IUser>(
         },
         phone: { type: String },
         onboarded: { type: Boolean, default: false },
+        isTwoFactorEnabled: { type: Boolean, default: false },
         emailVerified: { type: Boolean, default: false },
         profileImage: { type: String },
         accounts: [AccountSchema],
@@ -103,17 +97,8 @@ const PasswordResetTokenSchema = new Schema<IPasswordResetToken>({
 
 PasswordResetTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const TwoFactorAuthSchema = new Schema<ITwoFactorAuth>(
-    {
-        userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-        secret: { type: String, required: true },
-        isEnabled: { type: Boolean, default: false },
-        backupCodes: [{ type: String }],
-    },
-    { timestamps: true }
-);
+
 
 export const User = model<IUser>("User", UserSchema);
 export const VerificationToken = model<IVerificationToken>("VerificationToken", VerificationTokenSchema);
 export const PasswordResetToken = model<IPasswordResetToken>("PasswordResetToken", PasswordResetTokenSchema);
-export const TwoFactorAuth = model<ITwoFactorAuth>("TwoFactorAuth", TwoFactorAuthSchema);
