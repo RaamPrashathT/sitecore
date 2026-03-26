@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/empty";
 import { ClipboardCheckIcon, SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import ClientInviteButton from "./ClientInvite/ClientInviteButton";
 
 interface ClientEmptyProps {
     slug: string;
@@ -23,9 +24,7 @@ const ClientEmpty = ({ slug }: ClientEmptyProps) => {
                         <ClipboardCheckIcon />
                     </EmptyMedia>
                     <EmptyTitle>No Clients</EmptyTitle>
-                    <EmptyDescription>
-                        No pending clients yet. 
-                    </EmptyDescription>
+                    <EmptyDescription>No pending clients yet.</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="flex-row justify-center gap-2">
                     <Button className="w-50">
@@ -37,6 +36,9 @@ const ClientEmpty = ({ slug }: ClientEmptyProps) => {
                             <p className="mb-px">Check for Invitations</p>
                         </Link>
                     </Button>
+                    <div className="w-50">
+                        <ClientInviteButton />
+                    </div>
                 </EmptyContent>
             </Empty>
         </div>

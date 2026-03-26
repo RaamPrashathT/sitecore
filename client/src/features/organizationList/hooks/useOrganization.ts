@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-interface OrganizationType {
+export interface OrganizationType {
     id: string;
     name: string;
     slug: string;
@@ -12,10 +12,11 @@ const getOrganizations = async () => {
     return data;
 };
 
-export const useOrganizations = (userId: string) => {
+export const useOrganizations = (userId: string | undefined) => {
     return useQuery({
         queryKey: ["organizations", userId],
         queryFn: getOrganizations,
-        staleTime: 0
+        staleTime: 1000 * 60 * 60,
+        enabled: !!userId,
     })
 }

@@ -17,7 +17,6 @@ const VerifyEmail = () => {
     const [value, setValue] = React.useState("");
 
     const token = new URLSearchParams(globalThis.location.search).get("token");
-    console.log(token)
     const {
         mutate: verify,
         isPending,

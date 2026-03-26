@@ -29,6 +29,32 @@ const authController = {
             if (result.success) {
                 return response.status(200).json(result);
             }
+            if (result.success && result.frictionlessLogin) {
+                await redis.set(
+                    `session:${result.sessionId}`,
+                    JSON.stringify({
+                        userId: result.user!._id,
+                        email: result.user!.email,
+                        username: result.user!.username,
+                        onboarded: result.user!.onboarded,
+                        tenant: {},
+                    }),
+                    { EX: 60 * 60 * 24 },
+                );
+
+                response.cookie("session", result.sessionId, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "none",
+                    maxAge: 1000 * 60 * 60 * 24,
+                });
+
+                return response.status(200).json({
+                    success: true,
+                    message: "Registered and auto-verified via invite.",
+                    redirect: `/invites/accept?token=${request.body.inviteToken}`,
+                });
+            }
             logger.error("Something went wrong");
             return response.status(500).json({
                 success: false,
@@ -54,7 +80,7 @@ const authController = {
 
     async login(request: Request, response: Response) {
         try {
-            console.log(request.body)
+            console.log(request.body);
             const { sessionId, userId, username, email, onboarded, tenant } =
                 await authService.login(request.body);
 
@@ -117,7 +143,8 @@ const authController = {
                 throw new UnAuthorizedError("Token and OTP are required");
             }
 
-            const { sessionId, userId, username, email, onboarded, tenant } = await authService.verifyOtp(token, otp);
+            const { sessionId, userId, username, email, onboarded, tenant } =
+                await authService.verifyOtp(token, otp);
 
             await redis.set(
                 `session:${sessionId}`,
@@ -209,7 +236,8 @@ const authController = {
 
     async google(request: Request, response: Response) {
         try {
-            const redirectUrl = await authService.googleLogin();
+            const inviteToken = request.query.inviteToken as string;
+            const redirectUrl = await authService.googleLogin(inviteToken);
             return response.redirect(redirectUrl);
         } catch (error) {
             logger.error(error);
@@ -219,17 +247,12 @@ const authController = {
     async googleCallback(request: Request, response: Response) {
         try {
             const { code, state } = request.query;
-            const savedCodeVerifier = await redis.get(
-                `oauth_state:${state as string}`,
-            );
+            const savedStateData = await redis.get(`oauth_state:${state as string}`);
 
-            if (!savedCodeVerifier) {
-                return response
-                    .status(400)
-                    .send(
-                        "State mismatch or session expired. Possible CSRF attack.",
-                    );
+            if (!savedStateData) {
+                return response.status(400).send("State mismatch or session expired.");
             }
+            const { codeVerifier, inviteToken } = JSON.parse(savedStateData);
 
             await redis.del(`oauth_state:${state as string}`);
 
@@ -244,7 +267,7 @@ const authController = {
                         client_secret: process.env.GOOGLE_CLIENT_SECRET,
                         redirect_uri: process.env.GOOGLE_REDIRECT_URI,
                         grant_type: "authorization_code",
-                        code_verifier: savedCodeVerifier,
+                        code_verifier: codeVerifier,
                     }),
                 },
             );
@@ -280,6 +303,16 @@ const authController = {
             const existingUser = await User.findOne({
                 email: validatedProfile.data.email,
             });
+
+            if (inviteToken) {
+                const invite = await prisma.clientInvitation.findFirst({
+                    where: { token: inviteToken, status: "PENDING" }
+                });
+                if (invite && invite.email !== validatedProfile.data.email) {
+                    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+                    return response.redirect(`${frontendUrl}/login?error=account_mismatch&expected=${invite.email}`);
+                }
+            }
 
             let user;
 
@@ -351,8 +384,10 @@ const authController = {
                 maxAge: 1000 * 60 * 60 * 24,
             });
 
-            const frontendUrl =
-                process.env.FRONTEND_URL || "http://localhost:5173";
+            const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+            if (inviteToken) {
+                return response.redirect(`${frontendUrl}/invitation?token=${inviteToken}`);
+            }
             return response.redirect(`${frontendUrl}/organizations`);
         } catch (error) {
             logger.error(error);

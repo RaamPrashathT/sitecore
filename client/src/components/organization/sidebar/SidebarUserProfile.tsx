@@ -40,7 +40,7 @@ const SidebarUser = () => {
                             size="lg"
                             className="flex items-center gap-2.5 w-full px-2.5 py-8 rounded-none border border-transparent bg-transparent cursor-pointer transition-[background,border-color] duration-150 ease-in-out hover:bg-[#f0f3f9] hover:border-[#e8eaf0]"
                         >
-                            <div className="w-8 h-8 rounded-full bg-[#1e3a8a] text-white text-xs font-bold flex items-center justify-center shrink-0 tracking-[0.04em]">
+                            <div className="w-8 h-8 rounded-full bg-green-700 text-white text-xs font-bold flex items-center justify-center shrink-0 tracking-[0.04em]">
                                 {initials}
                             </div>
                             <div className="flex-1 flex flex-col min-w-0">
@@ -59,7 +59,7 @@ const SidebarUser = () => {
                     >
                         {/* Identity block */}
                         <DropdownMenuLabel className="flex items-center gap-2.5 px-2.5 py-2 font-normal">
-                            <div className="w-[34px] h-[34px] rounded-full bg-[#1e3a8a] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                            <div className="w-[34px] h-[34px] rounded-full bg-green-700 text-white text-xs font-bold flex items-center justify-center shrink-0">
                                 {initials}
                             </div>
                             <div className="flex flex-col min-w-0">

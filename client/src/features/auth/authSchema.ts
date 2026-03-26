@@ -20,5 +20,23 @@ export const registerSchema = loginSchema.extend({
     path: ["confirmPassword"],
 });
 
+const tenantSchema = z.record(
+    z.string(),
+    z.object({
+      id: z.string(),
+      role: z.string(),
+    })
+  );
+
+export const sessionSchema = z.object({
+    userId: z.string(),
+    email: z.string(),
+    username: z.string(),
+    onboarded: z.boolean(),
+    tenant: tenantSchema
+})
+
+
+export type SessionInput = z.infer<typeof sessionSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -59,8 +59,12 @@ export function LoginForm({
             });
 
             if (result.data.success) {
-                navigate("/organizations");
-                
+                const inviteToken = sessionStorage.getItem("pending_invite_token");
+                if (inviteToken) {
+                    navigate(`/invitation?token=${inviteToken}`);
+                } else {
+                    navigate("/organizations");
+                }
             }
         } catch (error: unknown) {
             let message = "Something went wrong";
@@ -167,12 +171,20 @@ export function LoginForm({
                 )}
                 <FieldSeparator>Or continue with</FieldSeparator>
                 <Field>
-                    <Button
+                <Button
                         variant="outline"
                         type="button"
                         className="flex items-center"
+                        onClick={() => {
+                            const inviteToken = sessionStorage.getItem("pending_invite_token");
+                            const googleUrl = inviteToken 
+                                ? `http://localhost:3000/auth/google?inviteToken=${inviteToken}`
+                                : `http://localhost:3000/auth/google`;
+                            
+                            globalThis.location.href = googleUrl;
+                        }}
                     >
-                        <FcGoogle className="mt-0.5" />
+                        <FcGoogle className="mt-0.5 mr-2" />
                         Login with Google
                     </Button>
                     <FieldDescription className="text-center">

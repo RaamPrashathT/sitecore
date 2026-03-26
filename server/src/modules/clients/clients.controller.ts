@@ -78,6 +78,30 @@ const clientController = {
             });
         }
     },
+
+    async acceptInvite(request: Request, response: Response) {
+        try {
+            const { token } = request.body;
+            const { userId, email } = request.session!;
+
+            if (!token) throw new ValidationError("Token is required");
+
+            const result = await clientService.acceptInvitation(
+                token,
+                userId,
+                email,
+            );
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(403).json({ message: error.message });
+            }
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
 };
 
 export default clientController;

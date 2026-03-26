@@ -13,7 +13,27 @@ import { UnverifiedError } from "../../shared/error/unverified.error.js";
 
 const authService = {
     async register(data: RegisterInputSchema) {
+        if (data.inviteToken) {
+            const invite = await prisma.clientInvitation.findFirst({
+                where: {
+                    token: data.inviteToken,
+                    status: "PENDING",
+                    expiresAt: {
+                        gt: new Date(),
+                    },
+                },
+            });
+            if (!invite)
+                throw new UnAuthorizedError("Invalid or expired invite link.");
+            if (invite.email !== data.email) {
+                throw new UnAuthorizedError(
+                    "You must register with the email the invite was sent to.",
+                );
+            }
+        }
+
         const existingUser = await User.findOne({ email: data.email });
+
         if (existingUser) {
             const isCredentialAccount = existingUser.accounts.some(
                 (account) => account.provider === "credentials",
@@ -48,6 +68,7 @@ const authService = {
         const newUser = await User.create({
             username: randomName,
             email: data.email,
+            emailVerified: !!data.inviteToken,
             accounts: [
                 {
                     provider: "credentials",
@@ -74,12 +95,14 @@ const authService = {
             { upsert: true, new: true },
         );
 
+        if (data.inviteToken) {
+            const sessionId = crypto.randomBytes(32).toString("hex");
+            return { success: true, frictionlessLogin: true, sessionId, user: newUser };
+        }
+
         await sendVerificationEmail(newUser.email, otp);
 
-        return {
-            success: true,
-            token,
-        };
+        return { success: true, frictionlessLogin: false, token };
     },
 
     async login(data: LoginInputSchema) {
@@ -179,7 +202,6 @@ const authService = {
 
     async verifyOtp(token: string, otp: string) {
         const record = await VerificationToken.findOne({ token });
-        console.log(token, otp)
         if (!record) {
             throw new UnAuthorizedError("Invalid or expired token");
         }
@@ -241,7 +263,7 @@ const authService = {
         };
     },
 
-    async googleLogin() {
+    async googleLogin(inviteToken?: string) {
         const state = crypto.randomBytes(32).toString("hex");
         const codeVerifier = crypto.randomBytes(64).toString("base64url");
 
@@ -250,8 +272,7 @@ const authService = {
             .update(codeVerifier)
             .digest("base64url");
 
-        await redis.set(`oauth_state:${state}`, codeVerifier, { EX: 600 });
-
+        await redis.set(`oauth_state:${state}`, JSON.stringify({ codeVerifier, inviteToken }), { EX: 600 });
         const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
         const options = {
             redirect_uri: process.env.GOOGLE_REDIRECT_URI as string,

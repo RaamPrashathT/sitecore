@@ -7,7 +7,7 @@ import {
     Users,
     ClipboardClock,
     ClipboardPlus,
-    Mail
+    Mail,
 } from "lucide-react";
 
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -23,32 +23,63 @@ import {
 import { useParams } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 
-
 const adminData = {
     sidebarContents: [
-        { title: "Dashboard", url: "/", icon: SquareTerminal },
-        { title: "Catalogue", url: "/catalogue", icon: ScrollText },
-        { title: "Engineers", url: "/engineers", icon: UserRoundCheck },
-        { title: "Clients", url: "/clients", icon: Users },
-        { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
-        { title: "Pending Payments", url: "/pending-payments", icon: ClipboardClock },
-        { title: "Pending Requests", url: "/pending-requisitions", icon: ClipboardPlus },
-        { title: "Pending Invitations", url: "/pending-invitations", icon: Mail },
+        {
+            Overview: [
+                { title: "Dashboard", url: "/", icon: SquareTerminal },
+                { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
+            ],
+        },
+        {
+            Management: [
+                { title: "Catalogue", url: "/catalogue", icon: ScrollText },
+                { title: "Engineers", url: "/engineers", icon: UserRoundCheck },
+                { title: "Clients", url: "/clients", icon: Users },
+            ],
+        },
+        {
+            Pending: [
+                {
+                    title: "Payments",
+                    url: "/pending-payments",
+                    icon: ClipboardClock,
+                },
+                {
+                    title: "Requests",
+                    url: "/pending-requisitions",
+                    icon: ClipboardPlus,
+                },
+                {
+                    title: "Invitations",
+                    url: "/pending-invitations",
+                    icon: Mail,
+                },
+            ],
+        },
     ],
 };
 
 const engineerData = {
     sidebarContents: [
-        { title: "Dashboard", url: "/", icon: SquareTerminal, isActive: true },
-        { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
-    ]
+        {
+            Overview: [
+                { title: "Dashboard", url: "/", icon: SquareTerminal },
+                { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
+            ],
+        },
+    ],
 };
 
 const clientData = {
     sidebarContents: [
-        { title: "Dashboard", url: "/", icon: SquareTerminal, isActive: true },
-        { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
-    ]
+        {
+            Overview: [
+                { title: "Dashboard", url: "/", icon: SquareTerminal },
+                { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
+            ],
+        },
+    ],
 };
 
 const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
@@ -64,7 +95,11 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     }
 
     if (!membership) {
-        return <div className="text-sm text-[#8892a4] p-4">No membership found</div>;
+        return (
+            <div className="text-sm text-[#8892a4] p-4">
+                No membership found
+            </div>
+        );
     }
 
     const roleDataMap: Record<string, typeof adminData> = {
@@ -86,10 +121,17 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             </SidebarHeader>
             <SidebarContent className="bg-white py-2">
                 <SidebarContents
-                    items={roleData.sidebarContents.map((item) => ({
-                        ...item,
-                        url: `/${orgSlug}${item.url}`,
-                    }))}
+                    groups={roleData.sidebarContents.map((group) => {
+                        const [label, items] = Object.entries(group)[0];
+
+                        return {
+                            label,
+                            items: items.map((item) => ({
+                                ...item, 
+                                url: `/${orgSlug}${item.url}`,
+                            })),
+                        };
+                    })}
                 />
             </SidebarContent>
             <SidebarFooter className="bg-white border-t p-0">

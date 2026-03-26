@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function RegisterForm({
     className,
@@ -41,13 +42,16 @@ export function RegisterForm({
     });
     
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const onSubmit = async (data: RegisterInput) => {
         setApiMessage(null)
         try {
+            const inviteToken = sessionStorage.getItem("pending_invite_token");
             const result = await api.post("/auth/register", {
                 email: data.email,
                 password: data.password,
+                inviteToken: inviteToken || undefined
             });
 
             setApiMessage({
@@ -56,7 +60,13 @@ export function RegisterForm({
             })
             
             if (result.data.success) {
-                navigate(`/verify-email?token=${result.data.token}`);
+                if (result.data.frictionlessLogin) {
+                    await queryClient.invalidateQueries({ queryKey: ['session'] });
+                    await queryClient.refetchQueries({ queryKey: ['session'] });
+                    navigate(`/invitation?token=${inviteToken}`);
+                } else {
+                    navigate(`/verify-email?token=${result.data.token}`);
+                }
             }
         } catch (error: unknown) {
             const message = axios.isAxiosError(error)

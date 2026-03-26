@@ -6,6 +6,7 @@ import { Role } from "../../../generated/prisma/client.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { Types } from "mongoose";
 import { sendInviteEmail } from "../../shared/lib/emails/sendClientInvitation.js";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 
 const clientService = {
     async getClients(
@@ -127,32 +128,30 @@ const clientService = {
             },
         });
 
-        if(!invitation) throw new MissingError("Invitation not found");
+        if (!invitation) throw new MissingError("Invitation not found");
 
         const projects = invitation.projects.map((project) => ({
             name: project.project.name,
             id: project.project.id,
-        }))
+        }));
 
         const organization = invitation.projects[0]?.project.organization;
 
-        if(!organization) throw new MissingError("Organization not found");
+        if (!organization) throw new MissingError("Organization not found");
 
         const adminIds = [
-            ...new Set(
-                organization.members.map((member) => member.userId),
-            )
-        ]
+            ...new Set(organization.members.map((member) => member.userId)),
+        ];
 
         const objectIds = adminIds.map((id) => new Types.ObjectId(id));
 
         const admins = await User.find(
             { _id: { $in: objectIds } },
-            { username: 1, profileImage: 1 } 
+            { username: 1, profileImage: 1 },
         ).lean();
 
         const adminMap = new Map(
-            admins.map((admin) => [admin._id.toString(), admin])
+            admins.map((admin) => [admin._id.toString(), admin]),
         );
 
         const adminDetails = adminIds.map((id) => {
@@ -172,7 +171,69 @@ const clientService = {
             projects,
             admins: adminDetails,
         };
+    },
 
+    async acceptInvitation(token: string, userId: string, userEmail: string) {
+        const invitation = await prisma.clientInvitation.findFirst({
+            where: {
+                token,
+                status: "PENDING",
+                expiresAt: { gt: new Date() },
+            },
+            include: { projects: true },
+        });
+
+        if (!invitation) {
+            throw new UnAuthorizedError(
+                "Invalid, expired, or already claimed invitation",
+            );
+        }
+
+        if (invitation.email !== userEmail) {
+            throw new UnAuthorizedError(
+                `Account Mismatch: Please log in with ${invitation.email}`,
+            );
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.clientInvitation.update({
+                where: { id: invitation.id },
+                data: {
+                    status: "ACCEPTED",
+                    accepted: true,
+                    claimedByUserId: userId,
+                },
+            });
+
+            await tx.membership.upsert({
+                where: {
+                    userId_organizationId: {
+                        userId,
+                        organizationId: invitation.organizationId,
+                    },
+                },
+                create: {
+                    userId,
+                    organizationId: invitation.organizationId,
+                    role: invitation.role,
+                },
+                update: {},
+            });
+            for (const proj of invitation.projects) {
+                await tx.assignment.upsert({
+                    where: {
+                        userId_projectId: { userId, projectId: proj.projectId },
+                    },
+                    create: {
+                        userId,
+                        projectId: proj.projectId,
+                        role: invitation.role,
+                    },
+                    update: {},
+                });
+            }
+        });
+        return { success: true, message: "Welcome to the organization." };
     },
 };
 

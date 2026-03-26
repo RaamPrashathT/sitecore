@@ -35,6 +35,7 @@ import SettingsPage from "./pages/adminPages/SettingsPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import ClientInvitePage from "./pages/adminPages/clients/ClientInvitePage";
 import InvitationPage from "./pages/invitation/InvitationPage";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -59,9 +60,18 @@ function App() {
 
                     {/* Protected Routes */}
                     <Route element={<PrivateRoutes />}>
-                        <Route path="/organizations" element={<OrganizationListPage />} />
-                        <Route path="/organizations/create" element={<CreateOrgPage />} />
-                        <Route path="/organizations/search" element={<SearchOrgPage />} />
+                        <Route
+                            path="/organizations"
+                            element={<OrganizationListPage />}
+                        />
+                        <Route
+                            path="/organizations/create"
+                            element={<CreateOrgPage />}
+                        />
+                        <Route
+                            path="/organizations/search"
+                            element={<SearchOrgPage />}
+                        />
 
                         {/* Organization Scoped Routes */}
                         <Route path="/:orgSlug" element={<OrgGuard />}>
@@ -69,21 +79,42 @@ function App() {
                                 <Route index element={<DashboardPage />} />
 
                                 {/* Catalogue */}
-                                <Route path="catalogue" element={<CataloguePage />} />
-                                <Route path="catalogue/create" element={<CreateCataloguePage />} />
+                                <Route
+                                    path="catalogue"
+                                    element={<CataloguePage />}
+                                />
+                                <Route
+                                    path="catalogue/create"
+                                    element={<CreateCataloguePage />}
+                                />
                                 <Route
                                     path="catalogue/edit/:catalogueId/:quoteId"
                                     element={<EditCataloguePage />}
                                 />
 
                                 {/* Users */}
-                                <Route path="engineers" element={<EngineerPage />} />
-                                <Route path="clients" element={<ClientPage />} />
-                                <Route path="clients/invite" element={<ClientInvitePage />} />
+                                <Route
+                                    path="engineers"
+                                    element={<EngineerPage />}
+                                />
+                                <Route
+                                    path="clients"
+                                    element={<ClientPage />}
+                                />
+                                <Route
+                                    path="clients/invite"
+                                    element={<ClientInvitePage />}
+                                />
 
                                 {/* Projects */}
-                                <Route path="projects" element={<ProjectListPage />} />
-                                <Route path="projects/create" element={<CreateProjectPage />} />
+                                <Route
+                                    path="projects"
+                                    element={<ProjectListPage />}
+                                />
+                                <Route
+                                    path="projects/create"
+                                    element={<CreateProjectPage />}
+                                />
 
                                 <Route
                                     path=":projectSlug/create-phase"
@@ -93,7 +124,10 @@ function App() {
                                     path=":projectSlug/requisition/:requisitionIdSlug"
                                     element={<RequisitionCreationPage />}
                                 />
-                                <Route path=":projectSlug" element={<ProjectPage />} />
+                                <Route
+                                    path=":projectSlug"
+                                    element={<ProjectPage />}
+                                />
 
                                 {/* Pending */}
                                 <Route
@@ -110,12 +144,17 @@ function App() {
                                 />
 
                                 {/* Settings */}
-                                <Route path="settings" element={<SettingsPage />} />
+                                <Route
+                                    path="settings"
+                                    element={<SettingsPage />}
+                                />
                             </Route>
                         </Route>
                     </Route>
                 </Routes>
             </BrowserRouter>
+            
+            <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 }

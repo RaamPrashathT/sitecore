@@ -135,10 +135,10 @@ const ClientInviteForm = () => {
 
     const { mutate, isPending, error, isError } = useMutation({
         mutationFn: async (data: PayloadSchema) => {
-            return api.post("/clients/invitation", data);
+            return api.post(`/clients/invitation`, data);
         },
         onSuccess: () => {
-            navigate("/clients");
+            navigate(`/${membership?.slug}/clients`);
         },
     });
 
@@ -158,7 +158,6 @@ const ClientInviteForm = () => {
             email: data.email,
             projects: data.selectedProjects.map((project) => project.id),
         };
-        console.log(payload)
         mutate(payload);
     };
 
