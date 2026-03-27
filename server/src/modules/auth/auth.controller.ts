@@ -28,6 +28,7 @@ const authController = {
     async register(request: Request, response: Response) {
         try {
             const result = await authService.register(request.body);
+            
             if (result.frictionlessLogin && result.sessionId && result.user) {
                 await redis.set(
                     `session:${result.sessionId}`,
@@ -35,11 +36,20 @@ const authController = {
                         userId: result.user._id,
                         email: result.user.email,
                         username: result.user.username,
+                        profileImage: result.user.profileImage,
                         onboarded: result.user.onboarded,
                         tenant: {},
                     }),
                     { EX: 60 * 60 * 24 },
                 );
+                
+                if (request.body.inviteToken) {
+                    await redis.set(
+                        `pending_invite:${result.user?._id}`, 
+                        request.body.inviteToken, 
+                        { EX: 3600 }
+                    );
+                }
 
                 response.cookie("session", result.sessionId, {
                     httpOnly: true,
@@ -53,6 +63,7 @@ const authController = {
                     frictionlessLogin: true,
                 });
             }
+            
 
             return response.status(200).json({
                 message: "OTP sent to email.",
@@ -95,6 +106,7 @@ const authController = {
                     email: user.email,
                     username: user.username,
                     onboarded: user.onboarded,
+                    profileImage: user.profileImage,
                     tenant: {},
                 }),
                 { EX: 60 * 60 * 24 },
@@ -141,10 +153,19 @@ const authController = {
                     email: user.email,
                     username: user.username,
                     onboarded: user.onboarded,
+                    profileImage: user.profileImage,
                     tenant: tenant,
                 }),
                 { EX: 60 * 60 * 24 },
             );
+
+            if (request.body.inviteToken) {
+                await redis.set(
+                    `pending_invite:${user?._id}`, 
+                    request.body.inviteToken, 
+                    { EX: 3600 }
+                );
+            }
 
             response.cookie("session", sessionId, {
                 httpOnly: true,
@@ -256,6 +277,57 @@ const authController = {
         }
     },
 
+    async verify2fa(request: Request, response: Response) {
+        try {
+            const { token, otp, inviteToken } = request.body;
+            
+            if (!token || !otp) {
+                throw new ValidationError("Token and OTP are required.");
+            }
+
+            const { sessionId, user, tenant } = await authService.verify2fa(token, otp);
+
+            await redis.set(
+                `session:${sessionId}`,
+                JSON.stringify({
+                    userId: user._id,
+                    email: user.email,
+                    username: user.username,
+                    onboarded: user.onboarded,
+                    profileImage: user.profileImage,
+                    tenant: tenant,
+                }),
+                { EX: 60 * 60 * 24 },
+            );
+
+            if (inviteToken) {
+                await redis.set(
+                    `pending_invite:${user._id}`, 
+                    inviteToken, 
+                    { EX: 3600 }
+                );
+            }
+
+            response.cookie("session", sessionId, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                maxAge: 1000 * 60 * 60 * 24,
+            });
+
+            return response.status(200).json({
+                message: "Two-step verification successful. Logged in.",
+            });
+
+        } catch (error) {
+            if (error instanceof ValidationError || error instanceof UnAuthorizedError) {
+                return response.status(400).json({ message: error.message });
+            }
+            logger.error("2FA Verification Error:", error);
+            return response.status(500).json({ message: "Internal server error" });
+        }
+    },
+
     async google(request: Request, response: Response) {
         try {
             const inviteToken = request.query.inviteToken as string;
@@ -331,7 +403,7 @@ const authController = {
             });
 
             if (inviteToken) {
-                const invite = await prisma.clientInvitation.findFirst({
+                const invite = await prisma.invitation.findFirst({
                     where: { token: inviteToken, status: "PENDING" },
                 });
                 if (invite && invite.email !== validatedProfile.data.email) {
@@ -402,11 +474,20 @@ const authController = {
                     email: user.email,
                     username: user.username,
                     onboarded: user.onboarded,
+                    profileImage: user.profileImage,
                     tenant: formattedTenant,
                 }),
                 { EX: 60 * 60 * 24 },
             );
 
+            if (inviteToken) {
+                await redis.set(
+                    `pending_invite:${user._id}`, 
+                    inviteToken, 
+                    { EX: 3600 }
+                );
+            }
+            
             response.cookie("session", sessionId, {
                 httpOnly: true,
                 secure: true,

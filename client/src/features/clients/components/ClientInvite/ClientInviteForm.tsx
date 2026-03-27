@@ -163,7 +163,7 @@ const ClientInviteForm = () => {
     return (
         <div className="w-full max-w-xl mx-auto mb-20">
             <div>
-                <h1 className="text-2xl font-semibold">Invite Clients</h1>
+                <h1 className="text-2xl font-semibold mb-2">Invite Clients</h1>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <FieldGroup>
                         <Field>
@@ -313,7 +313,7 @@ const ClientInviteForm = () => {
                     <FieldGroup className="mt-8">
                         <Button disabled={isPending} type="submit">
                             {isPending ? (
-                                <div>
+                                <div className="flex items-center gap-x-1">
                                     <Spinner />
                                     <p>Sending...</p>
                                 </div>

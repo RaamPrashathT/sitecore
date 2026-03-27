@@ -16,6 +16,8 @@ authRouter.get('/me', authorize, authController.me)
 
 authRouter.post("/verify-email", authController.verifyOtp)
 
+authRouter.post("/verify-2fa", authController.verify2fa);
+
 authRouter.get('/google', authController.google)
 
 authRouter.get('/google/callback', authController.googleCallback)

@@ -17,17 +17,17 @@ import { TwoFactorRequiredError } from "../../shared/error/twoFactor.error.js";
 const authService = {
     async register(data: RegisterInputSchema) {
         if (data.inviteToken) {
-            const invite = await prisma.clientInvitation.findFirst({
+            const invite = await prisma.invitation.findFirst({
                 where: {
                     token: data.inviteToken,
                     status: "PENDING",
                     expiresAt: { gt: new Date() },
                 },
             });
-
+            
             if (!invite) {
                 throw new UnAuthorizedError("Invalid or expired invite link");
-            }
+            }   
             if (invite.email !== data.email) {
                 throw new UnAuthorizedError(
                     "You must register with the exact email the invite was sent to.",
@@ -121,6 +121,68 @@ const authService = {
         };
     },
 
+    async verify2fa(tempToken: string, otp: string) {
+        const intentData = await redis.get(`2fa_intent:${tempToken}`);
+        if (!intentData) {
+            throw new UnAuthorizedError("Invalid or expired 2FA token. Please log in again.");
+        }
+
+        const { userId, otpHash } = JSON.parse(intentData);
+
+        const hashedOtp = hashOTP(otp);
+        if (hashedOtp !== otpHash) {
+            throw new UnAuthorizedError("Invalid OTP code.");
+        }
+
+        await redis.del(`2fa_intent:${tempToken}`);
+
+        const user = await User.findById(userId);
+        if (!user) throw new UnAuthorizedError("User not found.");
+
+        const sessionId = crypto.randomBytes(32).toString("hex");
+
+        const tenant = await prisma.membership.findMany({
+            where: { userId: user._id.toString() },
+            select: {
+                role: true,
+                organization: {
+                    select: {
+                        id: true,
+                        slug: true,
+                        projects: {
+                            where: {
+                                assignments: {
+                                    some: {
+                                        userId: user._id.toString(),
+                                        role: { in: ["CLIENT", "ENGINEER", "ADMIN"] },
+                                    },
+                                },
+                            },
+                            select: { id: true, slug: true },
+                        },
+                    },
+                },
+            },
+        });
+
+        const formattedTenant = tenant.reduce(
+            (acc, item) => {
+                acc[item.organization.slug] = {
+                    id: item.organization.id,
+                    role: item.role,
+                };
+                return acc;
+            },
+            {} as Record<string, { id: string; role: string }>,
+        );
+
+        return {
+            sessionId,
+            user,
+            tenant: formattedTenant,
+        };
+    },
+
     async login(data: LoginInputSchema) {
         const existingUser = await User.findOne({ email: data.email }).select(
             "+accounts.password",
@@ -149,7 +211,7 @@ const authService = {
 
         let isInvitedLogin = false;
         if (data.inviteToken) {
-            const invite = await prisma.clientInvitation.findFirst({
+            const invite = await prisma.invitation.findFirst({
                 where: {
                     token: data.inviteToken,
                     status: "PENDING",
@@ -220,7 +282,7 @@ const authService = {
                                 assignments: {
                                     some: {
                                         userId: existingUser._id.toString(),
-                                        role: { in: ["CLIENT", "ENGINEER"] },
+                                        role: { in: ["CLIENT", "ENGINEER", "ADMIN"] },
                                     },
                                 },
                             },

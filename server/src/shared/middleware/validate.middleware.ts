@@ -8,7 +8,7 @@ export const validate =
         if(!validatedData.success) {
             response.status(401).json({
                 success: false,
-                message: "Invalid Email or password"
+                message: "Invalid Request"
             })
             return
         }

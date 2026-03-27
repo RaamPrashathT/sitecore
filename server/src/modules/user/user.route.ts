@@ -11,4 +11,10 @@ userRouter.get("/invitation-details", loadSession, userController.getInvitationD
 
 userRouter.post("/onboard", authorize, validate(OnboardingSchema), userController.onboard);
 
-export default userRouter;``
+userRouter.get("/provision", authorize, userController.provision);
+
+userRouter.post("/accept-invitation", authorize, userController.acceptInvite);
+
+userRouter.post("/decline-invitation", authorize, userController.declineInvite);
+
+export default userRouter;

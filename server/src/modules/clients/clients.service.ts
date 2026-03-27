@@ -75,7 +75,7 @@ const clientService = {
     async createInvite(organizationId: string, data: CreateInviteBodySchema) {
         const { email, projects } = data;
         const token = crypto.randomBytes(32).toString("hex");
-        await prisma.clientInvitation.create({
+        await prisma.invitation.create({
             data: {
                 email,
                 token,
@@ -93,7 +93,7 @@ const clientService = {
     },
 
     async getInvitationDetails(token: string) {
-        const invitation = await prisma.clientInvitation.findFirst({
+        const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
                 expiresAt: {
@@ -177,7 +177,7 @@ const clientService = {
     },
 
     async acceptInvitation(token: string, userId: string, userEmail: string) {
-        const invitation = await prisma.clientInvitation.findFirst({
+        const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
                 status: "PENDING",
@@ -199,7 +199,7 @@ const clientService = {
         }
 
         await prisma.$transaction(async (tx) => {
-            await tx.clientInvitation.update({
+            await tx.invitation.update({
                 where: { id: invitation.id },
                 data: {
                     status: "ACCEPTED",

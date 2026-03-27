@@ -36,6 +36,8 @@ import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import ClientInvitePage from "./pages/adminPages/clients/ClientInvitePage";
 import InvitationPage from "./pages/invitation/InvitationPage";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import ProvisionPage from "./pages/invitation/ProvisionPage";
+import Verify2FAPage from "./pages/auth/Verify2FAPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -56,10 +58,15 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/verify-2fa" element={<Verify2FAPage />} />
                     <Route path="/invitation" element={<InvitationPage />} />
 
                     {/* Protected Routes */}
                     <Route element={<PrivateRoutes />}>
+                        <Route
+                            path="/provisioning"
+                            element={<ProvisionPage />}
+                        />
                         <Route
                             path="/organizations"
                             element={<OrganizationListPage />}
@@ -153,7 +160,7 @@ function App() {
                     </Route>
                 </Routes>
             </BrowserRouter>
-            
+
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );

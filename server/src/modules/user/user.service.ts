@@ -2,10 +2,11 @@ import { Types } from "mongoose";
 import { MissingError } from "../../shared/error/missing.error";
 import { prisma } from "../../shared/lib/prisma";
 import { User } from "../../shared/models/user";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error";
 
 export const userService = {
     async getInvitationDetails(token: string) {
-        const invitation = await prisma.clientInvitation.findFirst({
+        const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
                 status: "PENDING",
@@ -85,4 +86,92 @@ export const userService = {
             email: invitation.email,
         };
     },
+
+    async acceptInvitation(token: string, userId: string, userEmail: string) {
+        const invitation = await prisma.invitation.findFirst({
+            where: {
+                token,
+                status: "PENDING",
+                expiresAt: { gt: new Date() },
+            },
+            include: { projects: true }, 
+        });
+
+        if (!invitation) {
+            throw new UnAuthorizedError("Invalid, expired, or already claimed invitation.");
+        }
+
+        if (invitation.email !== userEmail) {
+            throw new UnAuthorizedError(`Account Mismatch: Please log in with ${invitation.email}`);
+        }
+
+        await prisma.$transaction(async (tx) => {
+            await tx.invitation.update({
+                where: { id: invitation.id },
+                data: {
+                    status: "ACCEPTED", 
+                    accepted: true,
+                    claimedByUserId: userId,
+                },
+            });
+
+            await tx.membership.upsert({
+                where: {
+                    userId_organizationId: { userId, organizationId: invitation.organizationId },
+                },
+                create: {
+                    userId,
+                    organizationId: invitation.organizationId,
+                    role: invitation.role,
+                },
+                update: {
+                    role: invitation.role, 
+                },
+            });
+
+            for (const proj of invitation.projects) {
+                await tx.assignment.upsert({
+                    where: {
+                        userId_projectId: { userId, projectId: proj.projectId },
+                    },
+                    create: {
+                        userId,
+                        projectId: proj.projectId,
+                        role: invitation.role,
+                    },
+                    update: {
+                        role: invitation.role,
+                    },
+                });
+            }
+        });
+
+        return { success: true, message: "Invitation accepted successfully." };
+    },
+
+    async declineInvitation(token: string, userId: string, userEmail: string) {
+        const invitation = await prisma.invitation.findFirst({
+            where: {
+                token,
+                status: "PENDING",
+            },
+        });
+
+        if (!invitation) {
+            throw new UnAuthorizedError("Invalid or already processed invitation.");
+        }
+
+        if (invitation.email !== userEmail) {
+            throw new UnAuthorizedError("You do not have permission to decline this invite.");
+        }
+
+        await prisma.invitation.update({
+            where: { id: invitation.id },
+            data: {
+                status: "REJECTED", 
+            },
+        });
+
+        return { success: true, message: "Invitation declined." };
+    }
 };

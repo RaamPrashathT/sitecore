@@ -11,7 +11,6 @@ export const authorize = async (
     try {  
         const sessionId = request.cookies.session;
         if (!sessionId) throw new UnAuthorizedError();
-
         const raw = await redis.get(`session:${sessionId}`);
         if (!raw) throw new UnAuthorizedError();
 
@@ -24,7 +23,6 @@ export const authorize = async (
             throw new UnAuthorizedError();
         }
         if (!session?.userId) throw new UnAuthorizedError();
-
         request.session = session;
         return next();
     } catch (error) {

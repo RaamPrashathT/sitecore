@@ -1,112 +1,65 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-    Field,
-    FieldDescription,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-    FieldSeparator,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
 import { registerSchema, type RegisterInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/lib/axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
 import { useInvitationDetails } from "@/features/clients/hooks/useInvitationDetails";
+import { useRegister } from "@/features/auth/hooks/useRegister";
 
-export function RegisterForm({
-    className,
-    ...props
-}: React.ComponentProps<"form">) {
+export function RegisterForm({ className, ...props }: React.ComponentProps<"form">) {
     const [searchParams] = useSearchParams();
     const inviteToken = searchParams.get("token");
-
-    const { data: invitation, isLoading } = useInvitationDetails(inviteToken);
-    const invitedEmail = invitation?.invitedEmail;
-
     const navigate = useNavigate();
 
-    const [apiMessage, setApiMessage] = useState<{
-        success: boolean;
-        message: string;
-    } | null>(null);
+    const { data: invitation, isLoading: isInviteLoading } = useInvitationDetails(inviteToken);
+    const { mutateAsync: registerUser, isPending: isRegistering } = useRegister();
+    const invitedEmail = invitation?.invitedEmail;
 
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        formState: { isSubmitting, errors },
-    } = useForm<RegisterInput>({
+    const { register, handleSubmit, setValue, setError, formState: { errors } } = useForm<RegisterInput>({
         resolver: zodResolver(registerSchema),
-        defaultValues: { email: "", password: "" },
+        defaultValues: { email: "", password: "", confirmPassword: "" },
     });
 
-    // pre-fill and lock email if coming from invite
     useEffect(() => {
-        if (invitedEmail) {
-            setValue("email", invitedEmail, { shouldValidate: true });
-        }
+        if (invitedEmail) setValue("email", invitedEmail, { shouldValidate: true });
     }, [invitedEmail, setValue]);
 
     const onSubmit = async (data: RegisterInput) => {
-        setApiMessage(null);
         try {
-            const result = await api.post("/auth/register", {
-                email: data.email,
-                password: data.password,
-                inviteToken: inviteToken || undefined,
-            });
+            const result = await registerUser({ ...data, inviteToken: inviteToken || undefined });
 
-            setApiMessage({
-                success: result.data.success,
-                message: result.data.message,
-            });
-
-            if (result.data.success) {
-                if (result.data.frictionlessLogin) {
-                    // invited user — already verified, go straight to accept
-                    navigate(`/invitation?token=${inviteToken}`);
-                } else if (inviteToken) {
-                    // needs email verification — carry both tokens through
-                    navigate(
-                        `/verify-email?token=${result.data.token}&inviteToken=${inviteToken}`,
-                    );
-                } else {
-                    // normal registration
-                    navigate(`/verify-email?token=${result.data.token}`);
-                }
+            if (result.frictionlessLogin) {
+                navigate(inviteToken ? `/provisioning?token=${inviteToken}` : "/provisioning");
+            } else {
+                const url = `/verify-email?token=${result.token}`;
+                navigate(inviteToken ? `${url}&inviteToken=${inviteToken}` : url);
             }
         } catch (error: unknown) {
-            const message = axios.isAxiosError(error)
-                ? (error.response?.data?.message ?? "Registration failed")
-                : "An unexpected error occurred";
-
-            setApiMessage({ success: false, message });
+            if (axios.isAxiosError(error) && error.response?.data) {
+                setError("root", { message: error.response.data.message || "Registration failed" });
+            } else {
+                setError("root", { message: "An unexpected error occurred. Try again." });
+            }
         }
     };
 
-    if (isLoading && inviteToken) return <Spinner />;
+    if (isInviteLoading && inviteToken) return <Spinner />;
 
     return (
-        <form
-            className={cn("flex flex-col gap-6", className)}
-            {...props}
-            onSubmit={handleSubmit(onSubmit)}
-        >
+        <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
                 <div className="flex flex-col items-center gap-1 text-center">
                     <h1 className="text-2xl font-bold">Create an account</h1>
                     {invitedEmail && (
                         <p className="text-sm text-muted-foreground">
-                            Registering as{" "}
-                            <span className="font-medium">{invitedEmail}</span>{" "}
-                            to accept your invite
+                            Registering as <span className="font-medium">{invitedEmail}</span> to accept your invite
                         </p>
                     )}
                 </div>
@@ -119,65 +72,32 @@ export function RegisterForm({
                         type="email"
                         placeholder="m@example.com"
                         readOnly={!!invitedEmail}
-                        className={cn(
-                            !!invitedEmail && "opacity-60 cursor-not-allowed",
-                        )}
+                        className={cn(!!invitedEmail && "opacity-60 cursor-not-allowed")}
                     />
-                    {errors.email && (
-                        <FieldError>{errors.email.message}</FieldError>
-                    )}
+                    {errors.email && <FieldError>{errors.email.message}</FieldError>}
                 </Field>
 
                 <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input
-                        {...register("password")}
-                        id="password"
-                        type="password"
-                        required
-                    />
-                    {errors.password && (
-                        <FieldError>{errors.password.message}</FieldError>
-                    )}
+                    <Input {...register("password")} id="password" type="password" />
+                    {errors.password && <FieldError>{errors.password.message}</FieldError>}
                 </Field>
 
                 <Field>
-                    <FieldLabel htmlFor="confirmPassword">
-                        Confirm Password
-                    </FieldLabel>
-                    <Input
-                        {...register("confirmPassword")}
-                        id="confirmPassword"
-                        type="password"
-                        required
-                    />
-                    {errors.confirmPassword && (
-                        <FieldError>
-                            {errors.confirmPassword.message}
-                        </FieldError>
-                    )}
+                    <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+                    <Input {...register("confirmPassword")} id="confirmPassword" type="password" />
+                    {errors.confirmPassword && <FieldError>{errors.confirmPassword.message}</FieldError>}
                 </Field>
 
+                {errors.root && <FieldError className="text-center text-red-500">{errors.root.message}</FieldError>}
+
                 <Field>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? (
-                            <div className="flex items-center gap-x-1.5">
-                                <Spinner />
-                                Registering...
-                            </div>
-                        ) : (
-                            "Register"
-                        )}
+                    <Button type="submit" disabled={isRegistering}>
+                        {isRegistering ? (
+                            <div className="flex items-center gap-x-1.5"><Spinner /> Registering...</div>
+                        ) : "Register"}
                     </Button>
                 </Field>
-
-                {apiMessage && (
-                    <FieldError
-                        className={`text-center ${apiMessage.success ? "text-green-500" : "text-red-500"}`}
-                    >
-                        {apiMessage.message}
-                    </FieldError>
-                )}
 
                 <FieldSeparator>Or continue with</FieldSeparator>
 
@@ -187,26 +107,15 @@ export function RegisterForm({
                         type="button"
                         className="flex items-center"
                         onClick={() => {
-                            const googleUrl = inviteToken
-                                ? `${import.meta.env.VITE_API_URL}/auth/google?inviteToken=${inviteToken}`
-                                : `${import.meta.env.VITE_API_URL}/auth/google`;
-                            globalThis.location.href = googleUrl;
+                            globalThis.location.href = `${import.meta.env.VITE_API_URL}/auth/google${inviteToken ? `?inviteToken=${inviteToken}` : ""}`;
                         }}
                     >
-                        <FcGoogle className="mt-0.5 mr-2" />
-                        Continue with Google
+                        <FcGoogle className="mt-0.5 mr-2" /> Continue with Google
                     </Button>
 
                     <FieldDescription className="text-center">
                         Already have an account?{" "}
-                        <a
-                            href={
-                                inviteToken
-                                    ? `/login?token=${inviteToken}`
-                                    : "/login"
-                            }
-                            className="underline underline-offset-4 hover:text-green-700"
-                        >
+                        <a href={`/login${inviteToken ? `?token=${inviteToken}` : ""}`} className="underline underline-offset-4 hover:text-green-700">
                             Log in
                         </a>
                     </FieldDescription>

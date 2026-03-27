@@ -22,7 +22,7 @@ const OrgSwitcher = () => {
     const { isMobile } = useSidebar();
     const { user, isLoading: userLoading } = useSession();
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { data: orgs, isLoading: orgsLoading } = useOrganizations(user?.id);
+    const { data: orgs, isLoading: orgsLoading } = useOrganizations(user?.userId);
     const navigate = useNavigate();
 
     if (membershipLoading || orgsLoading || userLoading) {
@@ -50,15 +50,18 @@ const OrgSwitcher = () => {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="flex items-center gap-2.5 w-full py-7.5 rounded-none border border-transparent bg-transparent cursor-pointer transition-[background,border-color] duration-150 ease-in-out hover:bg-[#f0f3f9] hover:border-[#e8eaf0]"
+                            className="flex items-center gap-2.5 w-full py-7.5 rounded-none border border-transparent bg-transparent cursor-pointer transition-[background,border-color] duration-150 ease-in-out hover:bg-green-50 hover:border-[#e8eaf0]"
                         >
                             <div className="w-[34px] h-[34px] rounded-[6px] bg-green-700 text-white text-[13px] font-semibold tracking-[0.02em] flex items-center justify-center shrink-0 font-[DM_Sans,Geist,system-ui,sans-serif]">
                                 {displayName[0].toUpperCase()}
                             </div>
                             <div className="flex-1 flex flex-col items-start min-w-0">
-                                <span className="text-[13.5px] font-semibold text-gray-700 leading-[1.3] truncate max-w-[200px] ">{displayName}</span>
+                                <span className="text-[13.5px] font-semibold text-gray-700 leading-[1.3] truncate max-w-[200px] ">
+                                    {displayName}
+                                </span>
                                 <span className="text-[11px] text-[#8892a4] font-normal mt-px">
-                                    {membership.role.charAt(0) + membership.role.slice(1).toLowerCase()}
+                                    {membership.role.charAt(0) +
+                                        membership.role.slice(1).toLowerCase()}
                                 </span>
                             </div>
                             <ChevronsUpDown className="w-3.5 h-3.5 text-[#b5bcc9] shrink-0" />
@@ -66,13 +69,18 @@ const OrgSwitcher = () => {
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent
-                        className="bg-white border border-[#e8eaf0] rounded-[14px] shadow-[0_8px_32px_-4px_rgba(30,58,138,0.10),0_2px_8px_-2px_rgba(0,0,0,0.06)] p-1.5 min-w-[220px]"
+                        className="bg-white border mt-2 border-[#e8eaf0] rounded-[14px] shadow-[0_8px_32px_-4px_rgba(30,58,138,0.10),0_2px_8px_-2px_rgba(0,0,0,0.06)] p-1.5 min-w-[220px]"
                         align="start"
                         side={isMobile ? "bottom" : "right"}
                         sideOffset={8}
                     >
-                        <DropdownMenuLabel className="text-[10.5px] font-semibold tracking-[0.08em] uppercase text-[#b5bcc9] px-2.5 pt-1.5 pb-1">
-                            Your organizations
+                        <DropdownMenuLabel className="text-[10.5px] font-semibold tracking-[0.08em] uppercase text-[#b5bcc9] p-0 ">
+                            <Link
+                                to="/organizations"
+                                className="flex items-center gap-2.5  px-2.5 pt-1.5 pb-1 h-full w-full "
+                            >
+                                Your organizations
+                            </Link>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
 
@@ -95,8 +103,14 @@ const OrgSwitcher = () => {
                         ))}
 
                         <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
-                        <DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-[#8892a4] font-[450] transition-colors duration-[120ms] hover:bg-[#f0f3f9]" asChild>
-                            <Link to="/organizations/create" className="flex w-full items-center gap-2.5">
+                        <DropdownMenuItem
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-[#8892a4] font-[450] transition-colors duration-[120ms] hover:bg-[#f0f3f9]"
+                            asChild
+                        >
+                            <Link
+                                to="/organizations/create"
+                                className="flex w-full items-center gap-2.5"
+                            >
                                 <div className="w-[26px] h-[26px] rounded-[6px] border-[1.5px] border-dashed border-[#e8eaf0] flex items-center justify-center text-[#8892a4] shrink-0">
                                     <Plus className="h-3 w-3" />
                                 </div>

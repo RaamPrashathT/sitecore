@@ -33,10 +33,19 @@ export const sessionSchema = z.object({
     email: z.string(),
     username: z.string(),
     onboarded: z.boolean(),
+    profileImage: z.string().optional(),
     tenant: tenantSchema
 })
 
 
+export const onboardSchema = z.object({
+    username: z.string().min(3, "Username must be at least 3 characters").max(30, "Username is too long"),
+    phone: z.string().max(15, "Phone number is too long").optional(),
+    avatar: z.url().optional(),
+    isTwoFactorEnabled: z.boolean().default(false).optional(), 
+});
+
+export type OnboardInput = z.infer<typeof onboardSchema>;
 export type SessionInput = z.infer<typeof sessionSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -13,115 +13,82 @@ import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
 import { loginSchema, type LoginInput } from "@/features/auth/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/lib/axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
-import { useQueryClient } from "@tanstack/react-query";
 import { useInvitationDetails } from "@/features/clients/hooks/useInvitationDetails";
-
-type ApiErrorResponse = {
-    code?: string;
-    message?: string;
-    verificationToken?: string;
-};
+import { useLogin } from "@/features/auth/hooks/useLogin";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentProps<"form">) {
-    const queryClient = useQueryClient();
     const [searchParams] = useSearchParams();
     const inviteToken = searchParams.get("token");
-
-    // reuse the same query — hits cache if invite page was visited first
-    const { data: invitation, isLoading } = useInvitationDetails(inviteToken);
-    const invitedEmail = invitation?.invitedEmail;
-
     const navigate = useNavigate();
 
-    const [apiMessage, setApiMessage] = useState<{
-        success: boolean;
-        message: string;
-    } | null>(null);
+    const { data: invitation, isLoading: isInviteLoading } =
+        useInvitationDetails(inviteToken);
+    const { mutateAsync: loginUser, isPending: isLoggingIn } = useLogin();
+    const invitedEmail = invitation?.invitedEmail;
 
     const {
         register,
         handleSubmit,
         setValue,
-        formState: { isSubmitting, errors },
+        setError,
+        formState: { errors },
     } = useForm<LoginInput>({
         resolver: zodResolver(loginSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
+        defaultValues: { email: "", password: "" },
     });
 
-    // pre-fill and lock email if coming from invite
     useEffect(() => {
-        if (invitedEmail) {
+        if (invitedEmail)
             setValue("email", invitedEmail, { shouldValidate: true });
-        }
     }, [invitedEmail, setValue]);
 
     const onSubmit = async (data: LoginInput) => {
-        setApiMessage(null);
         try {
-            queryClient.clear();
-            const result = await api.post("/auth/login", data);
-            setApiMessage({
-                success: result.data.success,
-                message: result.data.message,
+            await loginUser({
+                ...data,
+                inviteToken: inviteToken || undefined,
             });
-
-            if (result.data.success) {
-                if (inviteToken) {
-                    navigate(`/invitation?token=${inviteToken}`);
-                } else {
-                    navigate("/organizations");
-                }
-            }
+            navigate(
+                inviteToken
+                    ? `/provisioning?token=${inviteToken}`
+                    : "/provisioning",
+            );
         } catch (error: unknown) {
-            let message = "Something went wrong";
-
-            if (axios.isAxiosError<ApiErrorResponse>(error)) {
-                const data = error.response?.data;
-
-                switch (data?.code) {
-                    case "INVALID_CREDENTIALS":
-                        message = "Invalid email or password";
-                        break;
-
-                    case "EMAIL_NOT_VERIFIED":
-                        message = "OTP sent. Redirecting...";
-                        if (data.verificationToken) {
-                            // carry invite token through verification
-                            const verifyUrl = inviteToken
-                                ? `/verify-email?token=${data.verificationToken}&inviteToken=${inviteToken}`
-                                : `/verify-email?token=${data.verificationToken}`;
-                            navigate(verifyUrl);
-                            return;
-                        }
-                        break;
-
-                    case "INTERNAL_ERROR":
-                        message = "Server error. Try again later.";
-                        break;
-
-                    default:
-                        message = data?.message ?? "Login failed";
+            if (axios.isAxiosError(error) && error.response?.data) {
+                const apiData = error.response.data;
+                if (apiData.code === "EMAIL_NOT_VERIFIED") {
+                    const url = `/verify-email?token=${apiData.verificationToken}`;
+                    navigate(
+                        inviteToken ? `${url}&inviteToken=${inviteToken}` : url,
+                    );
+                    return;
                 }
-            } else if (error instanceof Error) {
-                message = error.message;
+                if (apiData.code === "2FA_REQUIRED") {
+                    const url = `/verify-2fa?token=${apiData.tempToken}`;
+                    navigate(
+                        inviteToken ? `${url}&inviteToken=${inviteToken}` : url,
+                    );
+                    return;
+                }
+                setError("root", {
+                    message: apiData.message || "Invalid email or password",
+                });
+            } else {
+                setError("root", {
+                    message: "An unexpected error occurred. Try again.",
+                });
             }
-
-            setApiMessage({ success: false, message });
         }
     };
 
-    if (isLoading && inviteToken) return <Spinner />;
+    if (isInviteLoading && inviteToken) return <Spinner />;
 
     return (
         <form
@@ -136,7 +103,9 @@ export function LoginForm({
                     </h1>
                     {invitedEmail && (
                         <p className="text-sm text-muted-foreground">
-                            Logging in as <span className="font-medium">{invitedEmail}</span> to accept your invite
+                            Logging in as{" "}
+                            <span className="font-medium">{invitedEmail}</span>{" "}
+                            to accept your invite
                         </p>
                     )}
                 </div>
@@ -149,7 +118,9 @@ export function LoginForm({
                         type="email"
                         placeholder="m@example.com"
                         readOnly={!!invitedEmail}
-                        className={cn(!!invitedEmail && "opacity-60 cursor-not-allowed")}
+                        className={cn(
+                            !!invitedEmail && "opacity-60 cursor-not-allowed",
+                        )}
                     />
                     {errors.email && (
                         <FieldError>{errors.email.message}</FieldError>
@@ -162,7 +133,6 @@ export function LoginForm({
                         {...register("password")}
                         id="password"
                         type="password"
-                        required
                     />
                     {errors.password && (
                         <FieldError>{errors.password.message}</FieldError>
@@ -170,23 +140,19 @@ export function LoginForm({
                 </Field>
 
                 <Field>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? (
+                    <Button type="submit" disabled={isLoggingIn}>
+                        {isLoggingIn ? (
                             <div className="flex items-center gap-x-1.5">
-                                <Spinner />
-                                <p>Logging you in...</p>
+                                <Spinner /> Logging in...
                             </div>
                         ) : (
                             "Login"
                         )}
                     </Button>
                 </Field>
-
-                {apiMessage && (
-                    <FieldError
-                        className={`text-center ${apiMessage.success ? "text-green-500" : "text-red-500"}`}
-                    >
-                        {apiMessage.message}
+                {errors.root && (
+                    <FieldError className="text-center text-red-500">
+                        {errors.root.message}
                     </FieldError>
                 )}
 
@@ -198,20 +164,16 @@ export function LoginForm({
                         type="button"
                         className="flex items-center"
                         onClick={() => {
-                            const googleUrl = inviteToken
-                                ? `${import.meta.env.VITE_API_URL}/auth/google?inviteToken=${inviteToken}`
-                                : `${import.meta.env.VITE_API_URL}/auth/google`;
-                            globalThis.location.href = googleUrl;
+                            globalThis.location.href = `${import.meta.env.VITE_API_URL}/auth/google${inviteToken ? `?inviteToken=${inviteToken}` : ""}`;
                         }}
                     >
-                        <FcGoogle className="mt-0.5 mr-2" />
-                        Login with Google
+                        <FcGoogle className="mt-0.5 mr-2" /> Login with Google
                     </Button>
 
                     <FieldDescription className="text-center">
                         Don&apos;t have an account?{" "}
                         <a
-                            href={inviteToken ? `/register?token=${inviteToken}` : "/register"}
+                            href={`/register${inviteToken ? `?token=${inviteToken}` : ""}`}
                             className="underline underline-offset-4 hover:text-green-700"
                         >
                             Register

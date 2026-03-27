@@ -12,6 +12,7 @@ import { logger } from "./shared/lib/logger.js";
 import projectRouter from "./modules/project/project.route.js";
 import dashboardRouter from "./modules/dashboard/dashboard.route.js";
 import pendingRouter from "./modules/pending/pending.routes.js";
+import userRouter from "./modules/user/user.route.js";
 const PORT = env.PORT || 5000;
 
 const app = express();
@@ -34,6 +35,7 @@ app.use('/clients', clientRouter)
 app.use('/project', projectRouter)
 app.use('/dashboard', dashboardRouter)
 app.use('/pending', pendingRouter)
+app.use('/user', userRouter)
 
 app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);

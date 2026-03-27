@@ -5,6 +5,7 @@ import { logger } from "../../shared/lib/logger.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { userService } from "./user.service.js";
+import { syncSessionTenants } from "../../shared/lib/syncSession.js";
 
 const userController = {
     async onboard(request: Request, response: Response) {
@@ -93,6 +94,89 @@ const userController = {
             return response.status(500).json({
                 message: "Internal server error",
             });
+        }
+    },
+
+    async provision(request: Request, response: Response) {
+        try {
+            const session = request.session;
+            const stashedToken = await redis.get(
+                `pending_invite:${session!.userId}`,
+            );
+
+            if (stashedToken) {
+                await redis.del(`pending_invite:${session!.userId}`);
+            }
+            const redirectTo = stashedToken
+                ? `/invitation?token=${stashedToken}`
+                : "/organizations";
+
+            return response.status(200).json({
+                onboarded: session!.onboarded,
+                redirectTo,
+            });
+        } catch (error) {
+            logger.error("Provisioning Error:", error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async acceptInvite(request: Request, response: Response) {
+        try {
+            const { token } = request.body;
+            const sessionId = request.cookies.session;
+            const { userId, email } = request.session!;
+
+            if (!token)
+                return response
+                    .status(400)
+                    .json({ message: "Token is required" });
+
+            const result = await userService.acceptInvitation(
+                token,
+                userId,
+                email,
+            );
+            await syncSessionTenants(userId, sessionId);
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(403).json({ message: error.message });
+            }
+            logger.error("Accept Invite Error:", error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async declineInvite(request: Request, response: Response) {
+        try {
+            const { token } = request.body;
+            const { userId, email } = request.session!;
+
+            if (!token)
+                return response
+                    .status(400)
+                    .json({ message: "Token is required" });
+
+            const result = await userService.declineInvitation(
+                token,
+                userId,
+                email,
+            );
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(403).json({ message: error.message });
+            }
+            logger.error("Decline Invite Error:", error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 };

@@ -14,7 +14,7 @@ enum Role {
     CLIENT
 }
 
-enum ClientInvitationStatus {
+enum InvitationStatus {
     PENDING
     ACCEPTED
     REJECTED
@@ -118,7 +118,7 @@ model Project {
 
     assignments Assignment[]
     phases      Phase[]
-    invitations ClientInvitationProject[]
+    invitations InvitationProject[]
 
     @@unique([slug, organizationId])
 }
@@ -182,27 +182,27 @@ model RequisitionItem {
     requisition   Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
 }
 
-model ClientInvitation {
+model Invitation {
     id        String   @id @default(uuid())
     token     String   @unique
     email     String
     role      Role
     expiresAt DateTime
 
-    status          ClientInvitationStatus    @default(PENDING)
+    status          InvitationStatus    @default(PENDING)
     organizationId  String
     createdAt       DateTime                  @default(now())
     accepted        Boolean                   @default(false)
     claimedByUserId String?
-    projects        ClientInvitationProject[]
+    projects        InvitationProject[]
 }
 
-model ClientInvitationProject {
+model InvitationProject {
     id           String @id @default(uuid())
     invitationId String
     projectId    String
 
-    invitation ClientInvitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+    invitation Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
     project    Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
     @@unique([invitationId, projectId])
