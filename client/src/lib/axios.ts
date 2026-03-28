@@ -9,14 +9,16 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-    const pathname = globalThis.location.pathname;
-    const pathParts = pathname.split("/");
-    const firstPart = pathParts[1];
+    const { pathname } = globalThis.location;
+    const parts = pathname.split("/").filter(Boolean); 
 
-    const excludedPaths = ["", "login", 'register', "organizations"];
+    if (parts[0] && !["login", "register", "organizations"].includes(parts[0])) {
+        config.headers["x-tenant-slug"] = parts[0];
 
-    if (firstPart && !excludedPaths.includes(firstPart)) {
-        config.headers["x-tenant-slug"] = firstPart;
+        const reservedKeywords = ["settings", "engineers", "clients", "projects", "catalogue"];
+        if (parts[1] && !reservedKeywords.includes(parts[1])) {
+            config.headers["x-project-slug"] = parts[1];
+        }
     }
 
     return config

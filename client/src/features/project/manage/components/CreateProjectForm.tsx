@@ -21,6 +21,7 @@ import { useClients } from "@/hooks/useClients";
 import { useEngineers } from "@/hooks/useEngineers";
 import api from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LocateIcon, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -75,7 +76,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
         setIsLoading(true);
         setError(null);
         try {
-            console.log(data)
+            console.log(data);
             const response = await api.post("/project", data, {
                 headers: {
                     "x-organization-id": orgId,
@@ -98,12 +99,12 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
         <div className="flex items-center justify-center">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-3xl"
+                className="w-full max-w-3xl "
             >
                 <h1 className="text-3xl font-semibold my-8">Create Project</h1>
-                <FieldGroup>
+                <FieldGroup className="flex flex-col gap-y-4">
                     <Field>
-                        <FieldLabel>Project Name</FieldLabel>
+                        <FieldLabel className="text-lg">Project Name</FieldLabel>
                         <Input
                             {...register("name")}
                             placeholder="Project Name"
@@ -113,8 +114,18 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                             <FieldError>{errors.name.message}</FieldError>
                         )}
                     </Field>
-                    <Field>
-                        <FieldLabel>Address</FieldLabel>
+                    <Field className="w-full flex flex-col gap-y-2">
+                        <div className="flex w-full flex-row justify-between">
+                            <FieldLabel className="text-lg">Address</FieldLabel>
+                            <Button
+                                variant="ghost"
+                                className="flex items-center gap-x-1 p-0 m-0 text-destructive hover:text-destructive hover:bg-transparent hover:underline hover:cursor-pointer text-md"
+                                type="button"
+                            >
+                                <MapPin size={16} className="mt-0.5"/>
+                                <span>Set Location</span>
+                            </Button>
+                        </div>
                         <Textarea
                             {...register("address")}
                             placeholder="Address"
@@ -125,7 +136,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel>Estimated Budget</FieldLabel>
+                        <FieldLabel className="text-lg">Estimated Budget</FieldLabel>
                         <Input
                             {...register("estimatedBudget")}
                             type="number"
@@ -140,7 +151,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                     </Field>
                     <div className="flex gap-x-2">
                         <Field className="w-full">
-                            <FieldLabel>Engineers</FieldLabel>
+                            <FieldLabel className="text-lg">Engineers</FieldLabel>
                             <Controller
                                 name="engineerId"
                                 control={control}
@@ -200,13 +211,15 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                         </Field>
 
                         <Field className="w-full">
-                            <FieldLabel>Clients</FieldLabel>
+                            <FieldLabel className="text-lg">Clients</FieldLabel>
                             <Controller
                                 name="clientId"
                                 control={control}
                                 render={({ field }) => (
                                     <Select
-                                    key={clientsArray?.map(e => e.id).join(",")} 
+                                        key={clientsArray
+                                            ?.map((e) => e.id)
+                                            .join(",")}
                                         onValueChange={field.onChange}
                                         value={field.value || undefined}
                                     >

@@ -38,14 +38,12 @@ const projectController = {
             const index = Number.parseInt(request.query.index as string) ?? 0;
             const size = Number.parseInt(request.query.size as string) ?? 10;
             const searchQuery = request.query.search as string || "";
-
             const validatedData = getProjectListSchema.safeParse({
                 organizationId,
                 pageIndex: index,
                 pageSize: size,
                 searchQuery,
             });
-
             if (!validatedData.success) {
                 throw new ValidationError("Invalid Organization ID");
             }
@@ -127,6 +125,22 @@ const projectController = {
             const projectId = request.project!.id;
 
             const result = await projectService.getPhases(projectId);
+
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async getMembers(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+            const organizationId = request.tenant!.orgId;
+            console.log(projectId, organizationId)
+            const result = await projectService.getMembers(projectId, organizationId);
 
             return response.status(200).json(result);
         } catch (error) {

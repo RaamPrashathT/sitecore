@@ -310,8 +310,8 @@ const ClientInviteForm = () => {
                             </div>
                         </Field>
                     </FieldGroup>
-                    <FieldGroup className="mt-8">
-                        <Button disabled={isPending} type="submit">
+                    <FieldGroup className="mt-8 flex items-center w-full ">
+                        <Button disabled={isPending} type="submit" className="w-60">
                             {isPending ? (
                                 <div className="flex items-center gap-x-1">
                                     <Spinner />

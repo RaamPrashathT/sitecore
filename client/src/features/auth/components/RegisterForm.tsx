@@ -12,6 +12,7 @@ import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
 import { useInvitationDetails } from "@/features/clients/hooks/useInvitationDetails";
 import { useRegister } from "@/features/auth/hooks/useRegister";
+import { RegistrationFormSkeleton } from "./RegisterFormSkeleton";
 
 export function RegisterForm({ className, ...props }: React.ComponentProps<"form">) {
     const [searchParams] = useSearchParams();
@@ -50,7 +51,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
         }
     };
 
-    if (isInviteLoading && inviteToken) return <Spinner />;
+    if (isInviteLoading && inviteToken) return <RegistrationFormSkeleton />;
 
     return (
         <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit(onSubmit)}>

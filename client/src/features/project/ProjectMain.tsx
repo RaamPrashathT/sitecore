@@ -1,37 +1,61 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
-import type { ProjectDetailsType } from "@/hooks/useProjectDetails";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, HardHat, UsersRound, Workflow } from "lucide-react";
+import ProjectMembersMain from "./members/components/ProjectMembersMain";
+import ProjectProgressMain from "./progress/components/ProjectProgressMain";
+import ProjectPhaseMain from "./phase/components/ProjectPhaseMain";
+import ProjectDetails from "./details/ProjectDetails";
 
-interface ProjectDetailsProps {
-    projectDetails: ProjectDetailsType;
-}
-
-const ProjectDetails = ({ projectDetails }: ProjectDetailsProps) => {
-    const { name, address, estimatedBudget } = projectDetails;
-
+const ProjectMain = () => {
     return (
-        <Card className="shadow-none border-none m-0">
-            <CardContent className="p-6 flex flex-col gap-y-2">
-                <h3 className="text-xl font-semibold tracking-tight text-foreground">
-                    {name}
-                </h3>
-                <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="mr-1 h-3.5 w-3.5" />
-                    {address}
-                </div>
-                <div>
-
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-                    Est. Budget:
-                </p>
-                <div className="flex items-center justify-start  text-lg font-bold text-primary">
-                    {estimatedBudget.toLocaleString()}
-                </div>
-                </div>
-            </CardContent>
-        </Card>
-        
+        <div className="flex flex-col">
+            <div>
+                <Tabs defaultValue="details" className="w-[400px]">
+                    <TabsList className="bg-white" variant={"line"}>
+                        <TabsTrigger
+                            value="details"
+                            className="flex flex-row items-center"
+                        >
+                            <Form className="mt-[2px]" />
+                            <p>Details</p>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="progress"
+                            className="flex flex-row items-center"
+                        >
+                            <HardHat className="mt-[2.5px]" />
+                            <p>Progress</p>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="phases"
+                            className="flex flex-row items-center"
+                        >
+                            <Workflow className="mt-[2.5px]" />
+                            <p>Phases</p>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="members"
+                            className="flex flex-row items-center"
+                        >
+                            <UsersRound className="mt-[2.5px]" />
+                            <p>Members</p>
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="details">
+                        <ProjectDetails />
+                    </TabsContent>
+                    <TabsContent value="progress">
+                        <ProjectProgressMain />
+                    </TabsContent>
+                    <TabsContent value="phases">
+                        <ProjectPhaseMain />
+                    </TabsContent>
+                    <TabsContent value="members">
+                        <ProjectMembersMain />
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </div>
     );
 };
 
-export default ProjectDetails;
+export default ProjectMain;

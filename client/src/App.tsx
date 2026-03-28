@@ -21,11 +21,11 @@ import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import ClientPage from "./pages/adminPages/clients/ClientPage";
 
-import ProjectPage from "./pages/adminPages/project/ProjectPage";
-import CreateProjectPage from "./pages/adminPages/project/CreateProjectPage";
-import ProjectListPage from "./pages/adminPages/project/ProjectListPage";
-import PhaseCreationPage from "./pages/adminPages/project/PhaseCreationPage";
-import RequisitionCreationPage from "./pages/adminPages/project/RequisitionCreationPage";
+import ProjectPage from "./pages/project/ProjectPage";
+import CreateProjectPage from "./pages/project/CreateProjectPage";
+import ProjectListPage from "./pages/project/ProjectListPage";
+import PhaseCreationPage from "./pages/project/PhaseCreationPage";
+import RequisitionCreationPage from "./pages/project/RequisitionCreationPage";
 
 import PendingRequisitionPage from "./pages/adminPages/pending/PendingRequisitionPage";
 import PhasePaymentApprovalPage from "./pages/adminPages/pending/PhasePaymentApprovalPage";

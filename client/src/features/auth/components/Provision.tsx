@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@/features/auth/hooks/useSession";
 import { useProvision } from "@/features/auth/hooks/useProvision";
-import { OnboardingForm } from "@/features/auth/components/onboarding-form";
+import { OnboardingForm } from "@/features/auth/components/OnboardingForm";
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent } from "@/components/ui/card";
 

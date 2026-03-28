@@ -19,6 +19,7 @@ import { Spinner } from "../../../components/ui/spinner";
 import axios from "axios";
 import { useInvitationDetails } from "@/features/clients/hooks/useInvitationDetails";
 import { useLogin } from "@/features/auth/hooks/useLogin";
+import { LoginFormSkeleton } from "./LoginFormSkeleton";
 
 export function LoginForm({
     className,
@@ -88,7 +89,7 @@ export function LoginForm({
         }
     };
 
-    if (isInviteLoading && inviteToken) return <Spinner />;
+    if (isInviteLoading && inviteToken) return <LoginFormSkeleton />;
 
     return (
         <form

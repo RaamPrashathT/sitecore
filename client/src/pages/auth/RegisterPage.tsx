@@ -1,6 +1,6 @@
 import { GalleryVerticalEnd } from "lucide-react";
 
-import { RegisterForm } from "@/features/auth/components/register-form";
+import { RegisterForm } from "@/features/auth/components/RegisterForm";
 
 export default function RegisterPage() {
     return (

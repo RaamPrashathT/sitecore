@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
@@ -7,6 +8,7 @@ import {
     type CreatePhaseBody,
     type RequisitionItemListBody,
 } from "./project.schema.js";
+import { count } from "node:console";
 
 const projectService = {
     async createProject({
@@ -239,6 +241,73 @@ const projectService = {
         }));
     },
 
+    async getMembers(projectId: string, organizationId: string) {
+        const [adminMembers, projectAssignments] = await Promise.all([
+            prisma.membership.findMany({
+                where: { organizationId, role: "ADMIN" },
+                select: { userId: true, role: true },
+            }),
+            prisma.assignment.findMany({
+                where: { projectId },
+                select: { userId: true, role: true },
+            }),
+        ]);
+
+        const allUserIds = [
+            ...new Set([
+                ...adminMembers.map((m) => m.userId),
+                ...projectAssignments.map((m) => m.userId),
+            ]),
+        ];
+
+        const usersDoc = await User.find(
+            { _id: { $in: allUserIds.map((id) => new Types.ObjectId(id)) } },
+            { username: 1, profileImage: 1, phone: 1, email: 1 },
+        ).lean();
+
+        const userMap = new Map(usersDoc.map((u) => [u._id.toString(), u]));
+
+        const formatUser = (userId: string, role: string) => {
+            const detail = userMap.get(userId);
+            return {
+                userId,
+                name: detail?.username || "",
+                image: detail?.profileImage || null,
+                phone: detail?.phone || "",
+                email: detail?.email || "",
+                role,
+            };
+        };
+
+        const adminList = adminMembers.map((m) =>
+            formatUser(m.userId, "ADMIN"),
+        );
+
+        const engineerList: any[] = [];
+        const clientList: any[] = [];
+
+        projectAssignments.forEach((assign) => {
+            const formatted = formatUser(assign.userId, assign.role);
+            if (assign.role === "ENGINEER") engineerList.push(formatted);
+            if (assign.role === "CLIENT") clientList.push(formatted);
+        });
+
+        return {
+            admin: {
+                members: adminList,
+                count: adminList.length,
+            },
+            engineers: {
+                members: engineerList,
+                count: engineerList.length,
+            },
+            clients: {
+                members: clientList,
+                count: clientList.length,
+            },
+        };
+    },
+
     async paymentApproval(phaseId: string) {
         await prisma.phase.update({
             where: {
@@ -433,13 +502,15 @@ const projectService = {
                 {
                     phase: {
                         project: {
-                            name: { contains: searchQuery, mode: "insensitive" },
+                            name: {
+                                contains: searchQuery,
+                                mode: "insensitive",
+                            },
                         },
-                    }
-                }
-            ]
+                    },
+                },
+            ];
         }
-            
 
         const [result, count] = await Promise.all([
             prisma.requisition.findMany({
@@ -490,7 +561,7 @@ const projectService = {
             prisma.requisition.count({
                 where: whereClause,
             }),
-        ])
+        ]);
 
         const engineerIds = [...new Set(result.map((req) => req.requestedBy))];
 
@@ -509,7 +580,7 @@ const projectService = {
             ]),
         );
 
-        const data =  result.map((req) => ({
+        const data = result.map((req) => ({
             id: req.id,
             budget: Number(req.budget),
             status: req.status as "PENDING_APPROVAL",

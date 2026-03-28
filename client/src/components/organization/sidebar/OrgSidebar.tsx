@@ -8,6 +8,8 @@ import {
     ClipboardClock,
     ClipboardPlus,
     Mail,
+    ChartArea,
+    Presentation,
 } from "lucide-react";
 
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -27,8 +29,8 @@ const adminData = {
     sidebarContents: [
         {
             Overview: [
-                { title: "Dashboard", url: "/", icon: SquareTerminal },
-                { title: "Projects", url: "/projects", icon: ChartNoAxesGantt },
+                { title: "Dashboard", url: "/", icon: ChartArea },
+                { title: "Projects", url: "/projects", icon: Presentation },
             ],
         },
         {
