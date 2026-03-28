@@ -1,7 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, HardHat, UsersRound, Workflow } from "lucide-react";
-import ProjectMembersMain from "./members/components/ProjectMembersMain";
-import ProjectProgressMain from "./progress/components/ProjectProgressMain";
+import { Form, HardHat, UsersRound   } from "lucide-react";
+import {ProjectMembersMain} from "./members/components/ProjectMembersMain";
 import ProjectPhaseMain from "./phase/components/ProjectPhaseMain";
 import ProjectDetails from "./details/ProjectDetails";
 
@@ -9,7 +8,7 @@ const ProjectMain = () => {
     return (
         <div className="flex flex-col">
             <div>
-                <Tabs defaultValue="details" className="w-[400px]">
+                <Tabs defaultValue="details" className="w-full ">
                     <TabsList className="bg-white" variant={"line"}>
                         <TabsTrigger
                             value="details"
@@ -25,13 +24,7 @@ const ProjectMain = () => {
                             <HardHat className="mt-[2.5px]" />
                             <p>Progress</p>
                         </TabsTrigger>
-                        <TabsTrigger
-                            value="phases"
-                            className="flex flex-row items-center"
-                        >
-                            <Workflow className="mt-[2.5px]" />
-                            <p>Phases</p>
-                        </TabsTrigger>
+                        
                         <TabsTrigger
                             value="members"
                             className="flex flex-row items-center"
@@ -43,9 +36,7 @@ const ProjectMain = () => {
                     <TabsContent value="details">
                         <ProjectDetails />
                     </TabsContent>
-                    <TabsContent value="progress">
-                        <ProjectProgressMain />
-                    </TabsContent>
+                    
                     <TabsContent value="phases">
                         <ProjectPhaseMain />
                     </TabsContent>

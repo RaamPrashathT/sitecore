@@ -4,7 +4,6 @@ import type { Request, Response } from "express";
 import clientService from "./clients.service.js";
 import { getFormSchema } from "./clients.schema.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
-import redis from "../../shared/lib/redis.js";
 import { User } from "../../shared/models/user.js";
 
 const clientController = {

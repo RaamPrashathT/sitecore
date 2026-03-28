@@ -11,7 +11,7 @@ interface MemberSchema {
 }
 
 interface ProjectMembersSchema {
-    admins: {
+    admin: {
         count: number;
         members: MemberSchema[];
     };

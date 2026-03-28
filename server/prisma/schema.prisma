@@ -70,6 +70,9 @@ model Membership {
 
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
+    siteLogs       SiteLog[]
+    images         Image[]
+    comments       Comment[]
 
     @@unique([userId, organizationId])
 }
@@ -149,8 +152,55 @@ model Phase {
     requisitions Requisition[]
     createdAt    DateTime      @default(now())
     updatedAt    DateTime      @updatedAt
+    siteLogs     SiteLog[]
 
     @@unique([name, projectId])
+}
+
+model SiteLog {
+    id          String  @id @default(uuid())
+    title       String
+    description String?
+
+    phaseId String
+    phase   Phase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+
+    authorId String
+    author   Membership @relation(fields: [authorId], references: [id])
+    images   Image[]
+
+    workDate  DateTime
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Image {
+    id  String @id @default(uuid())
+    url String
+
+    uploaderId String
+    uploader   Membership @relation(fields: [uploaderId], references: [id])
+
+    siteLogId String
+    siteLog   SiteLog @relation(fields: [siteLogId], references: [id], onDelete: Cascade)
+
+    comments Comment[]
+
+    createdAt DateTime @default(now())
+}
+
+model Comment {
+    id   String @id @default(uuid())
+    text String
+
+    authorId String
+    author   Membership @relation(fields: [authorId], references: [id])
+
+    imageId String
+    image   Image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Requisition {
@@ -191,8 +241,8 @@ model Invitation {
 
     status          InvitationStatus    @default(PENDING)
     organizationId  String
-    createdAt       DateTime                  @default(now())
-    accepted        Boolean                   @default(false)
+    createdAt       DateTime            @default(now())
+    accepted        Boolean             @default(false)
     claimedByUserId String?
     projects        InvitationProject[]
 }
@@ -203,7 +253,7 @@ model InvitationProject {
     projectId    String
 
     invitation Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
-    project    Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
     @@unique([invitationId, projectId])
 }

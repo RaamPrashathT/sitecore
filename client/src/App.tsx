@@ -38,6 +38,7 @@ import InvitationPage from "./pages/invitation/InvitationPage";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ProvisionPage from "./pages/invitation/ProvisionPage";
 import Verify2FAPage from "./pages/auth/Verify2FAPage";
+import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -126,6 +127,10 @@ function App() {
                                 <Route
                                     path=":projectSlug/create-phase"
                                     element={<PhaseCreationPage />}
+                                />
+                                <Route
+                                    path=":projectSlug/invite"
+                                    element={<ProjectMemberInvitePage />}
                                 />
                                 <Route
                                     path=":projectSlug/requisition/:requisitionIdSlug"

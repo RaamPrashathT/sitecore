@@ -5,10 +5,13 @@ import { prisma } from "../../shared/lib/prisma.js";
 import { User } from "../../shared/models/user.js";
 import { slugify } from "../../shared/utils/slugify.js";
 import {
+    type CreateInviteBody,
     type CreatePhaseBody,
     type RequisitionItemListBody,
 } from "./project.schema.js";
-import { count } from "node:console";
+import crypto from "node:crypto";
+import { sendInviteEmail } from "../../shared/lib/emails/sendClientInvitation.js";
+
 
 const projectService = {
     async createProject({
@@ -308,6 +311,30 @@ const projectService = {
         };
     },
 
+    async createInvite(
+        organizationId: string,
+        projectId: string,
+        data: CreateInviteBody
+    ) {
+        const { email, role } = data;
+        const token = crypto.randomBytes(32).toString("hex");
+        await prisma.invitation.create({
+            data: {
+                email,
+                token,
+                role: role,
+                organizationId,
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+                projects: {
+                    create: {
+                        projectId,
+                    }
+                },
+            },
+        });
+        await sendInviteEmail(email, token);
+    },
+
     async paymentApproval(phaseId: string) {
         await prisma.phase.update({
             where: {
@@ -554,6 +581,8 @@ const projectService = {
                         },
                     },
                 },
+                skip: skip,
+                take: pageSize,
                 orderBy: {
                     createdAt: "asc",
                 },

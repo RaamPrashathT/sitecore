@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import projectService from "./project.service.js";
 import { logger } from "../../shared/lib/logger.js";
-import { createPhaseSchema, createProjectSchema, createRequisitionSchema, getPaymentPendingSchema, getProjectListSchema, RequisitionItemListSchema } from "./project.schema.js";
+import { createInviteSchema, createPhaseSchema, createProjectSchema, createRequisitionSchema, getPaymentPendingSchema, getProjectListSchema, RequisitionItemListSchema } from "./project.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 
@@ -148,6 +148,33 @@ const projectController = {
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
+        }
+    },
+
+    async createInvitation(request: Request, response: Response) {
+        try {
+            const validatedData = createInviteSchema.safeParse(request.body);
+            if(!validatedData.success) {
+                throw new ValidationError(validatedData.error.message)
+            }
+            await projectService.createInvite(
+                request.tenant!.orgId,
+                request.project!.id,
+                validatedData.data,
+            );
+            return response.status(200).json({
+                message: "Invite sent",
+            });
+        } catch (error) {
+            if(error instanceof ValidationError) {
+                return response.status(400).json({
+                    message: error.message
+                })
+            }
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
         }
     },
 

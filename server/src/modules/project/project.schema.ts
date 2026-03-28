@@ -48,6 +48,12 @@ export const getPaymentPendingSchema = z.object({
     searchQuery: z.string().max(500),
 });
 
+export const createInviteSchema = z.object({
+    email: z.email("Invalid email address"),
+    role: z.enum(["CLIENT", "ENGINEER"]),
+});
+
+export type CreateInviteBody = z.infer<typeof createInviteSchema>;
 export type RequisitionItemListBody = z.infer<typeof RequisitionItemListSchema>;
 export type CreateProjectBody = z.infer<typeof createProjectSchema>;
 export type CreatePhaseBody = z.infer<typeof createPhaseSchema>;
