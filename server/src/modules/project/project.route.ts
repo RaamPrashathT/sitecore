@@ -7,7 +7,7 @@ import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middl
 // Import the split controllers
 import coreController from "./core/core.controller.js";
 import phaseController from "./phase/phase.controller.js";
-// import requisitionController from "./requisition/requisition.controller.js";
+import requisitionController from "./requisition/requisition.controller.js";
 // import sitelogController from "./sitelog/sitelog.controller.js";
 
 const projectRouter = Router();
