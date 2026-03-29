@@ -3,16 +3,13 @@ import { authorize } from "../../shared/middleware/authorize.middleware.js";
 import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware.js";
 import { requiredRole } from "../../shared/middleware/requireRole.middleware.js";
 import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middleware.js";
-
-// Import the split controllers
 import coreController from "./core/core.controller.js";
 import phaseController from "./phase/phase.controller.js";
 import requisitionController from "./requisition/requisition.controller.js";
-// import sitelogController from "./sitelog/sitelog.controller.js";
+import sitelogController from "./sitelog/sitelog.controller.js";
 
 const projectRouter = Router();
 
-// --- 1. CORE PROJECT ROUTES ---
 projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), coreController.createProject);
 projectRouter.get("/", authorize, orgAuthorize, coreController.getProjects);
 projectRouter.get("/members", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), coreController.getMembers);
@@ -32,12 +29,13 @@ projectRouter.post("/phase/:phaseId/approve-payment", authorize, orgAuthorize, p
 projectRouter.post("/phase/:phaseId/complete", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.completePhase);
 projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.getPaymentPendingPhases);
 
-// --- 3. REQUISITION ROUTES ---
+
 projectRouter.post("/phase/:phaseId/requisition", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), requisitionController.createRequisition);
 projectRouter.post("/requisition/:requisitionId/approve", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), requisitionController.approveRequisition);
 projectRouter.post("/requisition/:requisitionId/reject", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), requisitionController.rejectRequisition);
 
-// // We will add the multer middleware here to handle the max 5 image uploads
-// projectRouter.post("/phase/sitelog", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, uploadMiddleware, sitelogController.createSiteLog);
 
+projectRouter.post("/phase/:phaseId/sitelog", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), sitelogController.createSiteLog);
+projectRouter.post("/image/:imageId/comment", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), sitelogController.createComment);
+projectRouter.delete("/comment/:commentId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), sitelogController.deleteComment);
 export default projectRouter;

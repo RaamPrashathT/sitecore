@@ -120,11 +120,8 @@ const phaseController = {
         }
     },
 
-    // --- 4. ORG-LEVEL DASHBOARD ---
-
     async getPaymentPendingPhases(request: Request, response: Response) {
         try {
-            // Note: This relies on the orgAuthorize middleware, not projectAuthorize
             const organizationId = request.tenant!.orgId;
 
             const result = await phaseService.getPaymentPendingPhases(organizationId);
