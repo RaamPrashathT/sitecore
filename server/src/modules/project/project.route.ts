@@ -6,7 +6,7 @@ import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middl
 
 // Import the split controllers
 import coreController from "./core/core.controller.js";
-// import phaseController from "./phase/phase.controller.js";
+import phaseController from "./phase/phase.controller.js";
 // import requisitionController from "./requisition/requisition.controller.js";
 // import sitelogController from "./sitelog/sitelog.controller.js";
 
@@ -22,11 +22,16 @@ projectRouter.put("/", authorize, orgAuthorize, projectAuthorize, requiredRole("
 projectRouter.post("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.assignMember);
 projectRouter.delete("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.removeMember);
 
-// --- 2. PHASE ROUTES ---
-// projectRouter.post("/phase", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, phaseController.createPhase);
-// projectRouter.get("/phase", authorize, orgAuthorize, projectAuthorize, phaseController.getPhases);
-// projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.paymentApproval);
-// projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.getPaymentPendingPhases);
+projectRouter.post("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.createPhase);
+projectRouter.get("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhases);
+projectRouter.get("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhaseDetails);
+projectRouter.put("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.updatePhase);
+projectRouter.delete("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.deletePhase);
+projectRouter.patch("/phase/:phaseId/reorder", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.reorderPhase);
+projectRouter.post("/phase/:phaseId/request-payment", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), phaseController.requestPayment);
+projectRouter.post("/phase/:phaseId/approve-payment", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), phaseController.approvePayment);
+projectRouter.post("/phase/:phaseId/complete", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.completePhase);
+projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.getPaymentPendingPhases);
 
 // // --- 3. REQUISITION ROUTES ---
 // projectRouter.post("/phase/requisition", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, requisitionController.createRequisition);
