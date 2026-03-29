@@ -23,23 +23,19 @@ projectRouter.post("/members", authorize, orgAuthorize, projectAuthorize, requir
 projectRouter.delete("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.removeMember);
 
 projectRouter.post("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.createPhase);
-projectRouter.get("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhases);
-projectRouter.get("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhaseDetails);
+// projectRouter.get("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhases);
+// projectRouter.get("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhaseDetails);
 projectRouter.put("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.updatePhase);
 projectRouter.delete("/phase/:phaseId", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.deletePhase);
-projectRouter.patch("/phase/:phaseId/reorder", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.reorderPhase);
 projectRouter.post("/phase/:phaseId/request-payment", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), phaseController.requestPayment);
 projectRouter.post("/phase/:phaseId/approve-payment", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), phaseController.approvePayment);
 projectRouter.post("/phase/:phaseId/complete", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.completePhase);
 projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.getPaymentPendingPhases);
 
-// // --- 3. REQUISITION ROUTES ---
-// projectRouter.post("/phase/requisition", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, requisitionController.createRequisition);
-// projectRouter.post("/phase/requisitionItems", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, requisitionController.postRequisitionItems);
-// projectRouter.get("/pendingRequisitions", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.getPendingRequisitions);
-// projectRouter.get("/phase/requisition/:requisitionIdSlug", authorize, orgAuthorize, projectAuthorize, requisitionController.getRequisitionDetails);
-// projectRouter.post("/phase/approveRequisition", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.approveRequisition);
-// projectRouter.post("/phase/rejectRequisition", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.rejectRequisition);
+// --- 3. REQUISITION ROUTES ---
+projectRouter.post("/phase/:phaseId/requisition", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), requisitionController.createRequisition);
+projectRouter.post("/requisition/:requisitionId/approve", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), requisitionController.approveRequisition);
+projectRouter.post("/requisition/:requisitionId/reject", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), requisitionController.rejectRequisition);
 
 // // We will add the multer middleware here to handle the max 5 image uploads
 // projectRouter.post("/phase/sitelog", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, uploadMiddleware, sitelogController.createSiteLog);
