@@ -11,7 +11,7 @@ import {
     ChartArea,
     Presentation,
 } from "lucide-react";
-
+import type { LucideIcon } from "lucide-react";
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
 import SidebarUser from "@/components/organization/sidebar/SidebarUserProfile";
 import OrgSwitcher from "@/components/organization/sidebar/SidebarOrgSwitcher";
@@ -25,7 +25,14 @@ import {
 import { useParams } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 
-const adminData = {
+type SidebarItem = {
+    title: string;
+    url: string;
+    icon: LucideIcon;
+};
+type SidebarGroup = Record<string, SidebarItem[]>;
+
+const adminData : { sidebarContents: SidebarGroup[] } = {
     sidebarContents: [
         {
             Overview: [
@@ -91,7 +98,7 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     if (membershipLoading) {
         return (
             <div className="w-60 h-screen bg-white flex items-start p-5">
-                <div className="w-full h-10 rounded-[10px] bg-gradient-to-r from-[#e8eaf0] via-[#f0f3f9] to-[#e8eaf0] bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+                <div className="w-full h-10 rounded-[10px] bg-linear-to-r from-[#e8eaf0] via-[#f0f3f9] to-[#e8eaf0] bg-size-[200%_100%] animate-[shimmer_1.5s_infinite]" />
             </div>
         );
     }

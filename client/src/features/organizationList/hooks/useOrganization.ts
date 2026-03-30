@@ -9,11 +9,10 @@ interface OrganizationType {
 }
 const getOrganizations = async () => {
     const { data } = await api.get<OrganizationType[]>("/org");
-    console.log(data)
     return data;
 };
 
-export const useOrganizations = (userId: string) => {
+export const useOrganizations = (userId?: string) => {
     return useQuery({
         queryKey: ["organizations", userId],
         queryFn: getOrganizations,

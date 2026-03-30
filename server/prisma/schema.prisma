@@ -55,6 +55,22 @@ enum RequisitionItemStatus {
     UNORDERED
 }
 
+enum NotificationType {
+    REQUISITION_SUBMITTED
+    REQUISITION_APPROVED
+    REQUISITION_REJECTED
+    PHASE_STATUS_CHANGED
+    PHASE_PAYMENT_DUE
+    SITE_LOG_CREATED
+    PROJECT_STATUS_CHANGED
+}
+
+enum NotificationEntityType {
+    REQUISITION
+    PHASE
+    SITE_LOG
+    PROJECT
+}
 
 model Organization {
     id        String   @id @default(uuid())
@@ -66,22 +82,24 @@ model Organization {
     updatedAt DateTime @updatedAt
     image     String?
 
-    catalogue Catalogue[]
-    members   Membership[]
-    projects  Project[]
+    notifications Notification[]
+    catalogue     Catalogue[]
+    members       Membership[]
+    projects      Project[]
 }
 
 model Membership {
-    id             String @id @default(uuid())
-    userId         String
-    role           Role
+    id     String @id @default(uuid())
+    userId String
+    role   Role
 
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
-    
-    siteLogs       SiteLog[]
-    images         Image[]
-    comments       Comment[]
+
+    siteLogs               SiteLog[]
+    images                 Image[]
+    comments               Comment[]
+    notificationRecipients NotificationRecipient[]
 
     @@unique([userId, organizationId])
 }
@@ -93,10 +111,10 @@ model Catalogue {
     unit            String
     defaultLeadTime Int               @default(0)
 
-    supplierQuotes  SupplierQuote[]
+    supplierQuotes SupplierQuote[]
 
-    organization    Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId  String
+    organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId   String
     requisitionItems RequisitionItem[]
 
     @@unique([name, organizationId])
@@ -117,30 +135,32 @@ model SupplierQuote {
 }
 
 model Project {
-    id              String        @id @default(uuid())
+    id              String  @id @default(uuid())
     name            String
     slug            String
     slugBase        String
     slugIndex       Int
     address         String
     estimatedBudget Decimal
+
+    status ProjectStatus @default(ACTIVE)
+
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId String
+
     
-    status          ProjectStatus @default(ACTIVE)
-
-    organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId  String
-
-    assignments     Assignment[]
-    phases          Phase[]
-    invitations     InvitationProject[]
+    assignments   Assignment[]
+    phases        Phase[]
+    invitations   InvitationProject[]
+    notifications Notification[]
 
     @@unique([slug, organizationId])
 }
 
 model Assignment {
-    id        String  @id @default(uuid())
-    userId    String
-    role      Role
+    id     String @id @default(uuid())
+    userId String
+    role   Role
 
     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String
@@ -157,63 +177,62 @@ model Phase {
     startDate       DateTime
     isPaid          Boolean     @default(false)
     status          PhaseStatus @default(PLANNING)
-    
-    sequenceOrder   Decimal     @default(1.0)
-    
-    projectId       String
-    project         Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-    requisitions    Requisition[]
-    siteLogs        SiteLog[]
-    
-    createdAt       DateTime    @default(now())
-    updatedAt       DateTime    @updatedAt
+    sequenceOrder Decimal @default(1.0)
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    requisitions Requisition[]
+    siteLogs     SiteLog[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@unique([name, projectId])
 }
 
-
 model SiteLog {
-    id          String   @id @default(uuid())
+    id          String  @id @default(uuid())
     title       String
     description String?
 
-    phaseId     String
-    phase       Phase    @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+    phaseId String
+    phase   Phase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
 
-    authorId    String
-    author      Membership @relation(fields: [authorId], references: [id])
-    images      Image[]
+    authorId String
+    author   Membership @relation(fields: [authorId], references: [id])
+    images   Image[]
 
-    workDate    DateTime
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    workDate  DateTime
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Image {
-    id          String   @id @default(uuid())
-    url         String
+    id  String @id @default(uuid())
+    url String
 
-    uploaderId  String
-    uploader    Membership @relation(fields: [uploaderId], references: [id])
+    uploaderId String
+    uploader   Membership @relation(fields: [uploaderId], references: [id])
 
-    siteLogId   String
-    siteLog     SiteLog @relation(fields: [siteLogId], references: [id], onDelete: Cascade)
+    siteLogId String
+    siteLog   SiteLog @relation(fields: [siteLogId], references: [id], onDelete: Cascade)
 
-    comments    Comment[]
+    comments Comment[]
 
-    createdAt   DateTime @default(now())
+    createdAt DateTime @default(now())
 }
 
 model Comment {
-    id        String   @id @default(uuid())
-    text      String
+    id   String @id @default(uuid())
+    text String
 
-    authorId  String
-    author    Membership @relation(fields: [authorId], references: [id])
+    authorId String
+    author   Membership @relation(fields: [authorId], references: [id])
 
-    imageId   String
-    image     Image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    imageId String
+    image   Image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -227,33 +246,33 @@ model Requisition {
     requestedBy String
     budget      Decimal
 
-    items       RequisitionItem[]
-    createdAt   DateTime          @default(now())
-    updatedAt   DateTime          @updatedAt
+    items     RequisitionItem[]
+    createdAt DateTime          @default(now())
+    updatedAt DateTime          @updatedAt
 }
 
 model RequisitionItem {
-    id                 String                @id @default(uuid())
-    quantity           Decimal
-    estimatedUnitCost  Decimal
-    status             RequisitionItemStatus @default(UNORDERED)
+    id                String                @id @default(uuid())
+    quantity          Decimal
+    estimatedUnitCost Decimal
+    status            RequisitionItemStatus @default(UNORDERED)
 
-    catalogueId        String
-    catalogue          Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+    catalogueId String
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
 
     assignedSupplierId String?
     assignedSupplier   SupplierQuote? @relation(fields: [assignedSupplierId], references: [id], onDelete: Cascade)
 
-    requisitionId      String
-    requisition        Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+    requisitionId String
+    requisition   Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
 }
 
 model Invitation {
-    id              String   @id @default(uuid())
-    token           String   @unique
-    email           String
-    role            Role
-    expiresAt       DateTime
+    id        String   @id @default(uuid())
+    token     String   @unique
+    email     String
+    role      Role
+    expiresAt DateTime
 
     status          InvitationStatus    @default(PENDING)
     organizationId  String
@@ -268,8 +287,41 @@ model InvitationProject {
     invitationId String
     projectId    String
 
-    invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
-    project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    invitation Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+    project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
     @@unique([invitationId, projectId])
+}
+
+model Notification {
+    id         String                 @id @default(uuid())
+    type       NotificationType
+    title      String
+    body       String?
+    entityType NotificationEntityType
+    entityId   String
+
+    organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+    orgId        String
+
+    project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId String?
+
+    createdAt  DateTime                @default(now())
+    recipients NotificationRecipient[]
+}
+
+model NotificationRecipient {
+    id             String       @id @default(uuid())
+    
+    notificationId String
+    notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+    membershipId   String
+    membership     Membership   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+    
+    isRead         Boolean      @default(false)
+    readAt         DateTime?
+
+    @@unique([notificationId, membershipId])
 }

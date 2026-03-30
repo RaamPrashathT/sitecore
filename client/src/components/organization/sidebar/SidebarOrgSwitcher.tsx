@@ -88,7 +88,7 @@ const OrgSwitcher = () => {
                             <DropdownMenuItem
                                 key={org.id}
                                 onClick={() => navigate(`/${org.slug}`)}
-                                className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-gray-700 font-[450] transition-colors duration-[120ms] hover:bg-green-50"
+                                className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-gray-700 font-[450] transition-colors duration-120 hover:bg-green-50"
                             >
                                 <div className="w-[26px] h-[26px] rounded-[6px] bg-green-100 text-green-700 text-[11px] font-bold flex items-center justify-center shrink-0">
                                     {org.name[0].toUpperCase()}
@@ -104,7 +104,7 @@ const OrgSwitcher = () => {
 
                         <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
                         <DropdownMenuItem
-                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-[#8892a4] font-[450] transition-colors duration-[120ms] hover:bg-[#f0f3f9]"
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-[#8892a4] font-[450] transition-colors duration-120 hover:bg-[#f0f3f9]"
                             asChild
                         >
                             <Link

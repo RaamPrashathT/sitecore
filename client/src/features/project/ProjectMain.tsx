@@ -1,15 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, HardHat, UsersRound   } from "lucide-react";
-import {ProjectMembersMain} from "./members/components/ProjectMembersMain";
-import ProjectPhaseMain from "./phase/components/ProjectPhaseMain";
+import { Form, HardHat, UsersRound } from "lucide-react";
+import { ProjectMembersMain } from "./members/components/ProjectMembersMain";
 import ProjectDetails from "./details/ProjectDetails";
+import ProjectProgressMain from "./progress/components/ProjectProgressMain";
 
 const ProjectMain = () => {
     return (
         <div className="flex flex-col">
             <div>
                 <Tabs defaultValue="details" className="w-full ">
-                    <TabsList className="bg-white" variant={"line"}>
+                    <TabsList className="bg-white border-b" variant={"line"}>
                         <TabsTrigger
                             value="details"
                             className="flex flex-row items-center"
@@ -24,7 +24,7 @@ const ProjectMain = () => {
                             <HardHat className="mt-[2.5px]" />
                             <p>Progress</p>
                         </TabsTrigger>
-                        
+
                         <TabsTrigger
                             value="members"
                             className="flex flex-row items-center"
@@ -36,9 +36,8 @@ const ProjectMain = () => {
                     <TabsContent value="details">
                         <ProjectDetails />
                     </TabsContent>
-                    
-                    <TabsContent value="phases">
-                        <ProjectPhaseMain />
+                    <TabsContent value="progress">
+                        <ProjectProgressMain />
                     </TabsContent>
                     <TabsContent value="members">
                         <ProjectMembersMain />

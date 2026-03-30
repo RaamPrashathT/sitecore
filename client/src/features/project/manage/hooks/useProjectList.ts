@@ -21,9 +21,7 @@ const getAllProjects = async (
     pageSize: number,
     searchQuery: string,
 ) => {
-    console.log(organizationId, pageIndex, pageSize, searchQuery)
     const { data } = await api.get<PaginatedProjectResponse>(
-        
         `/project?index=${pageIndex}&size=${pageSize}&search=${searchQuery}`,
         {
             headers: {

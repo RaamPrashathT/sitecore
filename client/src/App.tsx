@@ -133,7 +133,7 @@ function App() {
                                     element={<ProjectMemberInvitePage />}
                                 />
                                 <Route
-                                    path=":projectSlug/requisition/:requisitionIdSlug"
+                                    path=":projectSlug/phase/:phaseId/requisition/new"
                                     element={<RequisitionCreationPage />}
                                 />
                                 <Route
