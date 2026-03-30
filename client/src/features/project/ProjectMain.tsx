@@ -1,48 +1,67 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, HardHat, UsersRound } from "lucide-react";
-import { ProjectMembersMain } from "./members/components/ProjectMembersMain";
-import ProjectDetails from "./details/ProjectDetails";
-import ProjectProgressMain from "./progress/components/ProjectProgressMain";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, HardHat, UsersRound, ClipboardList } from "lucide-react";
 
 const ProjectMain = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const currentTab = pathParts.length > 2 ? pathParts[2] : "details";
+
+    const handleTabChange = (value: string) => {
+        if (value === "details") {
+            navigate("");
+        } else {
+            navigate(value);
+        }
+    };
+
     return (
-        <div className="flex flex-col">
-            <div>
-                <Tabs defaultValue="details" className="w-full ">
-                    <TabsList className="bg-white border-b" variant={"line"}>
+        <div className="flex flex-col w-full h-full">
+            <div className="sticky top-0 z-10 bg-white border-b pt-2 px-6">
+                <Tabs
+                    value={currentTab}
+                    onValueChange={handleTabChange}
+                    className="w-full"
+                >
+                    <TabsList className="bg-transparent h-auto p-0 flex gap-6 justify-start">
                         <TabsTrigger
                             value="details"
-                            className="flex flex-row items-center"
+                            className="flex flex-row items-center gap-2 pb-3 pt-2 px-1 border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700 data-[state=active]:shadow-none rounded-none bg-transparent"
                         >
-                            <Form className="mt-[2px]" />
-                            <p>Details</p>
+                            <Form className="w-4 h-4" />
+                            <p className="font-medium">Details</p>
                         </TabsTrigger>
+
                         <TabsTrigger
                             value="progress"
-                            className="flex flex-row items-center"
+                            className="flex flex-row items-center gap-2 pb-3 pt-2 px-1 border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700 data-[state=active]:shadow-none rounded-none bg-transparent"
                         >
-                            <HardHat className="mt-[2.5px]" />
-                            <p>Progress</p>
+                            <HardHat className="w-4 h-4" />
+                            <p className="font-medium">Progress</p>
+                        </TabsTrigger>
+
+                        <TabsTrigger
+                            value="requisitions"
+                            className="flex flex-row items-center gap-2 pb-3 pt-2 px-1 border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700 data-[state=active]:shadow-none rounded-none bg-transparent"
+                        >
+                            <ClipboardList className="w-4 h-4" />
+                            <p className="font-medium">Requisitions</p>
                         </TabsTrigger>
 
                         <TabsTrigger
                             value="members"
-                            className="flex flex-row items-center"
+                            className="flex flex-row items-center gap-2 pb-3 pt-2 px-1 border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700 data-[state=active]:shadow-none rounded-none bg-transparent"
                         >
-                            <UsersRound className="mt-[2.5px]" />
-                            <p>Members</p>
+                            <UsersRound className="w-4 h-4" />
+                            <p className="font-medium">Members</p>
                         </TabsTrigger>
                     </TabsList>
-                    <TabsContent value="details">
-                        <ProjectDetails />
-                    </TabsContent>
-                    <TabsContent value="progress">
-                        <ProjectProgressMain />
-                    </TabsContent>
-                    <TabsContent value="members">
-                        <ProjectMembersMain />
-                    </TabsContent>
                 </Tabs>
+            </div>
+
+            <div className="flex-1 overflow-y-auto bg-gray-50/50">
+                <Outlet />
             </div>
         </div>
     );
