@@ -94,22 +94,26 @@ export const userService = {
                 status: "PENDING",
                 expiresAt: { gt: new Date() },
             },
-            include: { projects: true }, 
+            include: { projects: true },
         });
 
         if (!invitation) {
-            throw new UnAuthorizedError("Invalid, expired, or already claimed invitation.");
+            throw new UnAuthorizedError(
+                "Invalid, expired, or already claimed invitation.",
+            );
         }
 
         if (invitation.email !== userEmail) {
-            throw new UnAuthorizedError(`Account Mismatch: Please log in with ${invitation.email}`);
+            throw new UnAuthorizedError(
+                `Account Mismatch: Please log in with ${invitation.email}`,
+            );
         }
 
         await prisma.$transaction(async (tx) => {
             await tx.invitation.update({
                 where: { id: invitation.id },
                 data: {
-                    status: "ACCEPTED", 
+                    status: "ACCEPTED",
                     accepted: true,
                     claimedByUserId: userId,
                 },
@@ -117,7 +121,10 @@ export const userService = {
 
             await tx.membership.upsert({
                 where: {
-                    userId_organizationId: { userId, organizationId: invitation.organizationId },
+                    userId_organizationId: {
+                        userId,
+                        organizationId: invitation.organizationId,
+                    },
                 },
                 create: {
                     userId,
@@ -125,7 +132,7 @@ export const userService = {
                     role: invitation.role,
                 },
                 update: {
-                    role: invitation.role, 
+                    role: invitation.role,
                 },
             });
 
@@ -146,7 +153,13 @@ export const userService = {
             }
         });
 
-        return { success: true, message: "Invitation accepted successfully." };
+        return {
+            success: true,
+            message: "Invitation accepted successfully.",
+            id: invitation.id,
+            projectId: invitation.projects[0]?.projectId, 
+            organizationId: invitation.organizationId,
+        };
     },
 
     async declineInvitation(token: string, userId: string, userEmail: string) {
@@ -155,23 +168,34 @@ export const userService = {
                 token,
                 status: "PENDING",
             },
+            include: { projects: true },
         });
 
         if (!invitation) {
-            throw new UnAuthorizedError("Invalid or already processed invitation.");
+            throw new UnAuthorizedError(
+                "Invalid or already processed invitation.",
+            );
         }
 
         if (invitation.email !== userEmail) {
-            throw new UnAuthorizedError("You do not have permission to decline this invite.");
+            throw new UnAuthorizedError(
+                "You do not have permission to decline this invite.",
+            );
         }
 
         await prisma.invitation.update({
             where: { id: invitation.id },
             data: {
-                status: "REJECTED", 
+                status: "REJECTED",
             },
         });
 
-        return { success: true, message: "Invitation declined." };
-    }
+        return {
+            success: true,
+            message: "Invitation accepted successfully.",
+            id: invitation.id,
+            projectId: invitation.projects[0]?.projectId, 
+            organizationId: invitation.organizationId,
+        };    
+    },
 };

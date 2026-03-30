@@ -8,7 +8,7 @@ interface NotifyInput {
     body?: string;
     entityType: NotificationEntityType;
     entityId: string;
-    projectId?: string;
+    projectId?: string | undefined;
     orgId: string;
 }
 

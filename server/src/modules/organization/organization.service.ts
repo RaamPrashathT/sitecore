@@ -1,5 +1,6 @@
 import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
+import { User } from "../../shared/models/user.js";
 import { slugify } from "../../shared/utils/slugify.js";
 
 export type CreateOrganizationInput = {
@@ -49,13 +50,24 @@ const orgService = {
     },
 
     async signup(userId: string, orgId: string) {
-        return prisma.membership.create({
+        const result = await prisma.membership.create({
             data: {
                 userId: userId,
                 role: "IDLE",
-                organizationId: orgId
-            }
-        })
+                organizationId: orgId,
+            },
+            include: {
+                organization: true,
+            },
+        });
+
+        const user = await User.findById(result.userId);
+
+        return {
+            ...result,
+            email: user?.email,
+            username: user?.username,
+        };
     },
 
     async getOrgs(userId: string) {
@@ -104,12 +116,12 @@ const orgService = {
                 },
                 skip: skip,
                 take: limit,
-                orderBy: { createdAt: 'desc' },
-                select:{
+                orderBy: { createdAt: "desc" },
+                select: {
                     id: true,
                     name: true,
                     slug: true,
-                }
+                },
             }),
             prisma.organization.count({
                 where: {
@@ -117,9 +129,9 @@ const orgService = {
                         contains: query,
                         mode: "insensitive",
                     },
-                }
-            })
-        ])
+                },
+            }),
+        ]);
 
         return {
             items,
@@ -127,7 +139,7 @@ const orgService = {
             totalPages: Math.ceil(totalCount / limit),
             currentPage: page,
             hasNextPage: page + limit < totalCount,
-        }
+        };
     },
 
     async identity(data: {

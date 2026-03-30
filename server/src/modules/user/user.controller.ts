@@ -6,6 +6,11 @@ import { MissingError } from "../../shared/error/missing.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { userService } from "./user.service.js";
 import { syncSessionTenants } from "../../shared/lib/syncSession.js";
+import { notify } from "../../shared/lib/notify.js";
+import {
+    NotificationEntityType,
+    NotificationType,
+} from "../../../generated/prisma/index.js";
 
 const userController = {
     async onboard(request: Request, response: Response) {
@@ -140,6 +145,15 @@ const userController = {
                 email,
             );
             await syncSessionTenants(userId, sessionId);
+            await notify({
+                type: NotificationType.PROJECT_INVITATION_ACCEPTED,
+                title: "Invitation Accepted",
+                body: `The invitation sent to ${email} has been accepted.`,
+                entityType: NotificationEntityType.INVITATION,
+                entityId: result.id,
+                orgId: result.organizationId,
+                projectId: result.projectId,
+            });
             return response.status(200).json(result);
         } catch (error) {
             if (error instanceof UnAuthorizedError) {
@@ -166,7 +180,16 @@ const userController = {
                 token,
                 userId,
                 email,
-            );
+            ); 
+            await notify({
+                type: NotificationType.PROJECT_INVITATION_REJECTED,
+                title: "Invitation Declined",
+                body: `The invitation sent to ${email} has been declined.`,
+                entityType: NotificationEntityType.INVITATION,
+                entityId: result.id,
+                orgId: result.organizationId,
+                projectId: result.projectId,
+            });
 
             return response.status(200).json(result);
         } catch (error) {

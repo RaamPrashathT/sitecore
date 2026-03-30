@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import type { FilterType } from "./ProjectMembersMain";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface FilterBarProps {
     readonly activeFilter: FilterType;
@@ -25,6 +26,7 @@ export default function MembersFilterBar({
     setSearchQuery,
     counts,
 }: FilterBarProps) {
+    const navigate = useNavigate();
     return (
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4">
             <div className="flex flex-wrap gap-1  p-1 rounded-lg">
@@ -65,7 +67,9 @@ export default function MembersFilterBar({
                         className="pl-9 h-9 w-full text-sm  bg-white"
                     />
                 </div>
-                <Button className="h-9 bg-green-700 hover:bg-green-800 text-white px-6">
+                <Button 
+                    onClick={() => navigate("invite")}
+                className="h-9 bg-green-700 hover:bg-green-800 text-white px-6">
                     Invite
                 </Button>
             </div>

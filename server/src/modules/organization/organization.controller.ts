@@ -12,6 +12,8 @@ import { MissingError } from "../../shared/error/missing.error.js";
 import { ZodError } from "zod";
 import { addOrgContext } from "../../shared/utils/session.js";
 import redis from "../../shared/lib/redis.js";
+import { notify } from "../../shared/lib/notify.js";
+import { NotificationEntityType, NotificationType } from "../../../generated/prisma/index.js";
 
 const orgController = {
     async create(request: Request, response: Response) {
@@ -99,7 +101,14 @@ const orgController = {
             const orgId = request.body.id;
 
             const result = await orgService.signup(userId, orgId);
-
+            await notify({
+                type: NotificationType.ORGANIZATION_INVITATION_REQUEST,
+                title: "New Join Request",
+                body: `${result.username} - ${result.email} has requested to join ${result.organization.name}`,
+                entityType: NotificationEntityType.INVITATION,
+                entityId: result.id,
+                orgId: result.organizationId,
+            });
             return response.status(200).json({ result });
         } catch (error) {
             if (error instanceof UnAuthorizedError) {

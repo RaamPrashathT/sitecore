@@ -63,6 +63,9 @@ enum NotificationType {
     PHASE_PAYMENT_DUE
     SITE_LOG_CREATED
     PROJECT_STATUS_CHANGED
+    PROJECT_INVITATION_ACCEPTED
+    PROJECT_INVITATION_REJECTED
+    ORGANIZATION_INVITATION_REQUEST
 }
 
 enum NotificationEntityType {
@@ -70,6 +73,7 @@ enum NotificationEntityType {
     PHASE
     SITE_LOG
     PROJECT
+    INVITATION
 }
 
 model Organization {
