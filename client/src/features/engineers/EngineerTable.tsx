@@ -18,18 +18,18 @@ interface EngineerTableProps {
 
 const EngineerTable = ({ table }: EngineerTableProps) => {
     return (
-        <div>
-            <Table className="">
-                <TableHeader className="p-0">
+        <div className="overflow-x-auto">
+            <Table className="font-sans">
+                <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow
                             key={headerGroup.id}
-                            className="p-0 bg-slate-100 border-none"
+                            className="border-b border-border/80 bg-muted/40"
                         >
                             {headerGroup.headers.map((header) => (
                                 <TableHead
                                     key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl last:rounded-r-xl first:pl-4"
+                                    className="h-12 px-4 font-display text-sm font-normal tracking-wide text-foreground first:rounded-l-lg last:rounded-r-lg"
                                 >
                                     {flexRender(
                                         header.column.columnDef.header,
@@ -40,11 +40,17 @@ const EngineerTable = ({ table }: EngineerTableProps) => {
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody className="p-0">
+                <TableBody>
                     {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="p-0 hover:bg-green-50">
+                        <TableRow
+                            key={row.id}
+                            className="border-b border-border/60 transition-colors hover:bg-green-50/70"
+                        >
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} className="p-0  first:rounded-l-xl last:rounded-r-xl ">
+                                <TableCell
+                                    key={cell.id}
+                                    className="p-0 align-top first:rounded-l-lg last:rounded-r-lg"
+                                >
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),

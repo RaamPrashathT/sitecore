@@ -17,22 +17,22 @@ interface ClientEmptyProps {
 
 const ClientEmpty = ({ slug }: ClientEmptyProps) => {
     return (
-        <div className="h-full flex items-center justify-center">
-            <Empty>
+        <div className="flex h-full items-center justify-center px-4 py-6">
+            <Empty className="w-full max-w-2xl rounded-xl border border-border/70 bg-background p-6 md:p-8">
                 <EmptyHeader>
-                    <EmptyMedia variant="icon">
+                    <EmptyMedia variant="icon" className="text-green-700">
                         <ClipboardCheckIcon />
                     </EmptyMedia>
-                    <EmptyTitle>No Clients</EmptyTitle>
-                    <EmptyDescription>No pending clients yet.</EmptyDescription>
+                    <EmptyTitle className="font-display text-3xl font-normal tracking-wide text-foreground">No Clients</EmptyTitle>
+                    <EmptyDescription className="font-sans text-sm text-muted-foreground">No pending clients yet.</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="flex-row justify-center gap-2">
-                    <Button className="w-50">
+                    <Button className="h-10 w-50 border border-green-700/30 bg-green-50 font-sans text-sm text-green-700 hover:bg-green-100">
                         <Link
                             to={`/${slug}/pending-invitations`}
                             className="flex items-center gap-x-1 p-3"
                         >
-                            <SquareArrowOutUpRight />
+                            <SquareArrowOutUpRight className="size-4" />
                             <p className="mb-px">Check for Invitations</p>
                         </Link>
                     </Button>

@@ -19,6 +19,7 @@ import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePag
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
+import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
 import ClientPage from "./pages/adminPages/clients/ClientPage";
 
 import ProjectPage from "./pages/project/ProjectPage";
@@ -115,6 +116,10 @@ function App() {
                                 <Route
                                     path="engineers"
                                     element={<EngineerPage />}
+                                />
+                                <Route
+                                    path="engineers/invite"
+                                    element={<EngineerInvitePage />}
                                 />
                                 <Route
                                     path="clients"

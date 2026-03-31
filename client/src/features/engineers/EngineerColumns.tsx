@@ -10,13 +10,13 @@ export const EngineerColumns = [
         cell: (info) => {
             const username = info.row.original.username || "A"
             return (
-                <div className="font-medium flex items-center h-12 px-4 gap-x-2">
-                    <Avatar>
-                        <AvatarFallback>
+                <div className="flex min-h-12 items-center gap-x-2 px-4 font-sans text-sm">
+                    <Avatar className="size-8">
+                        <AvatarFallback className="bg-green-50 font-mono text-xs text-green-700">
                             {username[0].toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
-                    <p>{username}</p>
+                    <p className="font-medium text-foreground">{username}</p>
                 </div>
             );
         },
@@ -25,8 +25,8 @@ export const EngineerColumns = [
     columnHelper.accessor("email", {
         header: "Email",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>{info.getValue()}</p>
+            <div className="flex min-h-12 items-center px-4 font-sans text-sm">
+                <p className="text-muted-foreground">{info.getValue()}</p>
             </div>
         ),
     }),

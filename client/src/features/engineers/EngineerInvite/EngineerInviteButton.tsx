@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const ClientInviteButton = () => {
+const EngineerInviteButton = () => {
     const navigate = useNavigate();
+
     return (
         <div>
             <Button
@@ -11,10 +12,10 @@ const ClientInviteButton = () => {
                 onClick={() => navigate("invite")}
             >
                 <Mail className="size-4" />
-                <p>Invite Clients</p>
+                <p>Invite Engineers</p>
             </Button>
         </div>
     );
 };
 
-export default ClientInviteButton;
+export default EngineerInviteButton;

@@ -8,7 +8,7 @@ import EngineerTable from "./EngineerTable";
 import { useEngineers } from "@/hooks/useEngineers";
 import { EngineerColumns as columns } from "./EngineerColumns";
 import EngineerEmpty from "./EngineerEmpty";
-// import EngineerEmpty from "./EngineerEmpty";
+import EngineerInviteButton from "./EngineerInvite/EngineerInviteButton";
 
 const EngineerMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
@@ -52,18 +52,19 @@ const EngineerMain = () => {
         membershipLoading || (engineersLoading && !engineers);
 
     if (isInitialLoading) return <></>;
-    if (!membership) return <div>No access</div>;
+    if (!membership) return <div className="px-4 py-6 font-sans text-sm text-muted-foreground">No access</div>;
     if (!engineers || engineers.totalCount === 0) return <EngineerEmpty slug={membership.slug}/>;
     
     return (
-        <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-end items-center py-2">
+        <div className="px-4 pb-4 pt-2 flex h-full flex-col font-sans">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+                <EngineerInviteButton />
                 <EngineerSearch table={table} />
             </div>
-            <div>
+            <div className="rounded-xl border border-border/70 bg-background">
                 <EngineerTable table={table} />
             </div>
-            <div className="mt-auto mb-4">
+            <div className="mt-auto pt-4">
                 <EngineerPagination table={table} />
             </div>
         </div>

@@ -1,16 +1,6 @@
 import { Button } from "@/components/ui/button";
-import {
-    Command,
-    CommandGroup,
-    CommandList,
-    CommandItem,
-} from "@/components/ui/command";
-import {
-    Field,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
+import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -22,11 +12,11 @@ import api from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import z from "zod";
-import ClientInviteFormSkeleton from "./ClientInviteFormSkeleton";
+import EngineerMutationFormSkeleton from "./EngineerMutationFormSkeleton";
 
 const selectedProjectSchema = z.object({
     id: z.string(),
@@ -60,7 +50,7 @@ const truncateLongName = (name: string, maxLength = 30) => {
     return `${name.slice(0, maxLength)}...`;
 };
 
-const ClientInviteForm = () => {
+const EngineerMutationForm = () => {
     const navigate = useNavigate();
     const { data: membership, isLoading: membershipLoading } = useMembership();
     const { data: projects, isLoading: projectsLoading } = useProjectList(
@@ -142,15 +132,21 @@ const ClientInviteForm = () => {
 
     const { mutate, isPending, error, isError } = useMutation({
         mutationFn: async (data: PayloadSchema) => {
-            return api.post(`/clients/invitation`, data);
+            return api.post(`/engineers/invitation`, data);
         },
         onSuccess: () => {
-            navigate(`/${membership?.slug}/clients`);
+            navigate(`/${membership?.slug}/engineers`);
         },
     });
 
-    if (projectsLoading || membershipLoading) return <ClientInviteFormSkeleton />;
-    if (!membership || !projects) return <div className="px-4 py-6 font-sans text-sm text-muted-foreground">No access</div>;
+    if (projectsLoading || membershipLoading) return <EngineerMutationFormSkeleton />;
+    if (!membership || !projects) {
+        return (
+            <div className="px-4 py-6 font-sans text-sm text-muted-foreground">
+                No access
+            </div>
+        );
+    }
 
     const selectedIds = new Set(selectedProjects.map((p) => p.id));
 
@@ -172,15 +168,19 @@ const ClientInviteForm = () => {
     return (
         <div className="mx-auto mb-20 w-full max-w-3xl px-4 py-2 font-sans">
             <div>
-                <h1 className="mb-6 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">Invite Clients</h1>
+                <h1 className="mb-6 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
+                    Invite Engineers
+                </h1>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <FieldGroup className="rounded-xl border border-border/70 bg-background p-6 md:p-8">
                         <Field>
-                            <FieldLabel className="font-sans text-sm text-muted-foreground">Email</FieldLabel>
+                            <FieldLabel className="font-sans text-sm text-muted-foreground">
+                                Email
+                            </FieldLabel>
                             <Input
                                 {...register("email")}
                                 id="email"
-                                placeholder="client@example.com"
+                                placeholder="engineer@example.com"
                                 className="font-sans text-sm"
                             />
                             {errors.email && (
@@ -189,7 +189,9 @@ const ClientInviteForm = () => {
                         </Field>
 
                         <Field>
-                            <FieldLabel className="font-sans text-sm text-muted-foreground">Projects</FieldLabel>
+                            <FieldLabel className="font-sans text-sm text-muted-foreground">
+                                Projects
+                            </FieldLabel>
 
                             {selectedProjects.length > 0 && (
                                 <div className="mb-3 max-h-50 overflow-auto rounded-lg border border-border/70">
@@ -238,9 +240,7 @@ const ClientInviteForm = () => {
                                                             {project.phases}
                                                         </td>
                                                         <td className="px-3 py-2 font-mono text-sm text-muted-foreground tabular-nums">
-                                                            {
-                                                                project.assignments
-                                                            }
+                                                            {project.assignments}
                                                         </td>
                                                         <td className="px-3 py-2">
                                                             <button
@@ -318,7 +318,11 @@ const ClientInviteForm = () => {
                         </Field>
                     </FieldGroup>
                     <FieldGroup className="mt-8 flex w-full items-center">
-                        <Button disabled={isPending} type="submit" className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800">
+                        <Button
+                            disabled={isPending}
+                            type="submit"
+                            className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800"
+                        >
                             {isPending ? (
                                 <div className="flex items-center gap-x-1">
                                     <Spinner />
@@ -336,4 +340,4 @@ const ClientInviteForm = () => {
     );
 };
 
-export default ClientInviteForm;
+export default EngineerMutationForm;
