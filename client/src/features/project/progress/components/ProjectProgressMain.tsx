@@ -1,6 +1,15 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useProjectProgress } from "../hooks/useProjectProgress";
-import { Loader2, Check, Clock, AlertCircle, ChevronRight } from "lucide-react";
+import {
+    Loader2,
+    Check,
+    Clock,
+    AlertCircle,
+    ChevronRight,
+    Settings,
+    Plus,
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { useSession } from "@/features/auth/hooks/useSession";
 import { UserAvatar } from "@/components/Avatar";
@@ -10,6 +19,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -56,6 +66,7 @@ const getStatusConfig = (status: string) => {
 };
 
 const ProjectProgressMain = () => {
+    const navigate = useNavigate();
     const { orgSlug, projectSlug } = useParams<{
         orgSlug: string;
         projectSlug: string;
@@ -95,7 +106,25 @@ const ProjectProgressMain = () => {
 
     return (
         <div className="min-h-screen bg-stone-50">
-            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-10 pt-5">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="font-display text-3xl text-stone-900">
+                            Project Progress
+                        </h1>
+                        <p className="font-sans text-stone-400 mt-px">
+                            Your project timeline:
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => navigate(`create-phase`)}
+                        className="font-display flex items-center gap-x-1 bg-green-700 rounded-lg px-3 py-1.5 text-white hover:bg-green-800 transition"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span>Create Phase</span>
+                    </button>
+                </div>
                 <div className="relative">
                     {phases.map((phase, phaseIndex) => {
                         const { badge, nodeStyle, spineColor } =
@@ -126,11 +155,44 @@ const ProjectProgressMain = () => {
                                 </div>
 
                                 <div className={`flex-1 min-w-0 pb-4`}>
-                                    <div className="flex flex-wrap items-center gap-2  mt-0.5">
-                                        <h2 className="text-xl font-display font-medium text-stone-900 tracking-tight">
-                                            {phase.name}
-                                        </h2>
-                                        {badge}
+                                    <div className="flex justify-between">
+                                        <div className="flex flex-wrap items-center gap-2  mt-0.5">
+                                            <h2 className="text-xl font-display font-medium text-stone-900 tracking-tight">
+                                                {phase.name}
+                                            </h2>
+                                            {badge}
+                                        </div>
+                                        <div className="flex flex-row items-center ">
+                                            <Button
+                                                variant={"ghost"}
+                                                size={"sm"}
+                                                onClick={() =>
+                                                    navigate(
+                                                        `create-log?phaseId=${phase.id}`,
+                                                    )
+                                                }
+                                            >
+                                                <Plus className="text-slate-500" />
+                                                <p className="mt-[2px]">
+                                                    Create Log
+                                                </p>
+                                            </Button>
+                                            <Separator
+                                                orientation="vertical"
+                                                className=" data-[orientation=vertical]:h-4"
+                                            />
+                                            <Button
+                                                variant={"ghost"}
+                                                size={"sm"}
+                                                onClick={() =>
+                                                    navigate(
+                                                        `update-phase?phaseId=${phase.id}`,
+                                                    )
+                                                }
+                                            >
+                                                <Settings className="text-slate-500" />
+                                            </Button>
+                                        </div>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mb-5 text-sm text-stone-400 font-mono">
                                         <span>
@@ -166,7 +228,6 @@ const ProjectProgressMain = () => {
                                             )}
                                         >
                                             {phase.siteLogs.map((log) => {
-
                                                 return (
                                                     <AccordionItem
                                                         key={log.id}
@@ -198,7 +259,7 @@ const ProjectProgressMain = () => {
                                                                             }
                                                                             className="w-6 h-6"
                                                                         />
-                                                                        <span className="text-sm text-stone-400 font-mono">
+                                                                        <span className="text-sm text-stone-400 font-sans">
                                                                             <span className="font-medium text-stone-700">
                                                                                 {
                                                                                     log
@@ -222,7 +283,7 @@ const ProjectProgressMain = () => {
                                                         </AccordionTrigger>
 
                                                         <AccordionContent className="px-3 pb-3">
-                                                            <div className="border-t border-stone-100">
+                                                            <div className="">
                                                                 {log.description && (
                                                                     <p className=" text-stone-700 mb-5 leading-relaxed font-sans">
                                                                         {

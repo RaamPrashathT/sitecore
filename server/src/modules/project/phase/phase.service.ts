@@ -60,7 +60,7 @@ const phaseService = {
     async getProjectTimeline(projectId: string) {
         const phases = await prisma.phase.findMany({
             where: { projectId: projectId },
-            orderBy: { sequenceOrder: "asc" },
+            orderBy: { sequenceOrder: "desc" },
             include: {
                 siteLogs: {
                     orderBy: { workDate: "desc" },
@@ -81,7 +81,6 @@ const phaseService = {
             },
         });
 
-        // Extract ALL unique user IDs (log authors + comment authors)
         const authorUserIds = new Set<string>();
         phases.forEach((phase) => {
             phase.siteLogs.forEach((log) => {
@@ -162,7 +161,7 @@ const phaseService = {
             where: { id: projectId },
             include: {
                 phases: {
-                    orderBy: { sequenceOrder: "asc" },
+                    orderBy: { sequenceOrder: "desc" },
                     select: {
                         id: true,
                         name: true,

@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
     if (parts[0] && !["login", "register", "organizations"].includes(parts[0])) {
         config.headers["x-tenant-slug"] = parts[0];
 
-        const reservedKeywords = ["settings", "engineers", "clients", "projects", "catalogue"];
+        const reservedKeywords = ["settings", "engineers", "clients", "projects", "catalogue", "notifications"];
         if (parts[1] && !reservedKeywords.includes(parts[1])) {
             config.headers["x-project-slug"] = parts[1];
         }

@@ -38,12 +38,14 @@ import InvitationPage from "./pages/invitation/InvitationPage";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ProvisionPage from "./pages/invitation/ProvisionPage";
 import Verify2FAPage from "./pages/auth/Verify2FAPage";
-import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
 import ProjectMain from "./features/project/ProjectMain";
 import ProjectDetails from "./features/project/details/components/ProjectDetails";
 import ProjectSettingsForm from "./features/project/details/components/ProjectSettingsForm";
 import ProjectProgressMain from "./features/project/progress/components/ProjectProgressMain";
 import { ProjectMembersMain } from "./features/project/members/components/ProjectMembersMain";
+import UpdatePhasePage from "./pages/project/UpdatePhasePage";
+import NotificationPage from "./pages/organization/NotificationPage";
+import CreateLogPage from "./pages/project/CreateLogPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -90,7 +92,10 @@ function App() {
                         <Route path="/:orgSlug" element={<OrgGuard />}>
                             <Route element={<MainOrganizationPage />}>
                                 <Route index element={<DashboardPage />} />
-
+                                <Route 
+                                    path="notifications"
+                                    element={<NotificationPage />}
+                                />
                                 {/* Catalogue */}
                                 <Route
                                     path="catalogue"
@@ -142,6 +147,9 @@ function App() {
     
     {/* Sub-tabs */}
     <Route path="progress" element={<ProjectProgressMain />} />
+    <Route path="progress/create-phase" element={<PhaseCreationPage />} />
+    <Route path="progress/update-phase" element={<UpdatePhasePage />} />
+    <Route path="progress/create-log" element={<CreateLogPage />} />
     {/* <Route path="requisitions" element={<ProjectRequisitionsMain />} /> */}
     <Route path="members" element={<ProjectMembersMain />} />
 </Route>
