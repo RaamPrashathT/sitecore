@@ -30,7 +30,7 @@ projectRouter.post("/phase/:phaseId/approve-payment", authorize, orgAuthorize, p
 projectRouter.post("/phase/:phaseId/complete", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.completePhase);
 projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.getPaymentPendingPhases);
 
-
+projectRouter.get("/requisitions", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getProjectRequisitions);
 projectRouter.post("/phase/:phaseId/requisition", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), requisitionController.createRequisition);
 projectRouter.post("/requisition/:requisitionId/approve", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), requisitionController.approveRequisition);
 projectRouter.post("/requisition/:requisitionId/reject", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), requisitionController.rejectRequisition);
