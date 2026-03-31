@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/Avatar";
 import type { ClientType } from "@/hooks/useClients";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -11,11 +11,8 @@ export const ClientColumns = [
             const username = info.row.original.username || "A"
             return (
                 <div className="flex min-h-12 items-center gap-x-2 px-4 font-sans text-sm">
-                    <Avatar className="size-8">
-                        <AvatarFallback className="bg-green-50 font-mono text-xs text-green-700">
-                            {username[0].toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar name={username} image={info.row.original.profileImage} className="w-8 h-8"/>
+
                     <p className="font-medium text-foreground">{username}</p>
                 </div>
             );

@@ -8,7 +8,7 @@ export const CatalogueColumns = [
     columnHelper.accessor('name', {
         header: "Item Name",
         cell: info => (
-            <div className='flex min-h-12 items-center px-4 font-sans text-sm font-medium text-foreground'>
+            <div className='flex h-full min-h-12 items-center px-4 font-sans text-sm font-medium text-foreground'>
                 {info.getValue()}
             </div>
         )
@@ -17,7 +17,7 @@ export const CatalogueColumns = [
     columnHelper.accessor('category', {
         header: "Category",
         cell: info => (
-            <div className='flex min-h-12 items-center px-4 font-sans text-sm font-medium capitalize text-muted-foreground'>
+            <div className='flex h-full min-h-12 items-center px-4 font-sans text-sm font-medium capitalize text-muted-foreground'>
                 {info.getValue().toLowerCase()}
             </div>
         )

@@ -49,7 +49,7 @@ const CatalogueDataTable = ({ table }: CatalogueDataTableProps) => {
                             {row.getVisibleCells().map((cell) => (
                                 <TableCell
                                     key={cell.id}
-                                    className="p-0 align-top first:rounded-l-lg last:rounded-r-lg"
+                                    className="p-0 align-middle first:rounded-l-lg last:rounded-r-lg"
                                 >
                                     {flexRender(
                                         cell.column.columnDef.cell,
