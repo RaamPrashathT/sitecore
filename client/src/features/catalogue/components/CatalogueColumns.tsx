@@ -8,7 +8,7 @@ export const CatalogueColumns = [
     columnHelper.accessor('name', {
         header: "Item Name",
         cell: info => (
-            <div className='font-medium flex items-center h-12 px-4'>
+            <div className='flex min-h-12 items-center px-4 font-sans text-sm font-medium text-foreground'>
                 {info.getValue()}
             </div>
         )
@@ -17,7 +17,7 @@ export const CatalogueColumns = [
     columnHelper.accessor('category', {
         header: "Category",
         cell: info => (
-            <div className='font-medium flex items-center h-12 px-4 capitalize'>
+            <div className='flex min-h-12 items-center px-4 font-sans text-sm font-medium capitalize text-muted-foreground'>
                 {info.getValue().toLowerCase()}
             </div>
         )
@@ -28,11 +28,11 @@ export const CatalogueColumns = [
         header: "Supplier",
         cell: ({row}) => {
             return (
-                <div className="flex flex-col divide-y w-full ">
+                <div className="flex w-full flex-col divide-y divide-border/60">
                     {row.original.supplierQuotes.map((quote) => (
                         <div 
                             key={quote.id}
-                            className='flex items-center h-12 px-4 font-medium'
+                            className='flex min-h-12 items-center px-4 font-sans text-sm text-foreground'
                         >
                             {quote.supplier}
                         </div>
@@ -48,11 +48,11 @@ export const CatalogueColumns = [
         cell: ({row}) => {
             const unit = row.original.unit;
             return (
-                <div className="flex flex-col divide-y w-full">
+                <div className="flex w-full flex-col divide-y divide-border/60">
                     {row.original.supplierQuotes.map((quote) => (
                         <div 
                             key={quote.id}
-                            className='flex items-center h-12 px-4 font-medium'
+                            className='flex min-h-12 items-center px-4 font-mono text-sm text-foreground tabular-nums'
                         >
                             {quote.truePrice}/{unit}
                         </div>
@@ -68,11 +68,11 @@ export const CatalogueColumns = [
         cell: ({row}) => {
             const unit = row.original.unit;
             return (
-                <div className="flex flex-col divide-y w-full  ">
+                <div className="flex w-full flex-col divide-y divide-border/60">
                     {row.original.supplierQuotes.map((quote) => (
                         <div 
                             key={quote.id}
-                            className='flex items-center h-12 px-4 font-medium '
+                            className='flex min-h-12 items-center px-4 font-mono text-sm text-foreground tabular-nums'
                         >
                             {quote.standardRate}/{unit}
                         </div>
@@ -88,11 +88,11 @@ export const CatalogueColumns = [
         cell: ({row}) => {
             const defaultLeadTime = row.original.defaultLeadTime;
             return (
-                <div className="flex flex-col divide-y w-full">
+                <div className="flex w-full flex-col divide-y divide-border/60">
                     {row.original.supplierQuotes.map((quote) => (
                         <div 
                             key={quote.id}
-                            className='flex items-center h-12 px-4 font-medium'
+                            className='flex min-h-12 items-center px-4 font-mono text-sm text-muted-foreground tabular-nums'
                         >
                             {quote.leadTime ? quote.leadTime : defaultLeadTime}
                         </div>
@@ -107,10 +107,10 @@ export const CatalogueColumns = [
         header: "Actions",
         cell: ({row}) => {
             return (
-                <div className="flex flex-col divide-y w-full">
+                <div className="flex w-full flex-col divide-y divide-border/60">
                     {row.original.supplierQuotes.map((quote) => (
                         <div key={quote.id} 
-                        className='h-12 px-4'>
+                        className='flex min-h-12 items-center px-3'>
                             <CatalogueActionButton quoteId={quote.id} catalogueId={quote.catalogueId} />
                         </div>
                     ))}

@@ -35,9 +35,9 @@ const DeleteCatalogueButton = (props: DeleteCatalogueButtonProps) => {
     return (
         <Button
             onClick={handleDelete}
-            className="border-0 shadow-none bg-white hover:bg-slate-100  text-black"
+            className="justify-start border-0 bg-transparent px-2 font-sans text-sm font-medium text-red-600 shadow-none hover:bg-red-50 hover:text-red-700"
         >
-            <Trash />
+            <Trash className="size-4" />
             Delete
         </Button>
     );

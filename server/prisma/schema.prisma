@@ -169,6 +169,8 @@ model Assignment {
     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String
 
+    notificationRecipients NotificationRecipient[]
+
     @@unique([userId, projectId])
 }
 
@@ -323,6 +325,10 @@ model NotificationRecipient {
 
     membershipId String
     membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+    assignmentId String?
+    assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+
 
     isRead Boolean   @default(false)
     readAt DateTime?

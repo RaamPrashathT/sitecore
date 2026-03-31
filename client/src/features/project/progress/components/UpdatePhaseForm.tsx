@@ -118,7 +118,6 @@ export default function UpdatePhaseForm() {
     return (
         <div className="min-h-screen bg-stone-50 p-6 font-sans">
             <div className="max-w-3xl mx-auto">
-                {/* Back */}
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-sm font-medium text-stone-500 hover:text-stone-900 mb-6"
@@ -126,8 +125,7 @@ export default function UpdatePhaseForm() {
                     <ArrowLeft className="w-4 h-4" />
                     Back to Progress
                 </button>
-
-                {/* Header */}
+=
                 <div className="mb-8 flex items-end justify-between">
                     <div>
                         <h1 className="text-3xl font-display text-stone-900 tracking-tight">
@@ -145,7 +143,7 @@ export default function UpdatePhaseForm() {
                     )}
                 </div>
 
-                <div className="border-y-1">
+                <div className="border-y">
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="flex flex-col gap-6"

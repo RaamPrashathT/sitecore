@@ -49,16 +49,16 @@ const CataloguePagination = ({ table }: CataloguePaginationProps) => {
     const paginationNumbers = getPaginationNumbers(pageIndex, pageCount);
 
     return (
-        <div className="flex flex-row relative">
-            <Field className="flex flex-row w-70 items-center gap-x-1">
-                <FieldLabel>Rows per page:</FieldLabel>
+        <div className="relative flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <Field className="flex flex-row items-center gap-x-2">
+                <FieldLabel className="font-sans text-sm text-muted-foreground">Rows per page</FieldLabel>
                 
                 <Select 
                     defaultValue={pageSize.toString()} 
                     value={pageSize.toString()}
                     onValueChange={(value) => table.setPageSize(Number(value))}
                 >
-                    <SelectTrigger className="" size="sm" id="select-rows-per-page">
+                    <SelectTrigger className="h-9 w-24 border-border bg-background font-mono text-sm tabular-nums" size="sm" id="select-rows-per-page">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="start">
@@ -72,13 +72,13 @@ const CataloguePagination = ({ table }: CataloguePaginationProps) => {
                 </Select>
             </Field>
             
-            <Pagination className="pr-80">
+            <Pagination className="md:justify-end">
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious
                             onClick={() => table.getCanPreviousPage() && table.previousPage()}
                             aria-disabled={!table.getCanPreviousPage()}
-                            className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : "cursor-pointer font-sans hover:border-green-700/40 hover:text-green-700"}
                         />
                     </PaginationItem>
                     
@@ -90,7 +90,7 @@ const CataloguePagination = ({ table }: CataloguePaginationProps) => {
                                 <PaginationLink
                                     isActive={pageIndex === (pageNumber as number) - 1}
                                     onClick={() => table.setPageIndex((pageNumber as number) - 1)}
-                                    className="cursor-pointer"
+                                    className="cursor-pointer font-mono tabular-nums data-[active=true]:border-green-700 data-[active=true]:bg-green-700 data-[active=true]:text-white"
                                 >
                                     {pageNumber}
                                 </PaginationLink>
@@ -102,7 +102,7 @@ const CataloguePagination = ({ table }: CataloguePaginationProps) => {
                         <PaginationNext 
                             onClick={() => table.getCanNextPage() && table.nextPage()}
                             aria-disabled={!table.getCanNextPage()}
-                            className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : "cursor-pointer font-sans hover:border-green-700/40 hover:text-green-700"}
                         />
                     </PaginationItem>
                 </PaginationContent>

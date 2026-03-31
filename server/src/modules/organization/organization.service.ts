@@ -176,6 +176,33 @@ const orgService = {
             role: fetchedData.role,
         };
     },
+
+    async getNotifications(userId: string, organizationId: string, role: string) {
+        const notifications = await prisma.notificationRecipient.findMany({
+            where: {
+                membership: {
+                    userId,
+                    organizationId,
+                },
+                ...(role !== "ADMIN" && {
+                    OR: [
+                        { assignmentId: { not: null } },  
+                        { notification: { projectId: null } }, 
+                    ],
+                }),
+            },
+            include: {
+                notification: true,
+            },
+            orderBy: {
+                notification: { createdAt: "desc" },
+            },
+        });
+    
+        return notifications;
+    }    
+    
+    
 };
 
 export default orgService;

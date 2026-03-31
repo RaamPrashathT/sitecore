@@ -1,7 +1,6 @@
 import { Role, type NotificationEntityType, type NotificationType } from "../../../generated/prisma";
 import { prisma } from "./prisma";
 
-
 interface NotifyInput {
     type: NotificationType;
     title: string;
@@ -13,15 +12,15 @@ interface NotifyInput {
 }
 
 export async function notify(input: NotifyInput) {
-    // Resolve assigned userIds for this project
-    const assignedUserIds = input.projectId
-        ? (
-              await prisma.assignment.findMany({
-                  where: { projectId: input.projectId },
-                  select: { userId: true },
-              })
-          ).map((a) => a.userId)
+    const assignments = input.projectId
+        ? await prisma.assignment.findMany({
+              where: { projectId: input.projectId },
+              select: { id: true, userId: true },
+          })
         : [];
+
+    const assignedUserIds = assignments.map((a) => a.userId);
+    const assignmentByUserId = Object.fromEntries(assignments.map((a) => [a.userId, a.id]));
 
     const memberships = await prisma.membership.findMany({
         where: {
@@ -34,7 +33,7 @@ export async function notify(input: NotifyInput) {
                 },
             ],
         },
-        select: { id: true },
+        select: { id: true, userId: true },
     });
 
     const notification = await prisma.notification.create({
@@ -47,7 +46,10 @@ export async function notify(input: NotifyInput) {
             projectId: input.projectId ?? null,
             orgId: input.orgId,
             recipients: {
-                create: memberships.map((m) => ({ membershipId: m.id })),
+                create: memberships.map((m) => ({
+                    membershipId: m.id,
+                    assignmentId: assignmentByUserId[m.userId] ?? null,
+                })),
             },
         },
     });

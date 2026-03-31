@@ -54,7 +54,7 @@ const getStatusConfig = (status: string) => {
         default:
             return {
                 badge: (
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-stone-100 text-stone-400 border border-stone-200 text-[10px] font-semibold tracking-wide uppercase mt-px">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200 text-[10px] font-semibold tracking-wide uppercase mt-px">
                         <Clock className="w-3 h-3 mb-px" />
                         {status.replace("_", " ")}
                     </span>
@@ -97,7 +97,7 @@ const ProjectProgressMain = () => {
                 <p className="text-sm font-medium text-stone-700">
                     Failed to load progress timeline
                 </p>
-                <p className="text-xs text-stone-400">
+                <p className="text-xs text-stone-700">
                     Please try refreshing the page.
                 </p>
             </div>
@@ -107,12 +107,12 @@ const ProjectProgressMain = () => {
     return (
         <div className="min-h-screen bg-stone-50">
             <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-10 pt-5">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 mt-2useProjectRequisitions">
                     <div>
                         <h1 className="font-display text-3xl text-stone-900">
                             Project Progress
                         </h1>
-                        <p className="font-sans text-stone-400 mt-px">
+                        <p className="font-sans text-stone-700 mt-px">
                             Your project timeline:
                         </p>
                     </div>
@@ -154,7 +154,7 @@ const ProjectProgressMain = () => {
                                     )}
                                 </div>
 
-                                <div className={`flex-1 min-w-0 pb-4`}>
+                                <div className={`flex-1 min-w-0 mb-4 rounded-lg px-3 pt-1 border`}>
                                     <div className="flex justify-between">
                                         <div className="flex flex-wrap items-center gap-2  mt-0.5">
                                             <h2 className="text-xl font-display font-medium text-stone-900 tracking-tight">
@@ -163,24 +163,28 @@ const ProjectProgressMain = () => {
                                             {badge}
                                         </div>
                                         <div className="flex flex-row items-center ">
-                                            <Button
-                                                variant={"ghost"}
-                                                size={"sm"}
-                                                onClick={() =>
-                                                    navigate(
-                                                        `create-log?phaseId=${phase.id}`,
-                                                    )
-                                                }
-                                            >
-                                                <Plus className="text-slate-500" />
-                                                <p className="mt-[2px]">
-                                                    Create Log
-                                                </p>
-                                            </Button>
-                                            <Separator
-                                                orientation="vertical"
-                                                className=" data-[orientation=vertical]:h-4"
-                                            />
+                                            {phase.status === "ACTIVE" && (
+                                                <>
+                                                    <Button
+                                                        variant={"ghost"}
+                                                        size={"sm"}
+                                                        onClick={() =>
+                                                            navigate(
+                                                                `create-log?phaseId=${phase.id}`,
+                                                            )
+                                                        }
+                                                    >
+                                                        <Plus className="text-slate-500" />
+                                                        <p className="mt-[2px]">
+                                                            Create Log
+                                                        </p>
+                                                    </Button>
+                                                    <Separator
+                                                        orientation="vertical"
+                                                        className=" data-[orientation=vertical]:h-4"
+                                                    />
+                                                </>
+                                            )}
                                             <Button
                                                 variant={"ghost"}
                                                 size={"sm"}
@@ -194,27 +198,24 @@ const ProjectProgressMain = () => {
                                             </Button>
                                         </div>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mb-5 text-sm text-stone-400 font-mono">
+                                    <div className="flex flex-wrap items-center justify-between border-b pb-1 gap-y-0.5 mb-5 text-md text-stone-700 font-mono">
                                         <span>
+                                            Budget{" "}
+                                            <span className="text-green-700 font-semibold font-mono">
+                                                {formatCurrency(phase.budget)}
+                                            </span>
+                                        </span>
+                                        <span className="mr-2">
                                             Started{" "}
                                             {format(
                                                 new Date(phase.startDate),
                                                 "MMM d, yyyy",
                                             )}
                                         </span>
-                                        <span className="text-stone-300">
-                                            ·
-                                        </span>
-                                        <span>
-                                            Budget{" "}
-                                            <span className="text-stone-600 font-semibold font-mono">
-                                                {formatCurrency(phase.budget)}
-                                            </span>
-                                        </span>
                                     </div>
 
                                     {phase.description && (
-                                        <p className="text-sm text-stone-500 mb-5 leading-relaxed">
+                                        <p className="text-sm text-stone-600 mb-5 leading-relaxed">
                                             {phase.description}
                                         </p>
                                     )}
@@ -238,7 +239,7 @@ const ProjectProgressMain = () => {
                                                             <div className="flex items-start justify-between w-full gap-4">
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center gap-2 mb-1">
-                                                                        <ChevronRight className="w-4 h-4 text-stone-400 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                                                                        <ChevronRight className="w-4 h-4 text-stone-700 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
                                                                         <span className="text-[16px] font-medium text-stone-900 leading-snug font-sans">
                                                                             {
                                                                                 log.title
@@ -259,7 +260,7 @@ const ProjectProgressMain = () => {
                                                                             }
                                                                             className="w-6 h-6"
                                                                         />
-                                                                        <span className="text-sm text-stone-400 font-sans">
+                                                                        <span className="text-sm text-stone-700 font-sans">
                                                                             <span className="font-medium text-stone-700">
                                                                                 {
                                                                                     log
@@ -271,7 +272,7 @@ const ProjectProgressMain = () => {
                                                                     </div>
                                                                 </div>
 
-                                                                <div className="text-stone-400 font-mono">
+                                                                <div className="text-stone-700 font-mono">
                                                                     {format(
                                                                         new Date(
                                                                             log.workDate,

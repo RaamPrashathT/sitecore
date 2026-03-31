@@ -1,61 +1,17 @@
-import {
-    flexRender,
-} from "@tanstack/react-table";
-import type { Table as ReactTableType } from "@tanstack/react-table";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import type { Table } from "@tanstack/react-table";
 import type { DashboardItemType } from "../hooks/useGetDashboardItems";
+import AdminDashboardCard from "./AdminDashboardCard";
 
 interface AdminDashboardDataTableProps {
-    table: ReactTableType<DashboardItemType>;
+    readonly table: Table<DashboardItemType>;
 }
 
 const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
     return (
-        <div>
-            <Table className="">
-                <TableHeader className="p-0">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow
-                            key={headerGroup.id}
-                            className="p-0 bg-slate-100 border-none"
-                        >
-                            {headerGroup.headers.map((header) => (
-                                <TableHead
-                                    key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl last:rounded-r-xl "
-                                >
-                                    {flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext(),
-                                    )}
-                                </TableHead>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody className="p-0">
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="p-0 hover:bg-green-50">
-                            {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} className="p-0  first:rounded-l-xl last:rounded-r-xl ">
-                                    {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext(),
-                                    )}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            
+        <div className="flex flex-col gap-4 ">
+            {table.getRowModel().rows.map((row) => (
+                <AdminDashboardCard key={row.id} row={row} />
+            ))}
         </div>
     );
 };

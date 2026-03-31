@@ -1,19 +1,27 @@
 import { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAddSiteLog } from "../hooks/useAddSiteLog";
-import { uploadToCloudinary } from "@/lib/cloudinary"; // Adjust import based on your structure
+import { uploadToCloudinary } from "@/lib/cloudinary"; 
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, ImagePlus, X, AlertCircle } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { Loader2, ArrowLeft, ImagePlus, X, AlertCircle, CalendarIcon } from "lucide-react";
 
 const siteLogSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
-    workDate: z.string().min(1, "Work date is required"),
+    workDate: z.date({ required_error: "Work date is required" }),
 });
 
 type FormValues = z.infer<typeof siteLogSchema>;
@@ -32,12 +40,12 @@ export default function AddSiteLogForm() {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    const { register, handleSubmit, control, formState: { errors } } = useForm<FormValues>({
         resolver: zodResolver(siteLogSchema),
         defaultValues: {
             title: "",
             description: "",
-            workDate: new Date().toISOString().split('T')[0], // Defaults to today
+            workDate: new Date(), // Defaults to today as a Date object
         },
     });
 
@@ -76,7 +84,7 @@ export default function AddSiteLogForm() {
             addSiteLog({
                 title: data.title,
                 description: data.description,
-                workDate: new Date(data.workDate).toISOString(),
+                workDate: data.workDate.toISOString(),
                 images: imageUrls,
             }, {
                 onSuccess: () => navigate(`/${orgSlug}/${projectSlug}/progress`)
@@ -133,11 +141,35 @@ export default function AddSiteLogForm() {
 
                             <div className={`flex flex-col ${GRID.gapSm}`}>
                                 <label className="text-xs font-semibold text-stone-500 uppercase tracking-widest">Work Date</label>
-                                <Input 
-                                    type="date"
-                                    {...register("workDate")}
-                                    disabled={isBusy}
-                                    className="font-mono text-stone-900 border-stone-200 focus-visible:ring-green-700"
+                                <Controller
+                                    control={control}
+                                    name="workDate"
+                                    render={({ field }) => (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    disabled={isBusy}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal border-stone-200 focus-visible:ring-green-700 bg-transparent",
+                                                        !field.value && "text-stone-500"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
                                 />
                                 {errors.workDate && <span className="text-xs font-medium text-red-500">{errors.workDate.message}</span>}
                             </div>

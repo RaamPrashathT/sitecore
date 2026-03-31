@@ -58,26 +58,28 @@ const CatalogueMain = () => {
         membershipLoading || (catalogueItemsLoading && !catalogueItems);
 
     if (isInitialLoading) return <CatalogueSkeleton />;
-    if (!membership || !catalogueItems) return <div>No access</div>;
+    if (!membership || !catalogueItems) {
+        return <div className="px-4 py-6 font-sans text-sm text-muted-foreground">No access</div>;
+    }
 
     return (
-        <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-between items-center py-2">
-                <Button>
+        <div className="px-4 pb-4 pt-2 flex flex-col h-full font-sans">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+                <Button className="bg-green-700 text-white hover:bg-green-800">
                     <Link
                         to={`/${membership.slug}/catalogue/create`}
                         className="flex items-center gap-x-1"
                     >
-                        <Plus />
-                        <p className="mb-px">Add Catalogue Item</p>
+                        <Plus className="size-4" />
+                        <p className="font-sans text-sm">Add Catalogue Item</p>
                     </Link>
                 </Button>
                 <CatalogueSearch table={table} />
             </div>
-            <div>
+            <div className="rounded-xl border border-border/70 bg-background">
                 <CatalogueDataTable table={table} />
             </div>
-            <div className="mt-auto mb-4">
+            <div className="mt-auto pt-4">
                 <CataloguePagination table={table} />
             </div>
         </div>

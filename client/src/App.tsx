@@ -46,6 +46,7 @@ import { ProjectMembersMain } from "./features/project/members/components/Projec
 import UpdatePhasePage from "./pages/project/UpdatePhasePage";
 import NotificationPage from "./pages/organization/NotificationPage";
 import CreateLogPage from "./pages/project/CreateLogPage";
+import ProjectRequisitionPage from "./pages/project/ProjectRequisitionPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -92,7 +93,7 @@ function App() {
                         <Route path="/:orgSlug" element={<OrgGuard />}>
                             <Route element={<MainOrganizationPage />}>
                                 <Route index element={<DashboardPage />} />
-                                <Route 
+                                <Route
                                     path="notifications"
                                     element={<NotificationPage />}
                                 />
@@ -136,28 +137,54 @@ function App() {
                                 />
 
                                 {/* Projects List & Creation */}
-<Route path="projects" element={<ProjectListPage />} />
-<Route path="projects/create" element={<CreateProjectPage />} />
+                                <Route
+                                    path="projects"
+                                    element={<ProjectListPage />}
+                                />
+                                <Route
+                                    path="projects/create"
+                                    element={<CreateProjectPage />}
+                                />
 
-{/* Individual Project Workspace (Route-based Tabs) */}
-<Route path=":projectSlug" element={<ProjectMain />}>
-    {/* Default tab is Details */}
-    <Route index element={<ProjectDetails />} /> 
-    <Route path="settings" element={<ProjectSettingsForm />} /> 
-    
-    {/* Sub-tabs */}
-    <Route path="progress" element={<ProjectProgressMain />} />
-    <Route path="progress/create-phase" element={<PhaseCreationPage />} />
-    <Route path="progress/update-phase" element={<UpdatePhasePage />} />
-    <Route path="progress/create-log" element={<CreateLogPage />} />
-    {/* <Route path="requisitions" element={<ProjectRequisitionsMain />} /> */}
-    <Route path="members" element={<ProjectMembersMain />} />
-</Route>
+                                <Route
+                                    path=":projectSlug"
+                                    element={<ProjectMain />}
+                                >
+                                    <Route index element={<ProjectDetails />} />
+                                    <Route
+                                        path="settings"
+                                        element={<ProjectSettingsForm />}
+                                    />
 
-{/* Action Routes inside a project */}
-{/* <Route path=":projectSlug/create-phase" element={<PhaseCreationPage />} /> */}
-{/* <Route path=":projectSlug/invite" element={<ProjectMemberInvitePage />} /> */}
-{/* <Route path=":projectSlug/phase/:phaseId/requisition/new" element={<RequisitionCreationPage />} /> */}
+                                    <Route
+                                        path="progress"
+                                        element={<ProjectProgressMain />}
+                                    />
+                                    <Route
+                                        path="progress/create-phase"
+                                        element={<PhaseCreationPage />}
+                                    />
+                                    <Route
+                                        path="progress/update-phase"
+                                        element={<UpdatePhasePage />}
+                                    />
+                                    <Route
+                                        path="progress/create-log"
+                                        element={<CreateLogPage />}
+                                    />
+                                    <Route
+                                        path="requisitions"
+                                        element={<ProjectRequisitionPage />}
+                                    />
+                                    <Route
+                                        path="members"
+                                        element={<ProjectMembersMain />}
+                                    />
+                                </Route>
+
+                                {/* Action Routes inside a project */}
+                                {/* <Route path=":projectSlug/invite" element={<ProjectMemberInvitePage />} /> */}
+                                {/* <Route path=":projectSlug/phase/:phaseId/requisition/new" element={<RequisitionCreationPage />} /> */}
                                 {/* Pending */}
                                 <Route
                                     path="pending-requisitions"

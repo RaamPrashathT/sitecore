@@ -13,7 +13,10 @@ import { ZodError } from "zod";
 import { addOrgContext } from "../../shared/utils/session.js";
 import redis from "../../shared/lib/redis.js";
 import { notify } from "../../shared/lib/notify.js";
-import { NotificationEntityType, NotificationType } from "../../../generated/prisma/index.js";
+import {
+    NotificationEntityType,
+    NotificationType,
+} from "../../../generated/prisma/index.js";
 
 const orgController = {
     async create(request: Request, response: Response) {
@@ -193,6 +196,26 @@ const orgController = {
                     message: error.message,
                 });
             }
+            logger.error(error);
+            return response.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    },
+
+    async getNotifications(request: Request, response: Response) {
+        try {
+            const userId = request.session?.userId
+            const organizationId = request.tenant?.orgId
+            const role = request.tenant?.role
+
+            if (!userId || !organizationId || !role) {
+                throw new UnAuthorizedError()
+            }
+            const result = await orgService.getNotifications(userId, organizationId, role);
+            return response.status(200).json(result)
+        } catch (error) {
             logger.error(error);
             return response.status(500).json({
                 success: false,

@@ -84,31 +84,31 @@ const CreateCatalogueForm = ({
     };
 
     return (
-        <div className="flex items-center justify-center ">
+        <div className="flex items-center justify-center px-4 py-2 font-sans">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-3xl"
+                className="w-full max-w-4xl rounded-xl border border-border/70 bg-background p-6 md:p-8"
             >
-                <h1 className="text-3xl font-semibold my-8">
+                <h1 className="mb-8 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
                     Create Catalogue Item:
                 </h1>
-                <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-y-4">
+                <FieldGroup className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <Field>
-                        <FieldLabel>Item Name</FieldLabel>
-                        <Input {...register("name")} id="name" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Item Name</FieldLabel>
+                        <Input {...register("name")} id="name" className="font-sans text-sm" />
                         {errors.name && (
                             <FieldError>{errors.name.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel>Supplier</FieldLabel>
-                        <Input {...register("supplier")} id="supplier" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Supplier</FieldLabel>
+                        <Input {...register("supplier")} id="supplier" className="font-sans text-sm" />
                         {errors.supplier && (
                             <FieldError>{errors.supplier.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel>Category</FieldLabel>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Category</FieldLabel>
                         <Controller
                             name="category"
                             control={control}
@@ -118,7 +118,7 @@ const CreateCatalogueForm = ({
                                     onValueChange={field.onChange}
                                     value={field.value}
                                 >
-                                    <SelectTrigger>
+                                    <SelectTrigger className="font-sans text-sm">
                                         <SelectValue placeholder="Select Category" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -152,25 +152,26 @@ const CreateCatalogueForm = ({
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel>Unit:</FieldLabel>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Unit</FieldLabel>
                         <Input
                             {...register("unit")}
                             placeholder="KG/Hour/Litre"
+                            className="font-sans text-sm"
                         />
                         {errors.unit && (
                             <FieldError>{errors.unit.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel>True Price</FieldLabel>
-                        <Input {...register("truePrice")} placeholder="0"/>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">True Price</FieldLabel>
+                        <Input {...register("truePrice")} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.truePrice && (
                             <FieldError>{errors.truePrice.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel>Standard Rate</FieldLabel>
-                        <Input {...register("standardRate")} placeholder="0"/>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Standard Rate</FieldLabel>
+                        <Input {...register("standardRate")} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.standardRate && (
                             <FieldError>
                                 {errors.standardRate.message}
@@ -178,9 +179,9 @@ const CreateCatalogueForm = ({
                         )}
                     </Field>
                 </FieldGroup>
-                    <Field className="mt-4">
-                        <FieldLabel>Lead Time</FieldLabel>
-                        <Input {...register("leadTime")} placeholder="0"/>
+                    <Field className="mt-5">
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Lead Time</FieldLabel>
+                        <Input {...register("leadTime")} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.leadTime && (
                             <FieldError className="">
                                 {errors.leadTime.message}
@@ -188,8 +189,8 @@ const CreateCatalogueForm = ({
                         )}
                     </Field>
                 {error && <p className="text-red-500 py-2">{error}</p>}
-                <div className="flex justify-end mt-8">
-                    <Button type="submit" className="w-60">
+                <div className="mt-8 flex justify-end">
+                    <Button type="submit" className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800">
                         {isLoading && <Spinner />}
                         <p>Create Item</p>
                     </Button>
