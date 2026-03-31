@@ -56,21 +56,23 @@ const ProjectManageMain = () => {
     const isInitialLoading =
         membershipLoading || (projectListLoading && !projectList);
 
-    if (isInitialLoading) return <ProjectSkeleton/>;
+    if (isInitialLoading) return <ProjectSkeleton />;
     if (!membership || !projectList) return <div>No access</div>;
 
     return (
         <div className=" px-4 flex flex-col h-full">
             <div className="flex flex-row justify-between items-center py-2">
-                <Button>
-                    <Link
-                        to={`/${membership.slug}/projects/create`}
-                        className="flex items-center gap-x-1"
-                    >
-                        <Plus />
-                        <p className="mb-px">Create Project</p>
-                    </Link>
-                </Button>
+                {membership.role === "ADMIN" && (
+                    <Button>
+                        <Link
+                            to={`/${membership.slug}/projects/create`}
+                            className="flex items-center gap-x-1"
+                        >
+                            <Plus />
+                            <p className="mb-px">Create Project</p>
+                        </Link>
+                    </Button>
+                )}
                 <ProjectSearch table={table} />
             </div>
             <div className="h-full flex flex-col">

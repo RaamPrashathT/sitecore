@@ -57,6 +57,106 @@ const phaseService = {
         };
     },
 
+    async getProjectTimeline(projectId: string) {
+        const phases = await prisma.phase.findMany({
+            where: { projectId: projectId },
+            orderBy: { sequenceOrder: "asc" },
+            include: {
+                siteLogs: {
+                    orderBy: { workDate: "desc" },
+                    include: {
+                        author: { select: { userId: true } },
+                        images: {
+                            include: {
+                                comments: {
+                                    orderBy: { createdAt: "asc" },
+                                    include: {
+                                        author: { select: { userId: true } },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // Extract ALL unique user IDs (log authors + comment authors)
+        const authorUserIds = new Set<string>();
+        phases.forEach((phase) => {
+            phase.siteLogs.forEach((log) => {
+                authorUserIds.add(log.author.userId);
+                log.images.forEach((img) => {
+                    img.comments.forEach((c) =>
+                        authorUserIds.add(c.author.userId),
+                    );
+                });
+            });
+        });
+
+        const { User } = await import("../../../shared/models/user.js");
+        const users = await User.find({
+            _id: { $in: Array.from(authorUserIds) },
+        }).lean();
+        const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+        const timeline = phases.map((phase) => {
+            const mappedSiteLogs = phase.siteLogs.map((log) => {
+                const mongoUser = userMap.get(log.author.userId);
+
+                const mappedImages = log.images.map((img) => ({
+                    id: img.id,
+                    url: img.url,
+                    comments: img.comments.map((c) => {
+                        const commentUser = userMap.get(c.author.userId);
+                        return {
+                            id: c.id,
+                            text: c.text,
+                            createdAt: c.createdAt,
+                            author: {
+                                name: commentUser
+                                    ? commentUser.username
+                                    : "Unknown User",
+                                profile: commentUser?.profileImage || null,
+                            },
+                        };
+                    }),
+                }));
+
+                const totalComments = mappedImages.reduce(
+                    (sum, img) => sum + img.comments.length,
+                    0,
+                );
+
+                return {
+                    id: log.id,
+                    title: log.title,
+                    workDate: log.workDate,
+                    description: log.description,
+                    author: {
+                        name: mongoUser ? mongoUser.username : "Unknown User",
+                        profile: mongoUser?.profileImage || null,
+                    },
+                    images: mappedImages,
+                    imageCount: mappedImages.length,
+                    commentCount: totalComments,
+                };
+            });
+
+            return {
+                id: phase.id,
+                name: phase.name,
+                description: phase.description,
+                budget: Number(phase.budget),
+                status: phase.status,
+                startDate: phase.startDate,
+                siteLogs: mappedSiteLogs,
+            };
+        });
+
+        return timeline;
+    },
+
     async getPhases(projectId: string) {
         const project = await prisma.project.findUnique({
             where: { id: projectId },
@@ -122,15 +222,8 @@ const phaseService = {
             where: { id: phaseId, projectId: projectId },
             include: {
                 requisitions: {
-                    orderBy: { createdAt: "desc" },
-                    include: {
-                        items: {
-                            include: {
-                                catalogue: true,
-                                assignedSupplier: true,
-                            },
-                        },
-                    },
+                    where: { status: "APPROVED" },
+                    select: { budget: true },
                 },
                 siteLogs: {
                     orderBy: { workDate: "desc" },
@@ -148,42 +241,20 @@ const phaseService = {
             throw new ValidationError("Phase not found");
         }
 
-        const spent = phase.requisitions
-            .filter((req) => req.status === "APPROVED")
-            .reduce((sum, req) => sum + Number(req.budget), 0);
+        const spent = phase.requisitions.reduce(
+            (sum, req) => sum + Number(req.budget),
+            0,
+        );
 
         const isOverdue = phase.paymentDeadline < new Date() && !phase.isPaid;
 
         const authorUserIds = [
             ...new Set(phase.siteLogs.map((log) => log.author.userId)),
         ];
+
         const { User } = await import("../../../shared/models/user.js");
         const users = await User.find({ _id: { $in: authorUserIds } }).lean();
         const userMap = new Map(users.map((u) => [u._id.toString(), u]));
-
-        const mappedRequisitions = phase.requisitions.map((req) => {
-            const firstItemName =
-                req.items[0]?.catalogue?.name || "Various materials";
-            return {
-                id: req.id,
-                status: req.status,
-                budget: Number(req.budget),
-                itemsSummary: firstItemName,
-                // Add this new items array for your DataTable!
-                items: req.items.map((item) => ({
-                    id: item.id,
-                    itemName: item.catalogue.name,
-                    unit: item.catalogue.unit,
-                    quantity: Number(item.quantity),
-                    estimatedUnitCost: Number(item.estimatedUnitCost),
-                    supplierName:
-                        item.assignedSupplier?.supplier || "Unknown supplier",
-                    standardRate: item.assignedSupplier
-                        ? Number(item.assignedSupplier.standardRate)
-                        : Number(item.estimatedUnitCost),
-                })),
-            };
-        });
 
         const mappedSiteLogs = phase.siteLogs.map((log) => {
             const mongoUser = userMap.get(log.author.userId);
@@ -219,7 +290,6 @@ const phaseService = {
                 paymentDeadline: phase.paymentDeadline,
                 isOverdue: isOverdue,
             },
-            requisitions: mappedRequisitions,
             siteLogs: mappedSiteLogs,
         };
     },

@@ -32,6 +32,17 @@ const phaseController = {
         }
     },
 
+    async getProjectTimeline(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+            const result = await phaseService.getProjectTimeline(projectId);
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response.status(500).json({ message: "Internal server error" });
+        }
+    },
+
     async getPhases(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;

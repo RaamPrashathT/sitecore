@@ -39,6 +39,11 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ProvisionPage from "./pages/invitation/ProvisionPage";
 import Verify2FAPage from "./pages/auth/Verify2FAPage";
 import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
+import ProjectMain from "./features/project/ProjectMain";
+import ProjectDetails from "./features/project/details/components/ProjectDetails";
+import ProjectSettingsForm from "./features/project/details/components/ProjectSettingsForm";
+import ProjectProgressMain from "./features/project/progress/components/ProjectProgressMain";
+import { ProjectMembersMain } from "./features/project/members/components/ProjectMembersMain";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -115,6 +120,7 @@ function App() {
                                 />
 
                                 {/* Projects */}
+                                {/* Projects List & Creation */}
                                 <Route
                                     path="projects"
                                     element={<ProjectListPage />}
@@ -124,23 +130,26 @@ function App() {
                                     element={<CreateProjectPage />}
                                 />
 
-                                <Route
-                                    path=":projectSlug/create-phase"
-                                    element={<PhaseCreationPage />}
-                                />
-                                <Route
-                                    path=":projectSlug/invite"
-                                    element={<ProjectMemberInvitePage />}
-                                />
-                                <Route
-                                    path=":projectSlug/phase/:phaseId/requisition/new"
-                                    element={<RequisitionCreationPage />}
-                                />
-                                <Route
-                                    path=":projectSlug"
-                                    element={<ProjectPage />}
-                                />
+                                {/* Projects List & Creation */}
+<Route path="projects" element={<ProjectListPage />} />
+<Route path="projects/create" element={<CreateProjectPage />} />
 
+{/* Individual Project Workspace (Route-based Tabs) */}
+<Route path=":projectSlug" element={<ProjectMain />}>
+    {/* Default tab is Details */}
+    <Route index element={<ProjectDetails />} /> 
+    <Route path="settings" element={<ProjectSettingsForm />} /> 
+    
+    {/* Sub-tabs */}
+    <Route path="progress" element={<ProjectProgressMain />} />
+    {/* <Route path="requisitions" element={<ProjectRequisitionsMain />} /> */}
+    <Route path="members" element={<ProjectMembersMain />} />
+</Route>
+
+{/* Action Routes inside a project */}
+{/* <Route path=":projectSlug/create-phase" element={<PhaseCreationPage />} /> */}
+{/* <Route path=":projectSlug/invite" element={<ProjectMemberInvitePage />} /> */}
+{/* <Route path=":projectSlug/phase/:phaseId/requisition/new" element={<RequisitionCreationPage />} /> */}
                                 {/* Pending */}
                                 <Route
                                     path="pending-requisitions"
