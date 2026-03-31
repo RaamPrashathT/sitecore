@@ -130,6 +130,7 @@ model SupplierQuote {
     truePrice    Decimal
     standardRate Decimal
     leadTime     Int?
+    inventory    Int     @default(0)
 
     catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
     catalogueId  String
@@ -152,7 +153,6 @@ model Project {
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
 
-    
     assignments   Assignment[]
     phases        Phase[]
     invitations   InvitationProject[]
@@ -316,16 +316,16 @@ model Notification {
 }
 
 model NotificationRecipient {
-    id             String       @id @default(uuid())
-    
+    id String @id @default(uuid())
+
     notificationId String
     notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
-    membershipId   String
-    membership     Membership   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
-    
-    isRead         Boolean      @default(false)
-    readAt         DateTime?
+    membershipId String
+    membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+    isRead Boolean   @default(false)
+    readAt DateTime?
 
     @@unique([notificationId, membershipId])
 }
