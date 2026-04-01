@@ -7,9 +7,22 @@ interface AdminDashboardDataTableProps {
 }
 
 const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
+    const rows = table.getRowModel().rows;
+
+    if (rows.length === 0) {
+        return (
+            <div
+                className="flex flex-col items-center justify-center py-20 text-stone-400"
+                style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}
+            >
+                <p className="text-sm">No items to display</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-col gap-4 ">
-            {table.getRowModel().rows.map((row) => (
+        <div className="w-full max-w-2xl mx-auto flex flex-col gap-3">
+            {rows.map((row) => (
                 <AdminDashboardCard key={row.id} row={row} />
             ))}
         </div>

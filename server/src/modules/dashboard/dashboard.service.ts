@@ -71,6 +71,7 @@ const dashboardService = {
                             leadTime: true,
                             truePrice: true,
                             standardRate: true,
+                            inventory: true,
                         },
                     },
                     requisition: {
@@ -123,8 +124,10 @@ const dashboardService = {
             projectName: item.requisition.phase.project.name,
             phaseName: item.requisition.phase.name,
             phaseStartDate: item.requisition.phase.startDate,
+            inventory: item.assignedSupplier?.inventory ?? 0,
         }));
 
+        console.log(data)
         return {
             data,
             count,

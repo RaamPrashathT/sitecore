@@ -15,7 +15,7 @@ export interface DashboardItemSchema {
     projectName: string;
     phaseName: string;
     phaseStartDate: string;
-
+    inventory: string;
 }
 
 export interface DashboardItemInputSchema {

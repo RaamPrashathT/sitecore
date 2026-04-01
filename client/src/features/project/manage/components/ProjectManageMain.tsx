@@ -60,25 +60,25 @@ const ProjectManageMain = () => {
     if (!membership || !projectList) return <div>No access</div>;
 
     return (
-        <div className=" px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-between items-center py-2">
+        <div className="px-4 pb-4 pt-2 flex flex-col h-full font-sans">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
                 {membership.role === "ADMIN" && (
-                    <Button>
+                    <Button className="bg-green-700 text-white hover:bg-green-800">
                         <Link
                             to={`/${membership.slug}/projects/create`}
-                            className="flex items-center gap-x-1"
+                            className="flex items-center gap-2"
                         >
-                            <Plus />
-                            <p className="mb-px">Create Project</p>
+                            <Plus className="h-4 w-4" />
+                            <span className="text-sm">Create Project</span>
                         </Link>
                     </Button>
                 )}
                 <ProjectSearch table={table} />
             </div>
-            <div className="h-full flex flex-col">
+            <div className="rounded-xl border border-border/70 bg-background flex-1">
                 <ProjectListDataTable table={table} slug={membership.slug} />
             </div>
-            <div className="mt-auto mb-4">
+            <div className="mt-auto pt-4">
                 <ProjectListPagination table={table} />
             </div>
         </div>

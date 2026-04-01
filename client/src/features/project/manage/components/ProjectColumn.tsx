@@ -9,7 +9,7 @@ export const ProjectColumns = [
         cell: (info) => {
             const projectName = info.row.original.name;
             return (
-                <div className='font-medium flex items-center h-12 px-4'>
+                <div className="flex h-full min-h-12 items-center font-sans text-sm font-medium text-foreground">
                     {projectName}
                 </div>
             );
@@ -19,8 +19,8 @@ export const ProjectColumns = [
         header: "Estimated Budget",
         cell: (info) => {
             return (
-                <div className='font-medium flex items-center h-12 px-4'>
-                    {info.getValue()}
+                <div className="flex h-full min-h-12 items-center font-mono text-sm font-medium text-foreground tabular-nums">
+                    ₹{info.getValue()}
                 </div>
             );
         },
@@ -29,7 +29,7 @@ export const ProjectColumns = [
         header: "Phases",
         cell: (info) => {
             return (
-                <div className='font-medium flex items-center h-12 px-4'>
+                <div className="flex h-full min-h-12 items-center font-mono text-sm font-medium text-foreground tabular-nums">
                     {info.getValue()}
                 </div>
             );
@@ -39,7 +39,7 @@ export const ProjectColumns = [
         header: "No. of Assignments",
         cell: (info) => {
             return (
-                <div className='font-medium flex items-center h-12 px-4'>
+                <div className="flex h-full min-h-12 items-center font-mono text-sm font-medium text-foreground tabular-nums">
                     {info.getValue()}
                 </div>
             );

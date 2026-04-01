@@ -1,15 +1,8 @@
 import { flexRender } from "@tanstack/react-table";
 import type { Table as ReactTableType } from "@tanstack/react-table";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import type { ProjectListType } from "../hooks/useProjectList";
 import { useNavigate } from "react-router-dom";
+import EmptyProjectList from "./EmptyProjectList";
 
 interface ProjectListDataTableProps {
     table: ReactTableType<ProjectListType>;
@@ -18,53 +11,55 @@ interface ProjectListDataTableProps {
 
 const ProjectListDataTable = ({ table, slug }: ProjectListDataTableProps) => {
     const navigate = useNavigate();
+    const hasRows = table.getRowModel().rows.length > 0;
+
     return (
-        <div>
-            <Table className="">
-                <TableHeader className="pl-2">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow
-                            key={headerGroup.id}
-                            className="p-0 pl-2 bg-slate-100 border-none"
-                        >
-                            {headerGroup.headers.map((header) => (
-                                <TableHead
-                                    key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl first:pl-4 last:rounded-r-xl "
-                                >
-                                    {flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext(),
-                                    )}
-                                </TableHead>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody className="p-0">
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow
+        <div className="overflow-x-auto">
+            <div className="flex border-b border-border/80 bg-muted/40">
+                {table.getFlatHeaders().map((header) => (
+                    <div
+                        key={header.id}
+                        style={{ flex: 1 }}
+                        className="h-12 px-4 flex items-center font-display text-sm font-normal tracking-wide text-foreground first:rounded-tl-lg last:rounded-tr-lg"
+                    >
+                        {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {hasRows ? (
+                <div className="flex flex-col">
+                    {table.getRowModel().rows.map((row, index) => (
+                        <div
                             key={row.id}
-                            className="p-0 hover:bg-green-50"
-                            onClick={() =>
-                                navigate(`/${slug}/${row.original.slug}`)
-                            }
+                            onClick={() => navigate(`/${slug}/${row.original.slug}`)}
+                            className={`flex transition-colors hover:bg-green-50/50 cursor-pointer ${
+                                index !== table.getRowModel().rows.length - 1 ? "border-b border-border/40" : ""
+                            }`}
                         >
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell
+                                <div
                                     key={cell.id}
-                                    className="p-0  first:rounded-l-xl last:rounded-r-xl first:pl-4"
+                                    style={{ flex: 1 }}
+                                    className="flex items-center px-4"
                                 >
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),
                                     )}
-                                </TableCell>
+                                </div>
                             ))}
-                        </TableRow>
+                        </div>
                     ))}
-                </TableBody>
-            </Table>
+                </div>
+            ) : (
+                <div className="flex items-center justify-center py-16">
+                    <EmptyProjectList />
+                </div>
+            )}
         </div>
     );
 };

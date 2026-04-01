@@ -22,7 +22,7 @@ export default function LoginPage() {
             </div>
             <div className="bg-muted relative hidden lg:block">
                 <img
-                    src="https://res.cloudinary.com/datgb606y/image/upload/v1774244857/authImg_bjuho3.png"
+                    src="https://res.cloudinary.com/datgb606y/image/upload/q_auto/f_auto/v1775034906/Gemini_Generated_Image_mz0gbemz0gbemz0g_pypnai.png"
                     alt="placeholder"
                     className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
                 />

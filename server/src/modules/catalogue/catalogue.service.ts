@@ -111,6 +111,7 @@ const catalogueService = {
                 truePrice: data.truePrice,
                 standardRate: data.standardRate,
                 leadTime: data.leadTime,
+                inventory: data.inventory,
                 catalogueId: catalogue.id,
             },
         });

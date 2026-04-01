@@ -15,7 +15,7 @@ const DashboardPage = () => {
     }
 
     if(membership.role === "ADMIN") return (
-        <div className="h-full ">
+        <div className="h-full">
             <AdminDashboardMain />
         </div>
     )
