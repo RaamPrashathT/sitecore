@@ -10,7 +10,6 @@ import { User } from "../../shared/models/user.js";
 import crypto from "node:crypto";
 import { prisma } from "../../shared/lib/prisma.js";
 import { UnverifiedError } from "../../shared/error/unverified.error.js";
-import { env } from "../../shared/config/env.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { TwoFactorRequiredError } from "../../shared/error/twoFactor.error.js";
 
@@ -28,7 +27,7 @@ const authController = {
     async register(request: Request, response: Response) {
         try {
             const result = await authService.register(request.body);
-            
+
             if (result.frictionlessLogin && result.sessionId && result.user) {
                 await redis.set(
                     `session:${result.sessionId}`,
@@ -42,12 +41,12 @@ const authController = {
                     }),
                     { EX: 60 * 60 * 24 },
                 );
-                
+
                 if (request.body.inviteToken) {
                     await redis.set(
-                        `pending_invite:${result.user?._id}`, 
-                        request.body.inviteToken, 
-                        { EX: 3600 }
+                        `pending_invite:${result.user?._id}`,
+                        request.body.inviteToken,
+                        { EX: 3600 },
                     );
                 }
 
@@ -60,7 +59,8 @@ const authController = {
                 logger.info("User registered (frictionless)", {
                     traceId: request.traceId,
                     service: "auth-service",
-                    endpoint: "/register",
+                    endpoint: request.originalUrl,
+                    responseTime: response.locals.responseTime,
                     method: "POST",
                     userId: result.user._id,
                     statusCode: 200,
@@ -70,11 +70,12 @@ const authController = {
                     frictionlessLogin: true,
                 });
             }
-            
+
             logger.info("User registered (OTP sent)", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/register",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 userId: result.user?._id,
                 statusCode: 200,
@@ -88,16 +89,23 @@ const authController = {
             logger.error("Registration failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/register",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 statusCode:
-                    error instanceof ConflictError ? 409 :
-                    error instanceof UnAuthorizedError ? 403 : 500,
+                    error instanceof ConflictError
+                        ? 409
+                        : error instanceof UnAuthorizedError
+                          ? 403
+                          : 500,
                 errorCode:
-                    error instanceof ConflictError ? "USER_ALREADY_EXISTS" :
-                    error instanceof UnAuthorizedError ? "UNAUTHORIZED" :
-                    "REGISTRATION_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                    error instanceof ConflictError
+                        ? "USER_ALREADY_EXISTS"
+                        : error instanceof UnAuthorizedError
+                          ? "UNAUTHORIZED"
+                          : "REGISTRATION_FAILED",
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             if (
                 error instanceof ConflictError ||
@@ -145,11 +153,12 @@ const authController = {
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
-            
+
             logger.info("OTP verified", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/verify-email",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 userId: user._id,
                 statusCode: 200,
@@ -161,16 +170,23 @@ const authController = {
             logger.error("OTP verification failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/verify-email",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 statusCode:
-                    error instanceof ValidationError ? 400 :
-                    error instanceof UnAuthorizedError ? 400 : 500,
+                    error instanceof ValidationError
+                        ? 400
+                        : error instanceof UnAuthorizedError
+                          ? 400
+                          : 500,
                 errorCode:
-                    error instanceof ValidationError ? "INVALID_OTP_INPUT" :
-                    error instanceof UnAuthorizedError ? "INVALID_OTP" :
-                    "OTP_VERIFICATION_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                    error instanceof ValidationError
+                        ? "INVALID_OTP_INPUT"
+                        : error instanceof UnAuthorizedError
+                          ? "INVALID_OTP"
+                          : "OTP_VERIFICATION_FAILED",
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             if (error instanceof ValidationError) {
                 return response.status(400).json({
@@ -209,9 +225,9 @@ const authController = {
 
             if (request.body.inviteToken) {
                 await redis.set(
-                    `pending_invite:${user?._id}`, 
-                    request.body.inviteToken, 
-                    { EX: 3600 }
+                    `pending_invite:${user?._id}`,
+                    request.body.inviteToken,
+                    { EX: 3600 },
                 );
             }
 
@@ -224,7 +240,8 @@ const authController = {
             logger.info("User login success", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/login",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 userId: user._id,
                 statusCode: 200,
@@ -236,18 +253,27 @@ const authController = {
             logger.error("Login failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/login",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 statusCode:
-                    error instanceof UnverifiedError ? 403 :
-                    error instanceof TwoFactorRequiredError ? 403 :
-                    error instanceof UnAuthorizedError ? 401 : 500,
+                    error instanceof UnverifiedError
+                        ? 403
+                        : error instanceof TwoFactorRequiredError
+                          ? 403
+                          : error instanceof UnAuthorizedError
+                            ? 401
+                            : 500,
                 errorCode:
-                    error instanceof UnverifiedError ? "EMAIL_NOT_VERIFIED" :
-                    error instanceof TwoFactorRequiredError ? "2FA_REQUIRED" :
-                    error instanceof UnAuthorizedError ? "INVALID_CREDENTIALS" :
-                    "LOGIN_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                    error instanceof UnverifiedError
+                        ? "EMAIL_NOT_VERIFIED"
+                        : error instanceof TwoFactorRequiredError
+                          ? "2FA_REQUIRED"
+                          : error instanceof UnAuthorizedError
+                            ? "INVALID_CREDENTIALS"
+                            : "LOGIN_FAILED",
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             if (error instanceof UnverifiedError) {
                 console.log(error);
@@ -271,7 +297,6 @@ const authController = {
                 });
             }
 
-
             return response.status(500).json({
                 code: "INTERNAL_ERROR",
                 message: "Internal server error",
@@ -283,30 +308,33 @@ const authController = {
         try {
             const { email } = request.body;
             if (!email) throw new Error("Email is required");
-            
+
             const newToken = await authService.resendVerificationOtp(email);
-            
+
             logger.info("OTP resent", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/resend-verification",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 statusCode: 200,
             });
             return response.status(200).json({
                 message:
-                "If the email is registered and unverified, a new OTP has been sent.",
+                    "If the email is registered and unverified, a new OTP has been sent.",
                 verificationToken: newToken || null,
             });
         } catch (error) {
             logger.error("Resend OTP failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/resend-verification",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 statusCode: 500,
                 errorCode: "RESEND_OTP_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             return response.status(500).json({
                 message: "Internal server error",
@@ -336,7 +364,8 @@ const authController = {
             logger.info("User logout success", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/logout",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 userId: request.session?.userId,
                 statusCode: 200,
@@ -349,12 +378,14 @@ const authController = {
             logger.error("Logout failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/logout",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 userId: request.session?.userId,
                 statusCode: 500,
                 errorCode: "LOGOUT_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             return response.status(500).json({
                 success: false,
@@ -368,7 +399,8 @@ const authController = {
             logger.info("User identity fetched", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/me",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "GET",
                 userId: request.session?.userId,
                 statusCode: 200,
@@ -382,12 +414,14 @@ const authController = {
             logger.error("Fetch user identity failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/me",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "GET",
                 userId: request.session?.userId,
                 statusCode: 500,
                 errorCode: "FETCH_USER_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             return response.status(500).json({
                 success: false,
@@ -399,12 +433,15 @@ const authController = {
     async verify2fa(request: Request, response: Response) {
         try {
             const { token, otp, inviteToken } = request.body;
-            
+
             if (!token || !otp) {
                 throw new ValidationError("Token and OTP are required.");
             }
 
-            const { sessionId, user, tenant } = await authService.verify2fa(token, otp);
+            const { sessionId, user, tenant } = await authService.verify2fa(
+                token,
+                otp,
+            );
 
             await redis.set(
                 `session:${sessionId}`,
@@ -420,11 +457,9 @@ const authController = {
             );
 
             if (inviteToken) {
-                await redis.set(
-                    `pending_invite:${user._id}`, 
-                    inviteToken, 
-                    { EX: 3600 }
-                );
+                await redis.set(`pending_invite:${user._id}`, inviteToken, {
+                    EX: 3600,
+                });
             }
 
             response.cookie("session", sessionId, {
@@ -436,7 +471,8 @@ const authController = {
             logger.info("2FA verification success", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/verify-2fa",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 userId: user._id,
                 statusCode: 200,
@@ -444,25 +480,36 @@ const authController = {
             return response.status(200).json({
                 message: "Two-step verification successful. Logged in.",
             });
-
         } catch (error) {
             logger.error("2FA verification failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/verify-2fa",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "POST",
                 statusCode:
-                    error instanceof ValidationError || error instanceof UnAuthorizedError ? 400 : 500,
+                    error instanceof ValidationError ||
+                    error instanceof UnAuthorizedError
+                        ? 400
+                        : 500,
                 errorCode:
-                    error instanceof ValidationError ? "INVALID_2FA_INPUT" :
-                    error instanceof UnAuthorizedError ? "INVALID_2FA" :
-                    "2FA_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                    error instanceof ValidationError
+                        ? "INVALID_2FA_INPUT"
+                        : error instanceof UnAuthorizedError
+                          ? "INVALID_2FA"
+                          : "2FA_FAILED",
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
-            if (error instanceof ValidationError || error instanceof UnAuthorizedError) {
+            if (
+                error instanceof ValidationError ||
+                error instanceof UnAuthorizedError
+            ) {
                 return response.status(400).json({ message: error.message });
             }
-            return response.status(500).json({ message: "Internal server error" });
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 
@@ -471,7 +518,8 @@ const authController = {
             logger.info("Google OAuth initiated", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/google",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "GET",
                 statusCode: 302,
             });
@@ -482,11 +530,13 @@ const authController = {
             logger.error("Google OAuth init failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/google",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "GET",
                 statusCode: 500,
                 errorCode: "GOOGLE_OAUTH_INIT_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
         }
     },
@@ -634,13 +684,11 @@ const authController = {
             );
 
             if (inviteToken) {
-                await redis.set(
-                    `pending_invite:${user._id}`, 
-                    inviteToken, 
-                    { EX: 3600 }
-                );
+                await redis.set(`pending_invite:${user._id}`, inviteToken, {
+                    EX: 3600,
+                });
             }
-            
+
             response.cookie("session", sessionId, {
                 httpOnly: true,
                 secure: true,
@@ -658,7 +706,8 @@ const authController = {
             logger.info("Google OAuth login success", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/google/callback",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "GET",
                 userId: user._id,
                 statusCode: 302,
@@ -668,11 +717,13 @@ const authController = {
             logger.error("Google OAuth callback failed", {
                 traceId: request.traceId,
                 service: "auth-service",
-                endpoint: "/google/callback",
+                endpoint: request.originalUrl,
+                responseTime: response.locals.responseTime,
                 method: "GET",
                 statusCode: 500,
                 errorCode: "GOOGLE_OAUTH_CALLBACK_FAILED",
-                errorDetails: error instanceof Error ? error.stack : String(error),
+                errorDetails:
+                    error instanceof Error ? error.stack : String(error),
             });
             const frontendUrl =
                 process.env.FRONTEND_URL || "http://localhost:5173";
