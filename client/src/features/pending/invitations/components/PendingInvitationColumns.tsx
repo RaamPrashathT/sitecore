@@ -9,8 +9,8 @@ export const PendingInvitationColumns = [
     columnHelper.accessor("username", {
         header: "Name",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center font-sans text-sm font-medium text-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -18,8 +18,8 @@ export const PendingInvitationColumns = [
     columnHelper.accessor("email", {
         header: "Email",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center font-sans text-sm text-muted-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -27,7 +27,7 @@ export const PendingInvitationColumns = [
     columnHelper.display({
         header: "Assignment",
         cell: ({row}) => (
-            <div className="font-medium flex flex-row gap-x-2 items-center h-12 px-4">
+            <div className="flex h-full min-h-12 flex-row gap-2 items-center">
                 <ClientAssignButton userId={row.original.userId}/>
                 <EngineerAssignButton userId={row.original.userId}/>
             </div>

@@ -9,13 +9,13 @@ interface PendingRequisitionItemTableProps {
 const PendingRequisitionItemTable = ({ table }: PendingRequisitionItemTableProps) => {
     
     return (
-        <div className="w-full">
-            <div className="flex bg-slate-100 rounded-xl mb-1 px-4">
+        <div className="w-full rounded-lg border border-border/60 bg-background overflow-hidden">
+            <div className="flex bg-muted/40 border-b border-border/60 px-4">
                 {table.getFlatHeaders().map((header) => (
                     <div
                         key={header.id}
                         style={{ flex: 1 }}
-                        className="text-md text-gray-600 font-medium h-12 flex items-center"
+                        className="h-11 flex items-center font-display text-xs font-normal tracking-wide text-foreground"
                     >
                         {flexRender(
                             header.column.columnDef.header,
@@ -25,17 +25,19 @@ const PendingRequisitionItemTable = ({ table }: PendingRequisitionItemTableProps
                 ))}
             </div>
 
-            <div className="flex flex-col gap-0">
-                {table.getRowModel().rows.map((row) => (
+            <div className="flex flex-col">
+                {table.getRowModel().rows.map((row, index) => (
                     <div
                         key={row.id}
-                        className="flex rounded-xl hover:bg-green-50 transition-colors"
+                        className={`flex transition-colors hover:bg-green-50/50 ${
+                            index !== table.getRowModel().rows.length - 1 ? "border-b border-border/40" : ""
+                        }`}
                     >
                         {row.getVisibleCells().map((cell) => (
                             <div
                                 key={cell.id}
                                 style={{ flex: 1 }}
-                                className="h-12 flex items-center text-sm font-medium first:ml-4 last:mr-4  border-b"
+                                className="flex items-center px-4"
                             >
                                 {flexRender(
                                     cell.column.columnDef.cell,

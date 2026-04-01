@@ -4,6 +4,14 @@ import { PendingRequisitionItemColumns as columns } from "./PendingRequisitionIt
 import PendingRequisitionItemTable from "./PendingRequisitionItemTable";
 import ApproveRequisitionButton from "./RequisitionApprovalButton";
 import RequisitionRejectionButton from "./RequisitionRejectionButton";
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from "@/components/ui/empty";
+import { ClipboardCheckIcon } from "lucide-react";
 
 interface PendingRequisitionItemProps {
     pendingRequisitionItems: PendingRequisitionItemType[];
@@ -18,15 +26,35 @@ const PendingRequisitionItemMain = ({ pendingRequisitionItems, requisitionId } :
         getCoreRowModel: getCoreRowModel(),
     });
 
+    const isEmpty = pendingRequisitionItems.length === 0;
+
     return (
-        <div className="px-4">
-            <div>
-                <PendingRequisitionItemTable table={table} />
-            </div>
-            <div className="mt-2 flex flex-row justify-between">
-                <RequisitionRejectionButton requisitionId={requisitionId} />
-                <ApproveRequisitionButton requisitionId={requisitionId} />
-            </div>
+        <div>
+            {isEmpty ? (
+                <div className="flex items-center justify-center py-12">
+                    <Empty className="">
+                        <EmptyHeader>
+                            <EmptyMedia variant="icon">
+                                <ClipboardCheckIcon />
+                            </EmptyMedia>
+                            <EmptyTitle className="font-display text-base">No Pending Requisitions</EmptyTitle>
+                            <EmptyDescription className="font-sans text-sm">
+                                No pending requisitions at the moment.
+                            </EmptyDescription>
+                        </EmptyHeader>
+                    </Empty>
+                </div>
+            ) : (
+                <>
+                    <div className="mb-4">
+                        <PendingRequisitionItemTable table={table} />
+                    </div>
+                    <div className="flex flex-row justify-between items-center gap-3">
+                        <RequisitionRejectionButton requisitionId={requisitionId} />
+                        <ApproveRequisitionButton requisitionId={requisitionId} />
+                    </div>
+                </>
+            )}
         </div>
     );
 };

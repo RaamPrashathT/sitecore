@@ -12,7 +12,7 @@ export const PendingRequisitionsColumn = [
         cell: () => (
             <div className="flex items-center justify-center w-12 h-12">
                 <ChevronRight
-                    className="h-4 w-4 text-gray-400 transition-transform duration-200 group-data-[state=open]:rotate-90"
+                    className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90"
                 />
             </div>
         ),
@@ -20,8 +20,8 @@ export const PendingRequisitionsColumn = [
     columnHelper.accessor("projectName", {
         header: "Project",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center px-4 font-sans text-sm font-medium text-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -29,8 +29,8 @@ export const PendingRequisitionsColumn = [
     columnHelper.accessor("phaseName", {
         header: "Phase",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center px-4 font-sans text-sm font-medium text-muted-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -38,8 +38,8 @@ export const PendingRequisitionsColumn = [
     columnHelper.accessor("engineer.name", {
         header: "Engineer",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center px-4 font-sans text-sm font-medium text-muted-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -47,8 +47,8 @@ export const PendingRequisitionsColumn = [
     columnHelper.accessor("budget", {
         header: "Budget",
         cell: (info) => (
-            <div className='font-medium flex items-center h-12 px-4'>
-                <p>₹{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center px-4 font-mono text-sm font-medium text-foreground tabular-nums">
+                ₹{info.getValue()}
             </div>
         ),
     }),

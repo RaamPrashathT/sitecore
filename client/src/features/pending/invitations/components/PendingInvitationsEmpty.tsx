@@ -16,34 +16,34 @@ interface PendingInvitationsEmptyProps {
 
 const PendingInvitationsEmpty = ({ slug }: PendingInvitationsEmptyProps) => {
     return (
-        <div className="h-full flex justify-center">
-            <Empty className="mb-20">
+        <div className="flex items-center justify-center font-sans py-16">
+            <Empty>
                 <EmptyHeader>
                     <EmptyMedia variant="icon">
                         <ClipboardCheckIcon />
                     </EmptyMedia>
-                    <EmptyTitle>No pending Invitations</EmptyTitle>
-                    <EmptyDescription>
-                        No pending Invitations. 
+                    <EmptyTitle className="font-display">No Pending Invitations</EmptyTitle>
+                    <EmptyDescription className="font-sans text-sm">
+                        No pending invitations at the moment. Invite engineers and clients to your organization.
                     </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="flex-row justify-center gap-2">
-                    <Button className="w-50">
+                    <Button className="bg-green-700 text-white hover:bg-green-800">
                         <Link
                             to={`/${slug}/engineers`}
-                            className="flex items-center gap-x-1 p-3"
+                            className="flex items-center gap-2 px-3 py-2"
                         >
-                            <SquareArrowOutUpRight />
-                            <p className="mb-px">Check about Engineers</p>
+                            <SquareArrowOutUpRight className="h-4 w-4" />
+                            <span className="text-sm">Check Engineers</span>
                         </Link>
                     </Button>
-                    <Button className="w-50">
+                    <Button className="bg-green-700 text-white hover:bg-green-800">
                         <Link
                             to={`/${slug}/clients`}
-                            className="flex items-center gap-x-1 p-3"
+                            className="flex items-center gap-2 px-3 py-2"
                         >
-                            <SquareArrowOutUpRight />
-                            <p className="mb-px">Check about Clients</p>
+                            <SquareArrowOutUpRight className="h-4 w-4" />
+                            <span className="text-sm">Check Clients</span>
                         </Link>
                     </Button>
                 </EmptyContent>

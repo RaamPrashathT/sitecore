@@ -25,6 +25,15 @@ const clientService = {
             select: {
                 userId: true,
                 role: true,
+                organization: {
+                    select: {
+                        projects: {
+                            select: {
+                                assignments: true
+                            }
+                        }
+                    }
+                }
             },
         });
 

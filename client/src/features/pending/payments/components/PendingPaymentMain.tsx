@@ -52,17 +52,16 @@ const PendingPaymentMain = () => {
 
     if (isInitialLoading) return <></>;
     if (!membership) return <div>No access</div>;
-    if (!pendingPayments || pendingPayments.count === 0) return <PendingPaymentEmpty slug={membership.slug}/>;
     
     return (
-        <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-end items-center py-2">
+        <div className="px-4 pb-4 pt-2 flex flex-col h-full font-sans">
+            <div className="mb-4 flex flex-wrap items-center justify-end gap-3 border-b border-border/70 pb-3">
                 <PendingPaymentSearch table={table} />
             </div>
-            <div>
+            <div className="rounded-xl border border-border/70 bg-background h-full">
                 <PendingPaymentTable table={table} />
             </div>
-            <div className="mt-auto mb-4">
+            <div className="mt-auto pt-4">
                 <PendingPaymentPagination table={table} />
             </div>
         </div>

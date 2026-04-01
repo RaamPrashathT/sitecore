@@ -2,60 +2,62 @@ import {
     flexRender,
 } from "@tanstack/react-table";
 import type { Table as ReactTableType } from "@tanstack/react-table";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import type { PendingPhaseListType } from "../hooks/usePendingPhaseList";
+import PendingPaymentEmpty from "./PendingPaymentEmpty";
 
 interface PendingPaymentTableProps {
     table: ReactTableType<PendingPhaseListType>;
 }
 
 const PendingPaymentTable = ({ table }: PendingPaymentTableProps) => {
+    const hasRows = table.getRowModel().rows.length > 0;
+
     return (
-        <div>
-            <Table className="">
-                <TableHeader className="p-0">
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow
-                            key={headerGroup.id}
-                            className="p-0 bg-slate-100 border-none"
+        <div className="overflow-x-auto">
+            <div className="flex border-b border-border/80 bg-muted/40">
+                {table.getFlatHeaders().map((header) => (
+                    <div
+                        key={header.id}
+                        style={{ flex: 1 }}
+                        className="h-12 px-4 flex items-center font-display text-sm font-normal tracking-wide text-foreground first:rounded-tl-lg last:rounded-tr-lg"
+                    >
+                        {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {hasRows ? (
+                <div className="flex flex-col">
+                    {table.getRowModel().rows.map((row, index) => (
+                        <div
+                            key={row.id}
+                            className={`flex transition-colors hover:bg-green-50/50 ${
+                                index !== table.getRowModel().rows.length - 1 ? "border-b border-border/40" : ""
+                            }`}
                         >
-                            {headerGroup.headers.map((header) => (
-                                <TableHead
-                                    key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl last:rounded-r-xl first:pl-4"
-                                >
-                                    {flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext(),
-                                    )}
-                                </TableHead>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody className="p-0">
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id} className="p-0 hover:bg-green-50">
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} className="p-0  first:rounded-l-xl last:rounded-r-xl ">
+                                <div
+                                    key={cell.id}
+                                    style={{ flex: 1 }}
+                                    className="flex items-center px-4"
+                                >
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),
                                     )}
-                                </TableCell>
+                                </div>
                             ))}
-                        </TableRow>
+                        </div>
                     ))}
-                </TableBody>
-            </Table>
-            
+                </div>
+            ) : (
+                <div className="flex items-center justify-center py-16">
+                    <PendingPaymentEmpty slug="" />
+                </div>
+            )}
         </div>
     );
 };

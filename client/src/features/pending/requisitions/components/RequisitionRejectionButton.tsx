@@ -27,20 +27,21 @@ const RequisitionRejectionButton = ({
 
     return (
         <Button
-            variant={"destructive"}
+            variant="destructive"
             onClick={rejectRequisition}
-            
+            className="flex items-center gap-2 font-sans"
+            disabled={isPending}
         >
             {isPending ? (
-                <div className="flex items-center gap-x-2 ">
-                    <Spinner />
-                    <p>Rejecting Requisition...</p>
-                </div>
+                <>
+                    <Spinner className="h-4 w-4" />
+                    <span className="text-sm">Rejecting...</span>
+                </>
             ) : (
-                <div className="flex items-center gap-x-2 ">
-                    <X />
-                    <p>Reject Requisition</p>
-                </div>
+                <>
+                    <X className="h-4 w-4" />
+                    <span className="text-sm">Reject Requisition</span>
+                </>
             )}
         </Button>
     );

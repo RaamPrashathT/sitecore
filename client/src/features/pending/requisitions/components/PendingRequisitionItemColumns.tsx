@@ -7,7 +7,7 @@ export const PendingRequisitionItemColumns = [
     columnHelper.accessor("itemName", {
         header: "Item Name",
         cell: (info) => (
-            <div className="font-medium h-12 flex items-center">
+            <div className="flex h-full min-h-12 items-center font-sans text-sm font-medium text-foreground">
                 {info.getValue()}
             </div>
         ),
@@ -15,7 +15,7 @@ export const PendingRequisitionItemColumns = [
     columnHelper.accessor("supplierName", {
         header: "Supplier",
         cell: (info) => (
-            <div className="flex items-center h-12">
+            <div className="flex h-full min-h-12 items-center font-sans text-sm text-muted-foreground">
                 {info.getValue() || "Pending Selection"}
             </div>
         ),
@@ -23,17 +23,17 @@ export const PendingRequisitionItemColumns = [
     columnHelper.accessor("quantity", {
         header: "Quantity",
         cell: (info) => (
-            <div className="flex items-center h-12">
-                {info.getValue()} <span className="text-muted-foreground ml-1">{info.row.original.unit}</span>
+            <div className="flex h-full min-h-12 items-center font-mono text-sm tabular-nums text-foreground">
+                {info.getValue()} <span className="text-muted-foreground ml-1 font-sans">{info.row.original.unit}</span>
             </div>
         ),
     }),
     columnHelper.accessor("truePrice", {
-        header: "True price",
+        header: "True Price",
         cell: (info) => {
             const rate = info.getValue();
             return (
-                <div className="flex items-center h-12">
+                <div className="flex h-full min-h-12 items-center font-mono text-sm tabular-nums text-foreground">
                     ₹{rate ? `${rate.toFixed(2)}` : "-"}
                 </div>
             );
@@ -44,7 +44,7 @@ export const PendingRequisitionItemColumns = [
         cell: (info) => {
             const rate = info.getValue();
             return (
-                <div className="flex items-center h-12">
+                <div className="flex h-full min-h-12 items-center font-mono text-sm tabular-nums text-foreground">
                     ₹{rate ? `${rate.toFixed(2)}` : "-"}
                 </div>
             );
@@ -53,7 +53,7 @@ export const PendingRequisitionItemColumns = [
     columnHelper.accessor("estimatedUnitCost", {
         header: "Total Cost",
         cell: (info) => (
-            <div className="font-semibold text-primary flex items-center h-12">
+            <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
                 ₹{info.getValue().toFixed(2)}
             </div>
         ),
@@ -61,8 +61,8 @@ export const PendingRequisitionItemColumns = [
     columnHelper.accessor("estimatedUnitCost", {
         header: "Total Profit",
         cell: (info) => (
-            <div className="font-semibold text-primary flex items-center h-12">
-                ₹{info.getValue() -((info.row.original.truePrice || 0) * info.row.original.quantity)}
+            <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
+                ₹{(info.getValue() - ((info.row.original.truePrice || 0) * info.row.original.quantity)).toFixed(2)}
             </div>  
         ),
     }),

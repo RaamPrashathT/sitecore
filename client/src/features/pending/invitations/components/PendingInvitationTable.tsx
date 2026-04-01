@@ -3,40 +3,47 @@ import {
 } from "@tanstack/react-table";
 import type { Table as ReactTableType } from "@tanstack/react-table";
 import type { PendingInvitationType } from "../hooks/usePendingInvitations";
+import PendingInvitationsEmpty from "./PendingInvitationsEmpty";
 
 interface PendingInvitationTableProps {
     table: ReactTableType<PendingInvitationType>;
 }
 
 const PendingInvitationTable = ({ table }: PendingInvitationTableProps) => {
+    const hasRows = table.getRowModel().rows.length > 0;
+
     return (
-        <div>
-            <div className="">
-                <div className="p-0">
-                    {table.getHeaderGroups().map((headerGroup) => (
+        <div className="overflow-x-auto">
+            <div className="flex border-b border-border/80 bg-muted/40">
+                {table.getFlatHeaders().map((header) => (
+                    <div
+                        key={header.id}
+                        style={{ flex: 1 }}
+                        className="h-12 px-4 flex items-center font-display text-sm font-normal tracking-wide text-foreground first:rounded-tl-lg last:rounded-tr-lg"
+                    >
+                        {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {hasRows ? (
+                <div className="flex flex-col">
+                    {table.getRowModel().rows.map((row, index) => (
                         <div
-                            key={headerGroup.id}
-                            className="p-0 bg-slate-100 border-none flex flex-row justify-between h-10 items-center rounded-lg"
+                            key={row.id}
+                            className={`flex transition-colors hover:bg-green-50/50 ${
+                                index !== table.getRowModel().rows.length - 1 ? "border-b border-border/40" : ""
+                            }`}
                         >
-                            {headerGroup.headers.map((header) => (
-                                <div
-                                    key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl last:rounded-r-xl first:pl-4 last:pr-8"
-                                >
-                                    {flexRender(
-                                        header.column.columnDef.header,
-                                        header.getContext(),
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-                <div className="p-0 ">
-                    {table.getRowModel().rows.map((row) => (
-                        <div key={row.id} className="flex flex-row justify-between">
                             {row.getVisibleCells().map((cell) => (
-                                <div key={cell.id} className="first:rounded-l-xl last:rounded-r-xl last:flex last:justify-end flex-1 item-center flex justify-center first:justify-start first:p-2">
+                                <div
+                                    key={cell.id}
+                                    style={{ flex: 1 }}
+                                    className="flex items-center px-4"
+                                >
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),
@@ -46,8 +53,11 @@ const PendingInvitationTable = ({ table }: PendingInvitationTableProps) => {
                         </div>
                     ))}
                 </div>
-            </div>
-            
+            ) : (
+                <div className="flex items-center justify-center py-16">
+                    <PendingInvitationsEmpty slug="" />
+                </div>
+            )}
         </div>
     );
 };

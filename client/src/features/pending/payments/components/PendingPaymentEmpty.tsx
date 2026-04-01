@@ -16,25 +16,25 @@ interface PendingPaymentEmptyProps {
 
 const PendingPaymentEmpty = ({ slug }: PendingPaymentEmptyProps) => {
     return (
-        <div className="h-full flex items-center justify-center">
+        <div className="flex items-center justify-center font-sans py-16">
             <Empty>
                 <EmptyHeader>
                     <EmptyMedia variant="icon">
                         <ClipboardCheckIcon />
                     </EmptyMedia>
-                    <EmptyTitle>No pending Payments</EmptyTitle>
-                    <EmptyDescription>
-                        No pending payments yet. 
+                    <EmptyTitle className="font-display">No Pending Payments</EmptyTitle>
+                    <EmptyDescription className="font-sans text-sm">
+                        No pending payments at the moment. Check your projects for payment requests.
                     </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="flex-row justify-center gap-2">
-                    <Button className="w-50">
+                    <Button className="bg-green-700 text-white hover:bg-green-800">
                         <Link
                             to={`/${slug}/projects`}
-                            className="flex items-center gap-x-1 p-3"
+                            className="flex items-center gap-2 px-3 py-2"
                         >
-                            <SquareArrowOutUpRight />
-                            <p className="mb-px">Check for Projects</p>
+                            <SquareArrowOutUpRight className="h-4 w-4" />
+                            <span className="text-sm">Check for Projects</span>
                         </Link>
                     </Button>
                 </EmptyContent>

@@ -8,8 +8,8 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("projectName", {
         header: "Project",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center font-sans text-sm font-medium text-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -17,8 +17,8 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("phaseName", {
         header: "Phase",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center font-sans text-sm font-medium text-muted-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -26,8 +26,8 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("client", {
         header: "Client",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center font-sans text-sm font-medium text-muted-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -35,8 +35,8 @@ export const PendingPaymentColumns = [
     columnHelper.accessor("budget", {
         header: "Amount Due",
         cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                <p>₹{info.getValue()}</p>
+            <div className="flex h-full min-h-12 items-center font-mono text-sm font-medium text-foreground tabular-nums">
+                ₹{info.getValue()}
             </div>
         ),
     }),
@@ -64,12 +64,12 @@ export const PendingPaymentColumns = [
             }
 
             return (
-                <div className="flex flex-col">
-                    <p className="font-medium">
+                <div className="flex flex-col h-full min-h-12 justify-center">
+                    <p className="font-mono text-sm text-foreground tabular-nums">
                         {deadline.toLocaleDateString()}
                     </p>
                     <p
-                        className={`text-xs ${isOverdue ? "text-red-500" : "text-gray-500"} `}
+                        className={`text-xs font-sans ${isOverdue ? "text-red-500" : "text-muted-foreground"}`}
                     >
                         {displayStatus}
                     </p>
@@ -84,7 +84,7 @@ export const PendingPaymentColumns = [
         cell: (info) => {
             const phaseId = info.row.original.id;
             return (
-                <div className="font-medium flex items-center h-12 px-4">
+                <div className="flex h-full min-h-12 items-center px-4">
                     <ApprovePhasePaymentButton id={phaseId} />
                 </div>
             )

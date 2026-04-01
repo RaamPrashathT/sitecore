@@ -28,18 +28,19 @@ const ApproveRequisitionButton = ({
     return (
         <Button
             onClick={approveRequisition}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-green-700 text-white hover:bg-green-800 font-sans"
+            disabled={isPending}
         >
             {isPending ? (
-                <div className="flex items-center gap-x-2 ">
-                    <Spinner />
-                    <p>Approving Requisition...</p>
-                </div>
+                <>
+                    <Spinner className="h-4 w-4" />
+                    <span className="text-sm">Approving...</span>
+                </>
             ) : (
-                <div className="flex items-center gap-x-2 ">
-                    <Plus />
-                    <p>Approve Requisition</p>
-                </div>
+                <>
+                    <Plus className="h-4 w-4" />
+                    <span className="text-sm">Approve Requisition</span>
+                </>
             )}
         </Button>
     );

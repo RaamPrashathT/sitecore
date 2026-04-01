@@ -12,7 +12,6 @@ import { PendingRequisitionsColumn as columns } from "./PendingRequisitionsColum
 import PendingRequisitionSearch from "./PendingRequisitionsSearch";
 import PendingRequisitionTable from "./PendingRequisitionsTable";
 import PendingRequisitionPagination from "./PendingRequisitionsPagination";
-import PendingRequisitionEmpty from "./PendingRequisitionEmpty";
 
 const PendingRequisitionMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
@@ -59,19 +58,16 @@ const PendingRequisitionMain = () => {
 
     if (isInitialLoading) return <></>;
     if (!membership || isError) return <div>No access</div>;
-    
-    if (!pendingPayments || pendingPayments.count === 0) {
-        return <PendingRequisitionEmpty slug={membership.slug} />;
-    }
+
     return (
-        <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-end items-center py-2">
+        <div className="px-4 pb-4 pt-2 flex flex-col h-full font-sans">
+            <div className="mb-4 flex flex-wrap items-center justify-end gap-3 border-b border-border/70 pb-3">
                 <PendingRequisitionSearch table={table} />
             </div>
-            <div>
+            <div className="rounded-xl border border-border/70 bg-background h-full">
                 <PendingRequisitionTable table={table} />
             </div>
-            <div className="mt-auto mb-4">
+            <div className="mt-auto pt-4">
                 <PendingRequisitionPagination table={table} />
             </div>
         </div>
