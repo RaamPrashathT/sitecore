@@ -4,6 +4,7 @@ import { logger } from "../../../shared/lib/logger.js";
 import { ValidationError } from "../../../shared/error/validation.error.js";
 import {
     createRequisitionSchema,
+    getPaymentPendingSchema,
     phaseIdParamSchema,
     requisitionIdParamSchema,
 } from "./requisition.schema.js";
@@ -63,10 +64,45 @@ const requisitionController = {
         }
     },
 
+    async getPendingRequisitions(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant!.orgId;
+            const index = Number.parseInt(request.query.index as string) ?? 0;
+            const size = Number.parseInt(request.query.size as string) ?? 10;
+            const searchQuery = (request.query.search as string) || "";
+
+            const validatedData = getPaymentPendingSchema.safeParse({
+                organizationId,
+                pageIndex: index,
+                pageSize: size,
+                searchQuery,
+            });
+
+            if (!validatedData.success) {
+                throw new ValidationError("Invalid Organization ID");
+            }
+
+            const result = await requisitionService.getPendingRequisitions(
+                validatedData.data.organizationId,
+                validatedData.data.pageIndex,
+                validatedData.data.pageSize,
+                validatedData.data.searchQuery,
+            );
+
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
+            }
+            return response.status(500).json({
+                message: "Internal server error",
+            });
+        }
+    },
+
     async approveRequisition(request: Request, response: Response) {
         try {
-            const projectId = request.project!.id;
-
             const validatedParams = requisitionIdParamSchema.safeParse(
                 request.params,
             );
@@ -75,7 +111,6 @@ const requisitionController = {
             }
 
             await requisitionService.approveRequisition(
-                projectId,
                 validatedParams.data.requisitionId,
             );
 
@@ -86,7 +121,7 @@ const requisitionController = {
             if (error instanceof ValidationError) {
                 return response.status(400).json({ message: error.message });
             }
-            logger.error(error);
+            logger.error(error.message);
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
@@ -95,8 +130,6 @@ const requisitionController = {
 
     async rejectRequisition(request: Request, response: Response) {
         try {
-            const projectId = request.project!.id;
-
             const validatedParams = requisitionIdParamSchema.safeParse(
                 request.params,
             );
@@ -105,7 +138,6 @@ const requisitionController = {
             }
 
             await requisitionService.rejectRequisition(
-                projectId,
                 validatedParams.data.requisitionId,
             );
 

@@ -7,6 +7,13 @@ export const requisitionItemSchema = z.object({
     assignedSupplierId: z.uuid("Invalid Supplier ID").optional(),
 });
 
+export const getPaymentPendingSchema = z.object({
+    organizationId: z.string().length(36),
+    pageIndex: z.number().min(0),
+    pageSize: z.number().min(1),
+    searchQuery: z.string().max(500),
+});
+
 export const createRequisitionSchema = z.object({
     items: z.array(requisitionItemSchema).min(1, "A requisition must contain at least one item"),
 });

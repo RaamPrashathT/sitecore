@@ -1,8 +1,6 @@
 import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-    type PendingRequisitionSchema,
-} from "./usePendingRequisition";
+import { type PendingRequisitionSchema } from "./usePendingRequisition";
 
 interface MutationProps {
     requisitionId: string;
@@ -13,34 +11,11 @@ const approveRequisition = async (
     organizationId: string,
     requisitionId: string,
 ) => {
-    await api.post(
-        `project/phase/approveRequisition`,
-        {
-            requisitionId,
-        },
-        {
-            headers: {
-                "x-organization-id": organizationId,
-            },
-        },
-    );
+    await api.post(`project/requisition/${requisitionId}/approve`);
 };
 
-const rejectRequisition = async (
-    organizationId: string,
-    requisitionId: string,
-) => {
-    await api.post(
-        `/project/phase/rejectRequisition`,
-        {
-            requisitionId,
-        },
-        {
-            headers: {
-                "x-organization-id": organizationId,
-            },
-        },
-    );
+const rejectRequisition = async (requisitionId: string) => {
+    await api.post(`project/requisition/${requisitionId}/reject`);
 };
 
 export const useUpdateRequisitions = (organizationId: string | undefined) => {
@@ -82,16 +57,16 @@ export const useUpdateRequisitions = (organizationId: string | undefined) => {
         },
         onError: (_error, _variables, context) => {
             if (context?.previousData) {
-                queryClient.setQueryData([
-                    "pendingRequisitions",
-                    organizationId,
-                ], context.previousData);
+                queryClient.setQueryData(
+                    ["pendingRequisitions", organizationId],
+                    context.previousData,
+                );
             }
         },
         onSettled: () => {
             queryClient.invalidateQueries({
                 queryKey: ["pendingRequisitions", organizationId],
             });
-        }
+        },
     });
 };

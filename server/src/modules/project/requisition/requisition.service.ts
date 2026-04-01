@@ -1,5 +1,6 @@
 import { ValidationError } from "../../../shared/error/validation.error.js";
 import { prisma } from "../../../shared/lib/prisma.js";
+import { User } from "../../../shared/models/user.js";
 
 const requisitionService = {
     async createRequisition(
@@ -124,11 +125,150 @@ const requisitionService = {
         return mappedPhases;
     },
 
-    async approveRequisition(projectId: string, requisitionId: string) {
+    async getPendingRequisitions(
+        organizationId: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string,
+    ) {
+        const skip = pageIndex * pageSize;
+        const whereClause: any = {
+            status: "PENDING_APPROVAL",
+            phase: {
+                project: {
+                    organizationId: organizationId,
+                },
+            },
+        };
+        if (searchQuery) {
+            whereClause.OR = [
+                {
+                    phase: {
+                        name: { contains: searchQuery, mode: "insensitive" },
+                    },
+                },
+                {
+                    phase: {
+                        project: {
+                            name: {
+                                contains: searchQuery,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                },
+            ];
+        }
+
+        const [result, count] = await Promise.all([
+            prisma.requisition.findMany({
+                where: whereClause,
+                select: {
+                    id: true,
+                    budget: true,
+                    status: true,
+                    requestedBy: true,
+                    phaseId: true,
+                    createdAt: true,
+                    items: {
+                        select: {
+                            id: true,
+                            quantity: true,
+                            estimatedUnitCost: true,
+                            assignedSupplier: {
+                                select: {
+                                    id: true,
+                                    supplier: true,
+                                    truePrice: true,
+                                    standardRate: true,
+                                },
+                            },
+                            catalogue: {
+                                select: {
+                                    name: true,
+                                    unit: true,
+                                },
+                            },
+                        },
+                    },
+                    phase: {
+                        select: {
+                            name: true,
+                            project: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                skip: skip,
+                take: pageSize,
+                orderBy: {
+                    createdAt: "asc",
+                },
+            }),
+            prisma.requisition.count({
+                where: whereClause,
+            }),
+        ]);
+
+        const engineerIds = [...new Set(result.map((req) => req.requestedBy))];
+
+        const users = await User.find({
+            _id: { $in: engineerIds },
+        }).lean();
+
+        const userMap = new Map(
+            users.map((user) => [
+                user._id.toString(),
+                {
+                    id: user._id.toString(),
+                    name: user.username,
+                    image: user.profileImage || null,
+                },
+            ]),
+        );
+
+        const data = result.map((req) => ({
+            id: req.id,
+            budget: Number(req.budget),
+            status: req.status as "PENDING_APPROVAL",
+            phaseId: req.phaseId,
+            createdAt: req.createdAt,
+            projectName: req.phase?.project?.name || "",
+            phaseName: req.phase?.name || "",
+            engineer: userMap.get(req.requestedBy) || {
+                id: req.requestedBy,
+                name: "Unknown User",
+                image: null,
+            },
+            items: req.items.map((item) => ({
+                id: item.id,
+                quantity: Number(item.quantity),
+                estimatedUnitCost: Number(item.estimatedUnitCost),
+                supplierId: item.assignedSupplier?.id,
+                supplierName: item.assignedSupplier?.supplier,
+                truePrice: item.assignedSupplier
+                    ? Number(item.assignedSupplier.truePrice)
+                    : undefined,
+                standardRate: item.assignedSupplier
+                    ? Number(item.assignedSupplier.standardRate)
+                    : undefined,
+                itemName: item.catalogue?.name || "",
+                unit: item.catalogue?.unit || "",
+            })),
+        }));
+        return {
+            data,
+            count,
+        };
+    },
+
+    async approveRequisition(requisitionId: string) {
         const requisition = await prisma.requisition.findFirst({
             where: {
                 id: requisitionId,
-                phase: { projectId: projectId },
             },
         });
 
@@ -148,11 +288,10 @@ const requisitionService = {
         });
     },
 
-    async rejectRequisition(projectId: string, requisitionId: string) {
+    async rejectRequisition( requisitionId: string) {
         const requisition = await prisma.requisition.findFirst({
             where: {
                 id: requisitionId,
-                phase: { projectId: projectId },
             },
         });
 
