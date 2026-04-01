@@ -177,7 +177,11 @@ const orgService = {
         };
     },
 
-    async getNotifications(userId: string, organizationId: string, role: string) {
+    async getNotifications(
+        userId: string,
+        organizationId: string,
+        role: string,
+    ) {
         const notifications = await prisma.notificationRecipient.findMany({
             where: {
                 membership: {
@@ -186,23 +190,29 @@ const orgService = {
                 },
                 ...(role !== "ADMIN" && {
                     OR: [
-                        { assignmentId: { not: null } },  
-                        { notification: { projectId: null } }, 
+                        { assignmentId: { not: null } },
+                        { notification: { projectId: null } },
                     ],
                 }),
             },
             include: {
                 notification: true,
+                assignment: {
+                    include: {
+                        project: true,
+                    },
+                },
             },
             orderBy: {
                 notification: { createdAt: "desc" },
             },
         });
-    
-        return notifications;
-    }    
-    
-    
+
+        return notifications.map((item) => ({
+            ...item,
+            projectSlug: item.assignment?.project?.slug ?? null,
+        }));
+    },
 };
 
 export default orgService;

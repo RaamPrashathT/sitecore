@@ -57,20 +57,48 @@ const authController = {
                     sameSite: "none",
                     maxAge: 1000 * 60 * 60 * 24,
                 });
-
+                logger.info("User registered (frictionless)", {
+                    traceId: request.traceId,
+                    service: "auth-service",
+                    endpoint: "/register",
+                    method: "POST",
+                    userId: result.user._id,
+                    statusCode: 200,
+                });
                 return response.status(200).json({
                     message: "Registered and auto-verified via invite.",
                     frictionlessLogin: true,
                 });
             }
             
-
+            logger.info("User registered (OTP sent)", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/register",
+                method: "POST",
+                userId: result.user?._id,
+                statusCode: 200,
+            });
             return response.status(200).json({
                 message: "OTP sent to email.",
                 frictionlessLogin: false,
                 token: result.token,
             });
         } catch (error) {
+            logger.error("Registration failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/register",
+                method: "POST",
+                statusCode:
+                    error instanceof ConflictError ? 409 :
+                    error instanceof UnAuthorizedError ? 403 : 500,
+                errorCode:
+                    error instanceof ConflictError ? "USER_ALREADY_EXISTS" :
+                    error instanceof UnAuthorizedError ? "UNAUTHORIZED" :
+                    "REGISTRATION_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             if (
                 error instanceof ConflictError ||
                 (error as any).code === 11000
@@ -84,7 +112,6 @@ const authController = {
                     message: error.message,
                 });
             }
-            logger.error("Registration Error:", error);
             return response.status(500).json({
                 message: "Internal server error",
             });
@@ -118,11 +145,33 @@ const authController = {
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
-
+            
+            logger.info("OTP verified", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/verify-email",
+                method: "POST",
+                userId: user._id,
+                statusCode: 200,
+            });
             return response.status(200).json({
                 message: "OTP verified successfully",
             });
         } catch (error) {
+            logger.error("OTP verification failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/verify-email",
+                method: "POST",
+                statusCode:
+                    error instanceof ValidationError ? 400 :
+                    error instanceof UnAuthorizedError ? 400 : 500,
+                errorCode:
+                    error instanceof ValidationError ? "INVALID_OTP_INPUT" :
+                    error instanceof UnAuthorizedError ? "INVALID_OTP" :
+                    "OTP_VERIFICATION_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             if (error instanceof ValidationError) {
                 return response.status(400).json({
                     message: error.message,
@@ -133,7 +182,6 @@ const authController = {
                     message: error.message,
                 });
             }
-            logger.error("OTP Verification Error:", error);
             return response.status(500).json({
                 message: "Internal server error",
             });
@@ -173,11 +221,34 @@ const authController = {
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
-
+            logger.info("User login success", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/login",
+                method: "POST",
+                userId: user._id,
+                statusCode: 200,
+            });
             return response.status(200).json({
                 message: "User logged in successfully",
             });
         } catch (error) {
+            logger.error("Login failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/login",
+                method: "POST",
+                statusCode:
+                    error instanceof UnverifiedError ? 403 :
+                    error instanceof TwoFactorRequiredError ? 403 :
+                    error instanceof UnAuthorizedError ? 401 : 500,
+                errorCode:
+                    error instanceof UnverifiedError ? "EMAIL_NOT_VERIFIED" :
+                    error instanceof TwoFactorRequiredError ? "2FA_REQUIRED" :
+                    error instanceof UnAuthorizedError ? "INVALID_CREDENTIALS" :
+                    "LOGIN_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             if (error instanceof UnverifiedError) {
                 console.log(error);
                 return response.status(403).json({
@@ -200,7 +271,6 @@ const authController = {
                 });
             }
 
-            logger.error(error);
 
             return response.status(500).json({
                 code: "INTERNAL_ERROR",
@@ -213,16 +283,31 @@ const authController = {
         try {
             const { email } = request.body;
             if (!email) throw new Error("Email is required");
-
+            
             const newToken = await authService.resendVerificationOtp(email);
-
+            
+            logger.info("OTP resent", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/resend-verification",
+                method: "POST",
+                statusCode: 200,
+            });
             return response.status(200).json({
                 message:
-                    "If the email is registered and unverified, a new OTP has been sent.",
+                "If the email is registered and unverified, a new OTP has been sent.",
                 verificationToken: newToken || null,
             });
         } catch (error) {
-            logger.error("Resend OTP Error:", error);
+            logger.error("Resend OTP failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/resend-verification",
+                method: "POST",
+                statusCode: 500,
+                errorCode: "RESEND_OTP_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             return response.status(500).json({
                 message: "Internal server error",
             });
@@ -248,12 +333,29 @@ const authController = {
                 sameSite: "none",
             });
 
+            logger.info("User logout success", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/logout",
+                method: "POST",
+                userId: request.session?.userId,
+                statusCode: 200,
+            });
             return response.status(200).json({
                 success: true,
                 message: "User logged out successfully",
             });
         } catch (error) {
-            logger.error(error);
+            logger.error("Logout failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/logout",
+                method: "POST",
+                userId: request.session?.userId,
+                statusCode: 500,
+                errorCode: "LOGOUT_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             return response.status(500).json({
                 success: false,
                 message: "Internal server error",
@@ -263,13 +365,30 @@ const authController = {
 
     async me(request: Request, response: Response) {
         try {
+            logger.info("User identity fetched", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/me",
+                method: "GET",
+                userId: request.session?.userId,
+                statusCode: 200,
+            });
             return response.status(200).json({
                 success: true,
                 message: "User found",
                 data: request.session,
             });
         } catch (error) {
-            logger.error(error);
+            logger.error("Fetch user identity failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/me",
+                method: "GET",
+                userId: request.session?.userId,
+                statusCode: 500,
+                errorCode: "FETCH_USER_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             return response.status(500).json({
                 success: false,
                 message: "Internal server error",
@@ -314,27 +433,61 @@ const authController = {
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
-
+            logger.info("2FA verification success", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/verify-2fa",
+                method: "POST",
+                userId: user._id,
+                statusCode: 200,
+            });
             return response.status(200).json({
                 message: "Two-step verification successful. Logged in.",
             });
 
         } catch (error) {
+            logger.error("2FA verification failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/verify-2fa",
+                method: "POST",
+                statusCode:
+                    error instanceof ValidationError || error instanceof UnAuthorizedError ? 400 : 500,
+                errorCode:
+                    error instanceof ValidationError ? "INVALID_2FA_INPUT" :
+                    error instanceof UnAuthorizedError ? "INVALID_2FA" :
+                    "2FA_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             if (error instanceof ValidationError || error instanceof UnAuthorizedError) {
                 return response.status(400).json({ message: error.message });
             }
-            logger.error("2FA Verification Error:", error);
             return response.status(500).json({ message: "Internal server error" });
         }
     },
 
     async google(request: Request, response: Response) {
         try {
+            logger.info("Google OAuth initiated", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/google",
+                method: "GET",
+                statusCode: 302,
+            });
             const inviteToken = request.query.inviteToken as string;
             const redirectUrl = await authService.googleLogin(inviteToken);
             return response.redirect(redirectUrl);
         } catch (error) {
-            logger.error(error);
+            logger.error("Google OAuth init failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/google",
+                method: "GET",
+                statusCode: 500,
+                errorCode: "GOOGLE_OAUTH_INIT_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
         }
     },
 
@@ -502,9 +655,25 @@ const authController = {
                     `${frontendUrl}/invitation?token=${inviteToken}`,
                 );
             }
-            return response.redirect(`${frontendUrl}/organizations`);
+            logger.info("Google OAuth login success", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/google/callback",
+                method: "GET",
+                userId: user._id,
+                statusCode: 302,
+            });
+            return response.redirect(`${frontendUrl}/provisioning`);
         } catch (error) {
-            logger.error(error);
+            logger.error("Google OAuth callback failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: "/google/callback",
+                method: "GET",
+                statusCode: 500,
+                errorCode: "GOOGLE_OAUTH_CALLBACK_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
             const frontendUrl =
                 process.env.FRONTEND_URL || "http://localhost:5173";
             return response.redirect(`${frontendUrl}/login?error=oauth_failed`);

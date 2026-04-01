@@ -3,5 +3,6 @@ declare namespace Express {
         session?: { userId: string; email: string, username: string, onboarded: boolean , tenant: Record<string, { id: string; role: string }>};
         tenant?: { orgId: string; role: "ADMIN" | "ENGINEER" | "CLIENT" };
         project?: { id: string };
+        traceId?: string;
     }
 }

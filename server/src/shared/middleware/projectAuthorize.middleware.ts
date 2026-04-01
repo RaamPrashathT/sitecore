@@ -62,13 +62,27 @@ export const projectAuthorize = async (
 
         next();
     } catch (error) {
+        logger.error("Project authorization failed", {
+            traceId: request.traceId,
+            service: "project-service",
+            endpoint: request.originalUrl,
+            method: request.method,
+            userId: request.session?.userId,
+            statusCode:
+                error instanceof ValidationError ? 400 :
+                error instanceof UnAuthorizedError ? 401 : 500,
+            errorCode:
+                error instanceof ValidationError ? "INVALID_PROJECT_INPUT" :
+                error instanceof UnAuthorizedError ? "PROJECT_UNAUTHORIZED" :
+                "PROJECT_AUTH_FAILED",
+            errorDetails: error instanceof Error ? error.stack : String(error),
+        });
         if (error instanceof ValidationError) {
             return response.status(400).json({
                 success: false,
                 message: error.message,
             });
         }
-        logger.error(error);
         return response.status(500).json({
             success: false,
             message: "Internal server error",

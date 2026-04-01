@@ -15,17 +15,32 @@ export const loadSession = async (
 
         try {
             request.session = JSON.parse(raw);
-        } catch {
-            logger.error("Invalid session JSON");
+        } catch(error) {
+            logger.error("Session load failed", {
+                traceId: request.traceId,
+                service: "auth-service",
+                endpoint: request.originalUrl,
+                method: request.method,
+                statusCode: 500,
+                errorCode: "SESSION_LOAD_FAILED",
+                errorDetails: error instanceof Error ? error.stack : String(error),
+            });
         }
 
         return next();
     } catch (error) {
-        logger.error(error);
+        logger.error("Invalid session JSON", {
+            traceId: request.traceId,
+            service: "auth-service",
+            endpoint: request.originalUrl,
+            method: request.method,
+            userId: request.session?.userId,
+            statusCode: 500,
+            errorCode: "INVALID_SESSION_JSON",
+        });
         return response.status(500).json({
             success: false,
             message: "Internal server error",
         });
     }
-    
-}
+};

@@ -29,25 +29,52 @@ export const orgAuthorize = async (
         }
 
         const tenant = sessionObj.tenant?.[incomingSlug];
-        
+
         if (!tenant) {
-            throw new UnAuthorizedError("You do not have access to this organization");
+            throw new UnAuthorizedError(
+                "You do not have access to this organization",
+            );
         }
 
         request.tenant = {
-            orgId: tenant.id, 
+            orgId: tenant.id,
             role: tenant.role,
         };
-        
+
         next();
     } catch (error) {
-        logger.error(error);
-        if(error instanceof ValidationError) {
-            return response.status(400).json({ success: false, message: error.message });
+        logger.error("Organization authorization failed", {
+            traceId: request.traceId,
+            service: "auth-service",
+            endpoint: request.originalUrl,
+            method: request.method,
+            userId: request.session?.userId,
+            statusCode:
+                error instanceof ValidationError
+                    ? 400
+                    : error instanceof UnAuthorizedError
+                      ? 401
+                      : 500,
+            errorCode:
+                error instanceof ValidationError
+                    ? "INVALID_TENANT_SLUG"
+                    : error instanceof UnAuthorizedError
+                      ? "ORG_UNAUTHORIZED"
+                      : "ORG_AUTH_FAILED",
+            errorDetails: error instanceof Error ? error.stack : String(error),
+        });
+        if (error instanceof ValidationError) {
+            return response
+                .status(400)
+                .json({ success: false, message: error.message });
         }
         if (error instanceof UnAuthorizedError) {
-            return response.status(401).json({ success: false, message: error.message });
+            return response
+                .status(401)
+                .json({ success: false, message: error.message });
         }
-        return response.status(500).json({ success: false, message: "Internal server error" });
+        return response
+            .status(500)
+            .json({ success: false, message: "Internal server error" });
     }
 };

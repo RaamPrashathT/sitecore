@@ -31,15 +31,16 @@ const catalogueController = {
                 validatedData.data.pageSize,
                 validatedData.data.searchQuery
             );
+            logger.info(`Catalogue fetched successfully for organization ${validatedData.data.organizationId}`);
             return response.status(200).json(result)
         } catch (error) {
+            logger.error(error);
             if(error instanceof UnAuthorizedError) {
                 return response.status(401).json({
                     success: false,
                     message: error.message
                 })
             }
-            logger.error(error);
             return response.status(500).json({
                 success: false,
                 message: "Internal server error",
@@ -65,14 +66,15 @@ const catalogueController = {
                 validatedData.data.quoteId,
                 organizationId as string
             );
+            logger.info(`Catalogue fetched successfully for organization ${organizationId}`);
             return response.status(200).json(result)
         } catch (error) {
+            logger.error(error);
             if(error instanceof ValidationError) {
                 return response.status(400).json({
                     message: error.message
                 })
             }
-            logger.error(error);
             return response.status(500).json({
                 message: "Internal server error",
             })

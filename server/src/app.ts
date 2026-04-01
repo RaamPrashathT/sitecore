@@ -13,6 +13,8 @@ import projectRouter from "./modules/project/project.route.js";
 import dashboardRouter from "./modules/dashboard/dashboard.route.js";
 import pendingRouter from "./modules/pending/pending.routes.js";
 import userRouter from "./modules/user/user.route.js";
+import { traceMiddleware } from "./shared/middleware/trace.middleware.js";
+import { responseTimeMiddleware } from "./shared/middleware/responseTime.middleware.js";
 const PORT = env.PORT || 5000;
 
 const app = express();
@@ -22,7 +24,8 @@ app.use(
         credentials: true,
     }),
 );
-
+app.use(traceMiddleware); 
+app.use(responseTimeMiddleware);
 app.use(cookieParser());
 app.use(express.json());
 connectMongoDB();
