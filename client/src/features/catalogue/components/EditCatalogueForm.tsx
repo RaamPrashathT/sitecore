@@ -38,6 +38,7 @@ const formSchema = z.object({
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
     standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
     leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
+    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
 });
 
 type createCatalogueFormSchema = z.infer<typeof formSchema>;
@@ -47,6 +48,7 @@ interface EditCatalogueFormProps {
     slug: string;
     catalogueId: string;
     quoteId: string;
+    inventory: number;
 }
 
 const EditCatalogueForm = ({
@@ -54,11 +56,12 @@ const EditCatalogueForm = ({
     slug,
     catalogueId,
     quoteId,
+    inventory,
 }: EditCatalogueFormProps) => {
     const { data: catalogueItem, isLoading } = useGetCatalogueById(
         id,
         catalogueId,
-        quoteId
+        quoteId,
     );
 
     const {
@@ -77,14 +80,14 @@ const EditCatalogueForm = ({
             truePrice: 0,
             standardRate: 0,
             leadTime: 0,
+            inventory: inventory,
         },
     });
 
-    
     useEffect(() => {
         if (catalogueItem) {
             const selectedQuote = catalogueItem.supplierQuotes?.find(
-                (quote) => quote.id === quoteId
+                (quote) => quote.id === quoteId,
             );
 
             reset({
@@ -94,7 +97,10 @@ const EditCatalogueForm = ({
                 category: catalogueItem.category || "MATERIALS",
                 truePrice: selectedQuote?.truePrice || 0,
                 standardRate: selectedQuote?.standardRate || 0,
-                leadTime: selectedQuote?.leadTime ?? catalogueItem.defaultLeadTime ?? 0,
+                leadTime:
+                    selectedQuote?.leadTime ??
+                    catalogueItem.defaultLeadTime ??
+                    0,
             });
         }
     }, [catalogueItem, quoteId, reset]);
@@ -118,7 +124,7 @@ const EditCatalogueForm = ({
                     headers: {
                         "x-organization-id": id,
                     },
-                }
+                },
             );
             if (!response.data.success) {
                 setError(response.data.message);
@@ -133,10 +139,19 @@ const EditCatalogueForm = ({
         }
     };
 
-    if (isLoading) return <div className="px-4 py-6 font-sans text-sm text-muted-foreground">Loading...</div>;
+    if (isLoading)
+        return (
+            <div className="px-4 py-6 font-sans text-sm text-muted-foreground">
+                Loading...
+            </div>
+        );
 
     if (!catalogueItem && !isLoading) {
-        return <div className="py-10 text-center font-sans text-lg font-semibold text-foreground">Catalogue Item not found!</div>;
+        return (
+            <div className="py-10 text-center font-sans text-lg font-semibold text-foreground">
+                Catalogue Item not found!
+            </div>
+        );
     }
 
     return (
@@ -150,21 +165,35 @@ const EditCatalogueForm = ({
                 </h1>
                 <FieldGroup className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Item Name</FieldLabel>
-                        <Input {...register("name")} id="name" className="font-sans text-sm" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Item Name
+                        </FieldLabel>
+                        <Input
+                            {...register("name")}
+                            id="name"
+                            className="font-sans text-sm"
+                        />
                         {errors.name && (
                             <FieldError>{errors.name.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Supplier</FieldLabel>
-                        <Input {...register("supplier")} id="supplier" className="font-sans text-sm" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Supplier
+                        </FieldLabel>
+                        <Input
+                            {...register("supplier")}
+                            id="supplier"
+                            className="font-sans text-sm"
+                        />
                         {errors.supplier && (
                             <FieldError>{errors.supplier.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Category</FieldLabel>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Category
+                        </FieldLabel>
                         <Controller
                             name="category"
                             control={control}
@@ -179,12 +208,24 @@ const EditCatalogueForm = ({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectItem value="MATERIALS">Materials</SelectItem>
-                                            <SelectItem value="LABOUR">Labour</SelectItem>
-                                            <SelectItem value="EQUIPMENT">Equipment</SelectItem>
-                                            <SelectItem value="SUBCONTRACTORS">Subcontractors</SelectItem>
-                                            <SelectItem value="TRANSPORT">Transport</SelectItem>
-                                            <SelectItem value="OVERHEAD">Overhead</SelectItem>
+                                            <SelectItem value="MATERIALS">
+                                                Materials
+                                            </SelectItem>
+                                            <SelectItem value="LABOUR">
+                                                Labour
+                                            </SelectItem>
+                                            <SelectItem value="EQUIPMENT">
+                                                Equipment
+                                            </SelectItem>
+                                            <SelectItem value="SUBCONTRACTORS">
+                                                Subcontractors
+                                            </SelectItem>
+                                            <SelectItem value="TRANSPORT">
+                                                Transport
+                                            </SelectItem>
+                                            <SelectItem value="OVERHEAD">
+                                                Overhead
+                                            </SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
@@ -195,7 +236,9 @@ const EditCatalogueForm = ({
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Unit</FieldLabel>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Unit
+                        </FieldLabel>
                         <Input
                             {...register("unit")}
                             placeholder="KG/Hour/Litre"
@@ -206,34 +249,67 @@ const EditCatalogueForm = ({
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">True Price</FieldLabel>
-                        <Input {...register("truePrice")} className="font-mono text-sm tabular-nums" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            True Price
+                        </FieldLabel>
+                        <Input
+                            {...register("truePrice")}
+                            className="font-mono text-sm tabular-nums"
+                        />
                         {errors.truePrice && (
                             <FieldError>{errors.truePrice.message}</FieldError>
                         )}
                     </Field>
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Standard Rate</FieldLabel>
-                        <Input {...register("standardRate")} className="font-mono text-sm tabular-nums" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Standard Rate
+                        </FieldLabel>
+                        <Input
+                            {...register("standardRate")}
+                            className="font-mono text-sm tabular-nums"
+                        />
                         {errors.standardRate && (
                             <FieldError>
                                 {errors.standardRate.message}
                             </FieldError>
                         )}
                     </Field>
+                    <Field>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Lead Time
+                        </FieldLabel>
+                        <Input
+                            {...register("leadTime")}
+                            className="font-mono text-sm tabular-nums"
+                        />
+                        {errors.leadTime && (
+                            <FieldError className="">
+                                {errors.leadTime.message}
+                            </FieldError>
+                        )}
+                    </Field>
+                    <Field >
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Inventory
+                        </FieldLabel>
+                        <Input
+                            {...register("inventory")}
+                            className="font-mono text-sm tabular-nums"
+                        />
+                        {errors.inventory && (
+                            <FieldError className="">
+                                {errors.inventory.message}
+                            </FieldError>
+                        )}
+                    </Field>
                 </FieldGroup>
-                <Field className="mt-5">
-                    <FieldLabel className="font-sans text-sm text-muted-foreground">Lead Time</FieldLabel>
-                    <Input {...register("leadTime")} className="font-mono text-sm tabular-nums" />
-                    {errors.leadTime && (
-                        <FieldError className="">
-                            {errors.leadTime.message}
-                        </FieldError>
-                    )}
-                </Field>
                 {error && <p className="text-red-500 py-2">{error}</p>}
                 <div className="mt-8 flex justify-end">
-                    <Button type="submit" className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800" disabled={isLoadingState}>
+                    <Button
+                        type="submit"
+                        className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800"
+                        disabled={isLoadingState}
+                    >
                         {isLoadingState && <Spinner />}
                         <p>Edit Item</p>
                     </Button>

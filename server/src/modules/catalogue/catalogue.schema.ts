@@ -20,6 +20,7 @@ export const formSchema = z.object({
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
     standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
     leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
+    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
 });
 
 export const editFormSchema = z.object({
@@ -31,7 +32,8 @@ export const editFormSchema = z.object({
     standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
     leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
     catalogueId: z.string().min(1, "Catalogue Id is required"),
-    quoteId: z.string().min(1, "Quote Id is required")
+    quoteId: z.string().min(1, "Quote Id is required"),
+    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
 });
 
 export const deleteFormSchema = z.object({

@@ -99,6 +99,7 @@ const catalogueService = {
                             truePrice: data.truePrice,
                             standardRate: data.standardRate,
                             leadTime: data.leadTime,
+                            inventory: data.inventory,
                         },
                     },
                 },
@@ -139,6 +140,7 @@ const catalogueService = {
                     supplier: data.supplier,
                     standardRate: data.standardRate,
                     leadTime: data.leadTime,
+                    inventory: data.inventory,
                 },
             });
         } else {
@@ -172,6 +174,7 @@ const catalogueService = {
                         standardRate: data.standardRate,
                         leadTime: data.leadTime,
                         catalogueId: catalogue.id,
+                        inventory: data.inventory,
                     },
                 });
             } else {
@@ -187,6 +190,7 @@ const catalogueService = {
                                 supplier: data.supplier,
                                 standardRate: data.standardRate,
                                 leadTime: data.leadTime,
+                                inventory: data.inventory,
                             },
                         },
                     },

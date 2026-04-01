@@ -13,7 +13,6 @@ export const useUpdateProject = (orgSlug: string, projectSlug: string) => {
 
     return useMutation({
         mutationFn: async (data: UpdateProjectPayload) => {
-            console.log("hi")
             const response = await api.put("/project/", data);
             return response.data;
         },

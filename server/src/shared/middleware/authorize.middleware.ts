@@ -9,7 +9,6 @@ export const authorize = async (
     next: NextFunction,
 ) => {
     try {
-        console.log("hi")
         const sessionId = request.cookies.session;
         if (!sessionId) throw new UnAuthorizedError();
         const raw = await redis.get(`session:${sessionId}`);

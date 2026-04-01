@@ -21,6 +21,7 @@ export type CatalogueWithQuotes = {
         standardRate: number;
         leadTime: number | null;
         catalogueId: string;
+        inventory: number;
     }[];
 };
 

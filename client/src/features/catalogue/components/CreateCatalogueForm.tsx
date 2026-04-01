@@ -31,6 +31,7 @@ const formSchema = z.object({
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
     standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
     leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
+    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
 });
 
 type createCatalogueFormSchema = z.infer<typeof formSchema>;
@@ -84,10 +85,10 @@ const CreateCatalogueForm = ({
     };
 
     return (
-        <div className="flex items-center justify-center px-4 py-2 font-sans">
+        <div className="flex items-center justify-center px-4 py-2 font-sans mt-5">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-4xl rounded-xl border border-border/70 bg-background p-6 md:p-8"
+                className="w-full max-w-4xl p-6 md:p-8"
             >
                 <h1 className="mb-8 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
                     Create Catalogue Item:
@@ -178,8 +179,7 @@ const CreateCatalogueForm = ({
                             </FieldError>
                         )}
                     </Field>
-                </FieldGroup>
-                    <Field className="mt-5">
+                    <Field >
                         <FieldLabel className="font-sans text-sm text-muted-foreground">Lead Time</FieldLabel>
                         <Input {...register("leadTime")} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.leadTime && (
@@ -188,6 +188,17 @@ const CreateCatalogueForm = ({
                             </FieldError>
                         )}
                     </Field>
+                    <Field>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Inventory</FieldLabel>
+                        <Input {...register("inventory")} placeholder="0" className="font-mono text-sm tabular-nums"/>
+                        {errors.inventory && (
+                            <FieldError className="">
+                                {errors.inventory.message}
+                            </FieldError>
+                        )}
+                    </Field>
+                </FieldGroup>
+                    
                 {error && <p className="text-red-500 py-2">{error}</p>}
                 <div className="mt-8 flex justify-end">
                     <Button type="submit" className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800">

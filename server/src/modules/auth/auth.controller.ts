@@ -237,6 +237,7 @@ const authController = {
                 sameSite: "none",
                 maxAge: 1000 * 60 * 60 * 24,
             });
+            console.log(response.locals.responseTime);
             logger.info("User login success", {
                 traceId: request.traceId,
                 service: "auth-service",

@@ -24,6 +24,7 @@ export type CatalogueItemType = {
     defaultLeadTime: number;
     organizationId: string;
     supplierQuotes: SupplierQuotesType[];
+    inventory: number;
 };
 
 export interface CatalogueInputSchema {
