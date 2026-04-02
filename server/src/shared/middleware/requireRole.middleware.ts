@@ -10,8 +10,10 @@ export const requiredRole =
                 ? requiredRole
                 : [requiredRole];
             if (userRole && allowedRoles.includes(userRole)) {
+                console.log(request.tenant?.role)
                 return next();
             }
+
             logger.error("Role authorization failed", {
                 traceId: request.traceId,
                 service: "auth-service",

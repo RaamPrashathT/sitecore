@@ -14,6 +14,24 @@ const phaseService = {
             nextOrder?: number | undefined;
         },
     ) {
+        const slugBase = data.name
+            .toLowerCase()
+            .trim()
+            .replace(/[\s\W-]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+
+        const lastPhase = await prisma.phase.findFirst({
+            where: {
+                projectId: projectId,
+                slugBase: slugBase,
+            },
+            orderBy: { slugIndex: "desc" },
+        });
+
+        const nextIndex = lastPhase ? lastPhase.slugIndex + 1 : 1;
+        const currentSlug =
+            nextIndex === 1 ? slugBase : `${slugBase}-${nextIndex}`;
+
         let calculatedOrder = 1;
 
         if (data.prevOrder !== undefined && data.nextOrder !== undefined) {
@@ -45,7 +63,7 @@ const phaseService = {
                 startDate: data.startDate,
                 paymentDeadline: data.paymentDeadline,
                 sequenceOrder: calculatedOrder,
-                status: "PLANNING",
+                status: "PAYMENT_PENDING",
             },
         });
 
@@ -162,28 +180,75 @@ const phaseService = {
             include: {
                 phases: {
                     orderBy: { sequenceOrder: "desc" },
-                    select: {
-                        id: true,
-                        name: true,
-                        status: true,
-                        startDate: true,
-                        sequenceOrder: true,
-                        budget: true,
+                    include: {
                         requisitions: {
                             where: { status: "APPROVED" },
                             select: { budget: true },
+                        },
+                        siteLogs: {
+                            orderBy: { workDate: "desc" },
+                            take: 2,
+                            include: {
+                                author: { select: { userId: true } },
+                            },
+                        },
+                        _count: {
+                            select: { siteLogs: true },
+                        },
+                    },
+                },
+            },
+        });
+        if (!project) {
+            throw new ValidationError("Project not found");
+        }
+
+        const phaseIds = project.phases.map((p) => p.id);
+        const commentsData = await prisma.phase.findMany({
+            where: { id: { in: phaseIds } },
+            select: {
+                id: true,
+                siteLogs: {
+                    select: {
+                        images: {
+                            select: { _count: { select: { comments: true } } },
                         },
                     },
                 },
             },
         });
 
-        if (!project) {
-            throw new ValidationError("Project not found");
-        }
+        const commentCountMap = new Map();
+        commentsData.forEach((p) => {
+            const total = p.siteLogs.reduce((acc, log) => {
+                return (
+                    acc +
+                    log.images.reduce(
+                        (imgAcc, img) => imgAcc + img._count.comments,
+                        0,
+                    )
+                );
+            }, 0);
+            commentCountMap.set(p.id, total);
+        });
+
+        // Resolve MongoDB Users for the site log authors
+        const authorUserIds = new Set<string>();
+        project.phases.forEach((phase) => {
+            phase.siteLogs.forEach((log) =>
+                authorUserIds.add(log.author.userId),
+            );
+        });
+
+        const { User } = await import("../../../shared/models/user.js");
+        const users = await User.find({
+            _id: { $in: Array.from(authorUserIds) },
+        }).lean();
+        const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
         const totalBudget = Number(project.estimatedBudget);
         let totalSpent = 0;
+        let activePhasesCount = 0;
 
         const mappedPhases = project.phases.map((phase) => {
             const phaseSpent = phase.requisitions.reduce(
@@ -192,12 +257,31 @@ const phaseService = {
             );
             totalSpent += phaseSpent;
 
+            if (phase.status === "ACTIVE") activePhasesCount++;
+
+            const mappedLogs = phase.siteLogs.map((log) => {
+                const mongoUser = userMap.get(log.author.userId);
+                return {
+                    id: log.id,
+                    title: log.title,
+                    workDate: log.workDate,
+                    authorName: mongoUser ? mongoUser.username : "Unknown User",
+                };
+            });
+
             return {
                 id: phase.id,
                 name: phase.name,
+                slug: phase.slug,
                 status: phase.status,
                 startDate: phase.startDate,
+                description: phase.description,
                 sequenceOrder: Number(phase.sequenceOrder),
+                budget: Number(phase.budget),
+                spent: phaseSpent,
+                totalLogs: phase._count.siteLogs,
+                totalComments: commentCountMap.get(phase.id) || 0,
+                latestActivity: mappedLogs,
             };
         });
 
@@ -210,6 +294,7 @@ const phaseService = {
                 name: project.name,
                 totalBudget: totalBudget,
                 totalSpent: totalSpent,
+                activePhasesCount: activePhasesCount,
                 overallProgress: overallProgress,
             },
             phases: mappedPhases,
@@ -293,6 +378,109 @@ const phaseService = {
         };
     },
 
+    async getPhaseInfo(projectId: string, phaseSlug: string) {
+        const phase = await prisma.phase.findUnique({
+            where: {
+                slug_projectId: {
+                    slug: phaseSlug,
+                    projectId: projectId,
+                },
+            },
+            include: {
+                requisitions: {
+                    where: { status: "APPROVED" },
+                    select: { budget: true },
+                },
+                siteLogs: {
+                    orderBy: { workDate: "desc" },
+                    include: {
+                        author: { select: { userId: true } },
+                        images: true, // Fetch max 5 on frontend, but grab all here
+                        comments: {
+                            orderBy: { createdAt: "asc" },
+                            include: {
+                                author: { select: { userId: true } },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!phase) {
+            throw new ValidationError("Phase not found");
+        }
+
+        // 1. Calculate Financials
+        const spent = phase.requisitions.reduce(
+            (sum, req) => sum + Number(req.budget),
+            0,
+        );
+        const budget = Number(phase.budget);
+        const remaining = budget - spent;
+
+        // 2. Resolve MongoDB Users (for SiteLogs and Comments)
+        const authorUserIds = new Set<string>();
+        phase.siteLogs.forEach((log) => {
+            authorUserIds.add(log.author.userId);
+            log.comments.forEach((c) => authorUserIds.add(c.author.userId));
+        });
+
+        const { User } = await import("../../../shared/models/user.js");
+        const users = await User.find({
+            _id: { $in: Array.from(authorUserIds) },
+        }).lean();
+        const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+        // 3. Format the Output
+        const mappedSiteLogs = phase.siteLogs.map((log) => {
+            const logAuthor = userMap.get(log.author.userId);
+
+            return {
+                id: log.id,
+                title: log.title,
+                description: log.description,
+                workDate: log.workDate,
+                author: {
+                    name: logAuthor ? logAuthor.username : "Unknown User",
+                    profile: logAuthor?.profileImage || null,
+                },
+                images: log.images.map((img) => ({
+                    id: img.id,
+                    url: img.url,
+                })),
+                comments: log.comments.map((comment) => {
+                    const commentAuthor = userMap.get(comment.author.userId);
+                    return {
+                        id: comment.id,
+                        text: comment.text,
+                        createdAt: comment.createdAt,
+                        imageId: comment.imageId, // Pinpoints specific image if attached!
+                        author: {
+                            name: commentAuthor ? commentAuthor.username : "Unknown",
+                            profile: commentAuthor?.profileImage || null,
+                        },
+                    };
+                }),
+            };
+        });
+
+        return {
+            id: phase.id,
+            slug: phase.slug,
+            name: phase.name,
+            sequenceOrder: Number(phase.sequenceOrder),
+            status: phase.status,
+            startDate: phase.startDate,
+            financials: {
+                budget,
+                spent,
+                remaining,
+            },
+            siteLogs: mappedSiteLogs,
+        };
+    },
+    
     async updatePhase(
         projectId: string,
         phaseId: string,
@@ -526,6 +714,18 @@ const phaseService = {
         });
 
         return { data };
+    },
+
+    async paymentApproval(phaseId: string) {
+        await prisma.phase.update({
+            where: {
+                id: phaseId,
+                status: "PAYMENT_PENDING",
+            },
+            data: {
+                status: "ACTIVE",
+            },
+        });
     },
 };
 

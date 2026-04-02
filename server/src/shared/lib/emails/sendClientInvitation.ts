@@ -5,7 +5,7 @@ export async function sendInviteEmail(email: string, token: string) {
     try {
         const fromAddress =
             process.env.NODE_ENV === "production"
-                ? "SiteCore <no-reply@sitecore.com>"
+                ? "rajaram<no resply@gmail.com>"
                 : "onboarding@resend.dev";
 
         const { data, error } = await resend.emails.send({

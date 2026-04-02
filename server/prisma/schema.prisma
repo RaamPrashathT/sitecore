@@ -177,6 +177,9 @@ model Assignment {
 model Phase {
     id              String      @id @default(uuid())
     name            String
+    slug            String      @default("temp-slug")
+    slugBase        String      @default("temp-base")
+    slugIndex       Int         @default(0)
     description     String?
     budget          Decimal
     paymentDeadline DateTime
@@ -195,7 +198,7 @@ model Phase {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@unique([name, projectId])
+    @@unique([slug, projectId])
 }
 
 model SiteLog {
@@ -209,6 +212,7 @@ model SiteLog {
     authorId String
     author   Membership @relation(fields: [authorId], references: [id])
     images   Image[]
+    comments Comment[]
 
     workDate  DateTime
     createdAt DateTime @default(now())
@@ -237,8 +241,11 @@ model Comment {
     authorId String
     author   Membership @relation(fields: [authorId], references: [id])
 
-    imageId String
-    image   Image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
+    sitelogId String
+    sitelog   SiteLog @relation(fields: [sitelogId], references: [id], onDelete: Cascade)
+
+    imageId String?
+    image   Image?  @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -328,7 +335,6 @@ model NotificationRecipient {
 
     assignmentId String?
     assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
-
 
     isRead Boolean   @default(false)
     readAt DateTime?

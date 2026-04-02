@@ -23,3 +23,7 @@ export const updatePhaseSchema = z.object({
 export const phaseIdParamSchema = z.object({
     phaseId: z.uuid("Invalid Phase ID"),
 });
+
+export const phaseSlugParamSchema = z.object({
+    phaseSlug: z.string().min(1, "Phase slug is required"),
+});

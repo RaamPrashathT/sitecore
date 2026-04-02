@@ -338,7 +338,7 @@ const authService = {
         return verifyToken;
     },
 
-    async googleLogin(inviteToken?: string) {
+    async  googleLogin(inviteToken?: string) {
         const state = crypto.randomBytes(32).toString("hex");
         const codeVerifier = crypto.randomBytes(64).toString("base64url");
 

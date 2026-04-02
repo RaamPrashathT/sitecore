@@ -95,21 +95,41 @@ const coreService = {
             where: { id: projectId },
             include: {
                 phases: {
-                    select: { status: true, budget: true }
+                    select: { id: true, name: true, status: true, budget: true },
+                    orderBy: { sequenceOrder: "asc" }
                 }
             }
         });
 
         if (!project) throw new Error("Project not found");
 
-        const phaseCounts = { PLANNING: 0, PAYMENT_PENDING: 0, ACTIVE: 0, COMPLETED: 0 };
-        let consumedBudget = 0;
+        // Fetch recent site logs across all phases of this project
+        const recentLogs = await prisma.siteLog.findMany({
+            where: { phase: { projectId: projectId } },
+            orderBy: { workDate: "desc" },
+            take: 5,
+            include: { author: { select: { userId: true } } }
+        });
 
+        // Fetch authors for the logs
+        const authorUserIds = [...new Set(recentLogs.map((log) => log.author.userId))];
+        const { User } = await import("../../../shared/models/user.js");
+        const users = await User.find({ _id: { $in: authorUserIds } }).lean();
+        const userMap = new Map(users.map((u) => [u._id.toString(), u]));
+
+        const mappedLogs = recentLogs.map(log => {
+            const author = userMap.get(log.author.userId);
+            return {
+                id: log.id,
+                title: log.title,
+                workDate: log.workDate,
+                authorName: author ? author.username : "Unknown",
+            };
+        });
+
+        let consumedBudget = 0;
         project.phases.forEach((phase) => {
-            phaseCounts[phase.status]++;
-            if (phase.status === "COMPLETED") {
-                consumedBudget += Number(phase.budget);
-            }
+            if (phase.status === "COMPLETED") consumedBudget += Number(phase.budget);
         });
 
         return {
@@ -123,7 +143,8 @@ const coreService = {
                 consumed: consumedBudget,
                 remaining: Number(project.estimatedBudget) - consumedBudget
             },
-            phasePipeline: phaseCounts,
+            phases: project.phases,
+            recentSiteLogs: mappedLogs,
         };
     },
 

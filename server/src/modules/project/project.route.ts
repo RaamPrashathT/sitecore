@@ -18,6 +18,7 @@ projectRouter.get("/details", authorize, orgAuthorize, projectAuthorize, coreCon
 projectRouter.put("/", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.updateProject);
 projectRouter.post("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.assignMember);
 projectRouter.delete("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.removeMember);
+// projectRouter.delete("/", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.deleteProject);
 
 projectRouter.get("/timeline", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getProjectTimeline);
 projectRouter.post("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.createPhase);
@@ -29,6 +30,8 @@ projectRouter.post("/phase/:phaseId/request-payment", authorize, orgAuthorize, p
 projectRouter.post("/phase/:phaseId/approve-payment", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), phaseController.approvePayment);
 projectRouter.post("/phase/:phaseId/complete", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.completePhase);
 projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.getPaymentPendingPhases);
+projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.paymentApproval)
+projectRouter.get("/phase/:phaseSlug/info", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhaseInfo);
 
 projectRouter.get("/requisitions", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getProjectRequisitions);
 projectRouter.post("/phase/:phaseId/requisition", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), requisitionController.createRequisition);

@@ -39,16 +39,16 @@ const phaseController = {
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);
-            return response.status(500).json({ message: "Internal server error" });
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 
     async getPhases(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;
-
             const result = await phaseService.getPhases(projectId);
-
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);
@@ -78,6 +78,34 @@ const phaseController = {
         } catch (error) {
             if (error instanceof ValidationError) {
                 return response.status(400).json({ message: error.message });
+            }
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async getPhaseInfo(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+
+            const validatedParams = phaseSlugParamSchema.safeParse(
+                request.params,
+            );
+            if (!validatedParams.success) {
+                throw new ValidationError("Invalid Phase Slug format");
+            }
+
+            const result = await phaseService.getPhaseInfo(
+                projectId,
+                validatedParams.data.phaseSlug,
+            );
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(404).json({ message: error.message });
             }
             logger.error(error);
             return response
@@ -164,12 +192,10 @@ const phaseController = {
                 validatedParams.data.phaseId,
             );
 
-            return response
-                .status(200)
-                .json({
-                    message:
-                        "Payment requested successfully. Phase is now PAYMENT_PENDING.",
-                });
+            return response.status(200).json({
+                message:
+                    "Payment requested successfully. Phase is now PAYMENT_PENDING.",
+            });
         } catch (error) {
             if (error instanceof ValidationError)
                 return response.status(400).json({ message: error.message });
@@ -247,6 +273,24 @@ const phaseController = {
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
+        }
+    },
+
+    async paymentApproval(request: Request, response: Response) {
+        try {
+            console.log("hi");
+            const phaseId = request.body.id;
+            console.log(phaseId);
+            await phaseService.paymentApproval(phaseId);
+
+            return response.status(200).json({
+                message: "Payment approved successfully",
+            });
+        } catch (error) {
+            logger.error(error);
+            return response.status(500).json({
+                message: "Internal server error",
+            });
         }
     },
 };
