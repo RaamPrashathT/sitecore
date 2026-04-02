@@ -1,4 +1,3 @@
-import * as React from "react";
 import OrgSidebar from "@/components/organization/sidebar/OrgSidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -6,59 +5,114 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Outlet, useLocation, useParams } from "react-router-dom";
+import { Outlet, useLocation, useParams, useNavigate } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 import IdlePage from "@/components/IdlePage";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, HardHat, UsersRound, ClipboardList } from "lucide-react";
 
 const MainOrganizationPage = () => {
-    const [currentLocation, setCurrentLocation] = React.useState("");
     const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { orgSlug } = useParams<{ orgSlug: string }>();
+    const { orgSlug, projectSlug } = useParams<{
+        orgSlug: string;
+        projectSlug?: string;
+    }>();
+
     const location = useLocation();
-    const segments = location.pathname.split("/");
+    const navigate = useNavigate();
 
-    React.useEffect(() => {
-        setCurrentLocation(segments[2]);
-    }, [segments]);
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const currentTab = pathParts[2] || "details";
 
-    if (!orgSlug) {
-        return <div>invalid organization</div>;
-    }
-    if (!membership) {
-        return <div>No membership data</div>;
-    }
-    if (membershipLoading) {
-        return <div>Loading...</div>;
-    }
+    const handleTabChange = (value: string) => {
+        if (!orgSlug || !projectSlug) return;
+
+        if (value === "details") {
+            navigate(`/${orgSlug}/${projectSlug}`);
+        } else {
+            navigate(`/${orgSlug}/${projectSlug}/${value}`);
+        }
+    };
+
+    if (!orgSlug) return <div>invalid organization</div>;
+    if (!membership) return <div>No membership data</div>;
+    if (membershipLoading) return <div>Loading...</div>;
 
     if (membership.role === "IDLE") {
         return (
-            <div className="h-[100vh]">
+            <div className="h-[92vh]">
                 <IdlePage />
             </div>
         );
     }
 
     return (
-        <SidebarProvider>
+        <SidebarProvider className="h-screen">
             <OrgSidebar />
-            <SidebarInset>
-                <header className="flex h-15.5 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b">
-                    <div className="flex justify-start px-4 w-full">
-                        <div className="flex items-center gap-2">
-                            <SidebarTrigger className="-ml-1 " />
-                            <Separator
-                                orientation="vertical"
-                                className="mr-1 data-[orientation=vertical]:h-4"
-                            />
-                            <p className="text-xl capitalize font-medium mb-0.5">
-                                {currentLocation}
-                            </p>
-                        </div>
+
+            <SidebarInset className="flex flex-col h-full">
+                <header className="flex h-15.5 items-center justify-between border-b px-4">
+                    <div className="flex items-center gap-4">
+                        <SidebarTrigger />
+
+                        {projectSlug && (
+                            <>
+                                <Separator
+                                    orientation="vertical"
+                                    className="h-4"
+                                />
+
+                                <p className="font-medium text-sm capitalize">
+                                    {projectSlug}
+                                </p>
+
+                                <Tabs
+                                    value={currentTab}
+                                    onValueChange={handleTabChange}
+                                >
+                                    <TabsList className="bg-transparent p-0 flex gap-4 ml-4">
+                                        <TabsTrigger
+                                            value="details"
+                                            className="flex items-center gap-1 px-2 py-1 text-sm border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700"
+                                        >
+                                            <Form className="w-4 h-4" />
+                                            Details
+                                        </TabsTrigger>
+
+                                        <TabsTrigger
+                                            value="progress"
+                                            className="flex items-center gap-1 px-2 py-1 text-sm border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700"
+                                        >
+                                            <HardHat className="w-4 h-4" />
+                                            Progress
+                                        </TabsTrigger>
+
+                                        <TabsTrigger
+                                            value="requisitions"
+                                            className="flex items-center gap-1 px-2 py-1 text-sm border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700"
+                                        >
+                                            <ClipboardList className="w-4 h-4" />
+                                            Requisitions
+                                        </TabsTrigger>
+
+                                        <TabsTrigger
+                                            value="members"
+                                            className="flex items-center gap-1 px-2 py-1 text-sm border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700"
+                                        >
+                                            <UsersRound className="w-4 h-4" />
+                                            Members
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </Tabs>
+                            </>
+                        )}
                     </div>
                 </header>
-                <div className="flex flex-1 flex-col overflow-auto">
-                    <Outlet />
+
+                <div className="flex flex-1 flex-col overflow-hidden">
+                    <div className="flex-1 overflow-y-auto">
+                        <Outlet />
+                    </div>
                 </div>
             </SidebarInset>
         </SidebarProvider>

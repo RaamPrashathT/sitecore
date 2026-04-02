@@ -1,38 +1,49 @@
 import api from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface ProjectDetails {
     id: string;
     name: string;
     slug: string;
     address: string;
-    status: "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
+    status: string;
     budgets: {
         estimatedTotal: number;
         consumed: number;
         remaining: number;
     };
-    phasePipeline: {
-        PLANNING: number;
-        PAYMENT_PENDING: number;
-        ACTIVE: number;
-        COMPLETED: number;
-    };
+    phases: {
+        id: string;
+        name: string;
+        status: string;
+    }[];
+    recentSiteLogs: {
+        id: string;
+        title: string;
+        workDate: string;
+        authorName: string;
+    }[];
 }
 
-const getProjectDetails = async () => {
-    const { data } = await api.get<ProjectDetails>("/project/details");
-    return data;
+export const useProjectDetails = (orgSlug?: string, projectSlug?: string) => {
+    return useQuery({
+        queryKey: ["projectDetails", orgSlug, projectSlug],
+        queryFn: async () => {
+            const { data } = await api.get<ProjectDetails>("/project/details");
+            return data;
+        },
+        enabled: !!orgSlug && !!projectSlug, 
+    });
 };
 
-export const useProjectDetails = (
-    organizationSlug: string | undefined,
-    projectSlug: string | undefined,
-) => {
-    return useQuery({
-        queryKey: ["projectDetails", organizationSlug, projectSlug],
-        queryFn: getProjectDetails,
-        staleTime: 1000 * 60 * 5,
-        enabled: !!organizationSlug && !!projectSlug, 
+export const useDeleteProject = (orgSlug?: string, projectSlug?: string) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async () => {
+            await api.delete("/project/");
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["projects", orgSlug] });
+        }
     });
 };

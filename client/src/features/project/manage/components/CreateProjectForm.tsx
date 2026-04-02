@@ -1,31 +1,13 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-    Field,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
-import { Textarea } from "@/components/ui/textarea";
-import { useClients } from "@/hooks/useClients";
-import { useEngineers } from "@/hooks/useEngineers";
-import api from "@/lib/axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { MapPin } from "lucide-react";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import api from "@/lib/axios";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 interface CreateProjectFormProps {
     readonly orgId: string;
@@ -35,42 +17,30 @@ interface CreateProjectFormProps {
 const formSchema = z.object({
     name: z.string().trim().min(1, "Name is required"),
     address: z.string().trim().min(1, "Address is required"),
-    estimatedBudget: z.string().min(1, "Estimated budget is required"),
-    engineerId: z.string().min(1, "Engineer is required"),
-    clientId: z.string().min(1, "Client is required"),
+    estimatedBudget: z.coerce.number().min(0, "Estimated budget cannot be negative"),
 });
 
 type CreateProjectFormSchema = z.infer<typeof formSchema>;
 
-const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
-    const {
-        register,
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<CreateProjectFormSchema>({
-        resolver: zodResolver(formSchema),
-    });
+const GRID = { p: "p-6", gap: "gap-6", gapSm: "gap-2", radius: "rounded-lg" };
 
+const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const { data: engineers, isLoading: engineerLoading } = useEngineers(
-        orgId,
-        0,
-        100,
-    );
-    const { data: clients, isLoading: clientLoading } = useClients(
-        orgId,
-        0,
-        100,
-    );
-
-    const engineersArray = engineers?.data;
-    const clientsArray = clients?.data;
-
-    if (engineerLoading || clientLoading) return <div>Loading...</div>;
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<CreateProjectFormSchema>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: "",
+            address: "",
+            estimatedBudget: 0,
+        }
+    });
 
     const onSubmit = async (data: CreateProjectFormSchema) => {
         setIsLoading(true);
@@ -78,10 +48,11 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
         try {
             const response = await api.post("/project", data, {
                 headers: {
-                    "x-organization-id": orgId,
+                    "x-tenant-slug": orgId, // Assuming your org interceptor uses this
                 },
             });
 
+            // Redirect to the newly created project's dashboard
             navigate(`/${slug}/${response.data.slug}`);
         } catch (error) {
             if (error instanceof Error) {
@@ -95,196 +66,107 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
     };
 
     return (
-        <div className="flex items-center justify-center">
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-3xl "
-            >
-                <h1 className="text-3xl font-semibold my-8">Create Project</h1>
-                <FieldGroup className="flex flex-col gap-y-4">
-                    <Field>
-                        <FieldLabel className="text-lg">
-                            Project Name
-                        </FieldLabel>
-                        <Input
-                            {...register("name")}
-                            placeholder="Project Name"
-                            id="name"
-                        />
-                        {errors.name && (
-                            <FieldError>{errors.name.message}</FieldError>
+        <div className={`min-h-screen bg-stone-50 ${GRID.p} font-sans`}>
+            <div className="max-w-3xl mx-auto pt-4">
+                
+                <button 
+                    type="button"
+                    onClick={() => navigate(`/${slug}/projects`)} // Adjust back route as needed
+                    className="flex items-center gap-2 text-sm font-medium text-stone-500 hover:text-stone-900 mb-6 transition-none"
+                >
+                    <ArrowLeft className="w-4 h-4" /> Back to Projects
+                </button>
+
+                <div className="mb-8">
+                    <h1 className="text-4xl font-serif text-stone-900 tracking-tight">Create Project</h1>
+                    <p className="text-sm font-sans text-stone-500 mt-2">Establish a new construction site and financial baseline.</p>
+                </div>
+
+                <div className={`bg-white border border-stone-200 ${GRID.p} ${GRID.radius} shadow-sm`}>
+                    <form onSubmit={handleSubmit(onSubmit)} className={`flex flex-col ${GRID.gap}`}>
+                        
+                        {/* Project Name */}
+                        <div className={`flex flex-col ${GRID.gapSm}`}>
+                            <label className="text-xs font-semibold text-stone-500 uppercase tracking-widest">
+                                Project Name
+                            </label>
+                            <Input
+                                {...register("name")}
+                                placeholder="e.g. Skyline Apartments"
+                                className="font-sans text-stone-900 border-stone-200 focus-visible:ring-green-700"
+                            />
+                            {errors.name && (
+                                <span className="text-xs font-medium text-red-500">{errors.name.message}</span>
+                            )}
+                        </div>
+
+                        {/* Address */}
+                        <div className={`flex flex-col ${GRID.gapSm}`}>
+                            <label className="text-xs font-semibold text-stone-500 uppercase tracking-widest">
+                                Site Address
+                            </label>
+                            <textarea
+                                {...register("address")}
+                                placeholder="Full site address or coordinates"
+                                className="flex min-h-[80px] w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-700 disabled:cursor-not-allowed disabled:opacity-50 font-sans text-stone-900"
+                            />
+                            {errors.address && (
+                                <span className="text-xs font-medium text-red-500">{errors.address.message}</span>
+                            )}
+                        </div>
+
+                        {/* Estimated Budget */}
+                        <div className={`flex flex-col ${GRID.gapSm}`}>
+                            <label className="text-xs font-semibold text-stone-500 uppercase tracking-widest">
+                                Base Contract Value (₹)
+                            </label>
+                            <Input
+                                type="number"
+                                {...register("estimatedBudget")}
+                                placeholder="0"
+                                className="font-mono text-stone-900 border-stone-200 focus-visible:ring-green-700"
+                            />
+                            {errors.estimatedBudget && (
+                                <span className="text-xs font-medium text-red-500">{errors.estimatedBudget.message}</span>
+                            )}
+                        </div>
+
+                        {/* Error State */}
+                        {error && (
+                            <div className="p-3 bg-red-50 border border-red-100 rounded-md text-sm text-red-600 font-medium">
+                                {error}
+                            </div>
                         )}
-                    </Field>
-                    <Field className="w-full flex flex-col gap-y-2">
-                        <div className="flex w-full flex-row justify-between">
-                            <FieldLabel className="text-lg">Address</FieldLabel>
+
+                        {/* Actions */}
+                        <div className="flex items-center justify-end gap-4 pt-6 mt-2 border-t border-stone-100">
                             <Button
-                                variant="ghost"
-                                className="flex items-center gap-x-1 p-0 m-0 text-destructive hover:text-destructive hover:bg-transparent hover:underline hover:cursor-pointer text-md"
                                 type="button"
+                                variant="ghost"
+                                onClick={() => navigate(-1)}
+                                disabled={isLoading}
+                                className="text-xs font-semibold text-stone-500 hover:text-stone-900 uppercase tracking-wider px-6 transition-none"
                             >
-                                <MapPin size={16} className="mt-0.5" />
-                                <span>Set Location</span>
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="bg-green-700 text-white hover:bg-green-800 text-xs font-semibold uppercase tracking-wider px-8 transition-none disabled:opacity-50"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    "Create Project"
+                                )}
                             </Button>
                         </div>
-                        <Textarea
-                            {...register("address")}
-                            placeholder="Address"
-                            id="address"
-                        ></Textarea>
-                        {errors.address && (
-                            <FieldError>{errors.address.message}</FieldError>
-                        )}
-                    </Field>
-                    <Field>
-                        <FieldLabel className="text-lg">
-                            Estimated Budget
-                        </FieldLabel>
-                        <Input
-                            {...register("estimatedBudget")}
-                            type="number"
-                            placeholder="Estimated Budget"
-                            id="estimatedBudget"
-                        />
-                        {errors.estimatedBudget && (
-                            <FieldError>
-                                {errors.estimatedBudget.message}
-                            </FieldError>
-                        )}
-                    </Field>
-                    <div className="flex gap-x-2">
-                        <Field className="w-full">
-                            <FieldLabel className="text-lg">
-                                Engineers
-                            </FieldLabel>
-                            <Controller
-                                name="engineerId"
-                                control={control}
-                                defaultValue=""
-                                render={({ field }) => (
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value || undefined}
-                                    >
-                                        <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="Select an Engineer" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                {engineersArray &&
-                                                engineersArray.length > 0 ? (
-                                                    engineersArray.map(
-                                                        (engineer) => (
-                                                            <SelectItem
-                                                                key={
-                                                                    engineer.id
-                                                                }
-                                                                value={
-                                                                    engineer.id
-                                                                }
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <Avatar className="h-7 w-7">
-                                                                        <AvatarFallback className="text-xs">
-                                                                            {engineer.username[0].toUpperCase()}
-                                                                        </AvatarFallback>
-                                                                    </Avatar>
-                                                                    <span className="text-sm font-medium">
-                                                                        {
-                                                                            engineer.username
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                            </SelectItem>
-                                                        ),
-                                                    )
-                                                ) : (
-                                                    <div className="p-2 text-sm text-muted-foreground text-center">
-                                                        No engineers found
-                                                    </div>
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                            {errors.engineerId && (
-                                <FieldError>
-                                    {errors.engineerId.message}
-                                </FieldError>
-                            )}
-                        </Field>
-
-                        <Field className="w-full">
-                            <FieldLabel className="text-lg">Clients</FieldLabel>
-                            <Controller
-                                name="clientId"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select
-                                        key={clientsArray
-                                            ?.map((e) => e.id)
-                                            .join(",")}
-                                        onValueChange={field.onChange}
-                                        value={field.value || undefined}
-                                    >
-                                        <SelectTrigger className="h-12">
-                                            <SelectValue placeholder="Select a Client" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                {clientsArray &&
-                                                clientsArray.length > 0 ? (
-                                                    clientsArray.map(
-                                                        (client) => (
-                                                            <SelectItem
-                                                                key={client.id}
-                                                                value={
-                                                                    client.id
-                                                                }
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <Avatar className="h-7 w-7">
-                                                                        <AvatarFallback className="text-xs">
-                                                                            {client.username[0].toUpperCase()}
-                                                                        </AvatarFallback>
-                                                                    </Avatar>
-                                                                    <span className="text-sm font-medium">
-                                                                        {
-                                                                            client.username
-                                                                        }
-                                                                    </span>
-                                                                </div>
-                                                            </SelectItem>
-                                                        ),
-                                                    )
-                                                ) : (
-                                                    <div className="p-2 text-sm text-muted-foreground text-center">
-                                                        No clients found
-                                                    </div>
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                            {errors.clientId && (
-                                <FieldError>
-                                    {errors.clientId.message}
-                                </FieldError>
-                            )}
-                        </Field>
-                    </div>
-                </FieldGroup>
-
-                {error && <FieldError className="mt-4">{error}</FieldError>}
-                <div className="w-full flex justify-end mt-8">
-                    <Button type="submit" className="w-60" disabled={isLoading}>
-                        {isLoading && <Spinner className="mr-2" />}
-                        Create Project
-                    </Button>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };

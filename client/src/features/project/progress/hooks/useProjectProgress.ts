@@ -1,69 +1,49 @@
 import api from "@/lib/axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-export interface TimelineComment {
-    id: string;
-    text: string;
-    createdAt: string;
-    author: {
-        name: string;
-        profile: string | null;
-    };
-}
-
-export interface TimelineImage {
-    id: string;
-    url: string;
-    comments: TimelineComment[];
-}
-
-export interface TimelineLog {
-    id: string;
-    title: string;
-    description: string;
-    workDate: string;
-    author: {
-        name: string;
-        profile: string | null;
-    };
-    images: TimelineImage[];
-    imageCount: number;
-    commentCount: number;
-}
-
-export interface TimelinePhase {
+export interface ProjectStats {
     id: string;
     name: string;
-    description: string | null;
-    budget: number;
+    totalBudget: number;
+    totalSpent: number;
+    activePhasesCount: number;
+    overallProgress: number;
+}
+
+export interface LatestActivityLog {
+    id: string;
+    title: string;
+    workDate: string;
+    authorName: string;
+}
+
+export interface PhaseProgress {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
     status: "PLANNING" | "PAYMENT_PENDING" | "ACTIVE" | "COMPLETED";
     startDate: string;
-    siteLogs: TimelineLog[];
+    sequenceOrder: number;
+    budget: number;
+    spent: number;
+    totalLogs: number;
+    totalComments: number;
+    latestActivity: LatestActivityLog[];
+}
+
+export interface ProjectProgressResponse {
+    project: ProjectStats;
+    phases: PhaseProgress[];
 }
 
 export const useProjectProgress = (orgSlug?: string, projectSlug?: string) => {
     return useQuery({
-        queryKey: ["projectTimeline", orgSlug, projectSlug],
+        queryKey: ["projectPhases", orgSlug, projectSlug], 
         queryFn: async () => {
-            const { data } = await api.get<TimelinePhase[]>("/project/timeline");
+            const { data } = await api.get<ProjectProgressResponse>("/project/phases");
             return data;
         },
         enabled: !!orgSlug && !!projectSlug,
-    });
-};
-
-// Mutation Hook for posting comments
-export const useAddComment = (orgSlug?: string, projectSlug?: string) => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async ({ imageId, text }: { imageId: string; text: string }) => {
-            const { data } = await api.post(`/project/image/${imageId}/comment`, { text });
-            return data;
-        },
-        onSuccess: () => {
-            // Refetch the timeline to show the new comment instantly
-            queryClient.invalidateQueries({ queryKey: ["projectTimeline", orgSlug, projectSlug] });
-        },
     });
 };

@@ -60,8 +60,8 @@ const ProjectManageMain = () => {
     if (!membership || !projectList) return <div>No access</div>;
 
     return (
-        <div className="px-4 pb-4 pt-2 flex flex-col h-full font-sans">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+        <div className="px-4 pb-4 pt-2 flex flex-col font-sans h-full">
+            <div className="flex items-center justify-between  mb-2 border-b border-border/70 pb-3">
                 {membership.role === "ADMIN" && (
                     <Button className="bg-green-700 text-white hover:bg-green-800">
                         <Link

@@ -49,16 +49,16 @@ const ProjectListPagination = ({ table }: ProjectListPaginationProps) => {
     const paginationNumbers = getPaginationNumbers(pageIndex, pageCount);
 
     return (
-        <div className="flex flex-row items-center justify-between font-sans">
-            <Field className="flex flex-row items-center gap-2">
-                <FieldLabel className="text-sm text-muted-foreground">Rows per page:</FieldLabel>
+        <div className="flex flex-row relative">
+            <Field className="flex flex-row w-70 items-center gap-x-1">
+                <FieldLabel>Rows per page:</FieldLabel>
                 
                 <Select 
                     defaultValue={pageSize.toString()} 
                     value={pageSize.toString()}
                     onValueChange={(value) => table.setPageSize(Number(value))}
                 >
-                    <SelectTrigger className="w-[70px]" size="sm" id="select-rows-per-page">
+                    <SelectTrigger className="" size="sm" id="select-rows-per-page">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="start">
@@ -72,7 +72,7 @@ const ProjectListPagination = ({ table }: ProjectListPaginationProps) => {
                 </Select>
             </Field>
             
-            <Pagination>
+            <Pagination className="pr-80">
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious

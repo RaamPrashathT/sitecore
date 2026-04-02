@@ -7,7 +7,6 @@ interface EngineerDashboardItemTableProps {
 }
 
 const EngineerDashboardItemTable = ({ table }: EngineerDashboardItemTableProps) => {
-    
     return (
         <div className="w-full">
             <div className="flex bg-slate-100 rounded-xl mb-1 px-4">

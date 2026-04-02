@@ -4,10 +4,9 @@ import {
     EmptyContent,
     EmptyDescription,
     EmptyHeader,
-    EmptyMedia,
     EmptyTitle,
 } from "@/components/ui/empty";
-import { ClipboardCheckIcon, SquareArrowOutUpRight } from "lucide-react";
+import { SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import EngineerInviteButton from "./EngineerInvite/EngineerInviteButton";
 
@@ -20,9 +19,6 @@ const EngineerEmpty = ({ slug }: EngineerEmptyProps) => {
         <div className="flex h-full items-center justify-center px-4 py-6">
             <Empty className="w-full max-w-2xl rounded-xl border border-border/70 bg-background p-6 md:p-8">
                 <EmptyHeader>
-                    <EmptyMedia variant="icon" className="text-green-700">
-                        <ClipboardCheckIcon />
-                    </EmptyMedia>
                     <EmptyTitle className="font-display text-3xl font-normal tracking-wide text-foreground">No Engineers</EmptyTitle>
                     <EmptyDescription className="font-sans text-sm text-muted-foreground">
                         No pending engineers yet. 

@@ -2,7 +2,7 @@ import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { CatalogueInputSchema } from "../hooks/useGetCatalogues"; // Adjust the import path
+import type { CatalogueInputSchema } from "../hooks/useGetCatalogues"; 
 
 interface DeleteCatalogueButtonProps {
     orgId: string;

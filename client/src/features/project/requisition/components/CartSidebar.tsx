@@ -12,8 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import api from "@/lib/axios";
 import { Spinner } from "@/components/ui/spinner";
-// 1. Swap the hook! We need the Phase details now, not the Requisition.
-import { useGetPhaseDetails } from "@/features/project/progress/hooks/useGetPhaseDetails";
+import { useGetPhaseDetails } from "@/features/project/progress/hooks/useProjectProgress";
 
 const CartSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const [error, setError] = useState<string | null>(null);

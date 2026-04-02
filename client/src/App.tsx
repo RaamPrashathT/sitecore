@@ -48,6 +48,8 @@ import UpdatePhasePage from "./pages/project/UpdatePhasePage";
 import NotificationPage from "./pages/organization/NotificationPage";
 import CreateLogPage from "./pages/project/CreateLogPage";
 import ProjectRequisitionPage from "./pages/project/ProjectRequisitionPage";
+import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
+import ProjectPhaseMain from "./features/project/progress/components/ProjectPhaseMain";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -131,17 +133,6 @@ function App() {
                                 />
 
                                 {/* Projects */}
-                                {/* Projects List & Creation */}
-                                <Route
-                                    path="projects"
-                                    element={<ProjectListPage />}
-                                />
-                                <Route
-                                    path="projects/create"
-                                    element={<CreateProjectPage />}
-                                />
-
-                                {/* Projects List & Creation */}
                                 <Route
                                     path="projects"
                                     element={<ProjectListPage />}
@@ -165,6 +156,12 @@ function App() {
                                         path="progress"
                                         element={<ProjectProgressMain />}
                                     />
+
+                                    <Route
+                                        path="progress/:phaseSlug"
+                                        element={<ProjectPhaseMain />}
+                                    />
+
                                     <Route
                                         path="progress/create-phase"
                                         element={<PhaseCreationPage />}
@@ -188,8 +185,12 @@ function App() {
                                 </Route>
 
                                 {/* Action Routes inside a project */}
-                                {/* <Route path=":projectSlug/invite" element={<ProjectMemberInvitePage />} /> */}
+                                <Route
+                                    path=":projectSlug/members/invite"
+                                    element={<ProjectMemberInvitePage />}
+                                />
                                 {/* <Route path=":projectSlug/phase/:phaseId/requisition/new" element={<RequisitionCreationPage />} /> */}
+
                                 {/* Pending */}
                                 <Route
                                     path="pending-requisitions"
