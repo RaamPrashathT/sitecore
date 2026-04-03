@@ -8,16 +8,24 @@ export interface SiteLogPayload {
     images: string[]; 
 }
 
-export const useAddSiteLog = (orgSlug: string, projectSlug: string, phaseId: string | null) => {
+export const useAddSiteLog = (orgSlug: string, projectSlug: string, phaseSlug: string) => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (data: SiteLogPayload) => {
-            const response = await api.post(`/project/phase/${phaseId}/sitelog`, data);
+            // Updated endpoint to use the phaseSlug
+            const response = await api.post(`/project/phase/${phaseSlug}/sitelog`, data);
             return response.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["projectTimeline", orgSlug, projectSlug] });
+            // Invalidate the specific phase details so the new log shows up immediately
+            queryClient.invalidateQueries({ 
+                queryKey: ["phaseDetails", orgSlug, projectSlug, phaseSlug] 
+            });
+            // Also invalidate the main phases list to update the total log count
+            queryClient.invalidateQueries({ 
+                queryKey: ["projectPhases", orgSlug, projectSlug] 
+            });
         },
     });
 };

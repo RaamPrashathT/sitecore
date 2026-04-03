@@ -4,7 +4,6 @@ import { Loader2, AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhaseCard from "./PhaseCard";
 
-// Formatting utility for Indian Rupees
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
         style: "currency",

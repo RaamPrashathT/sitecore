@@ -5,6 +5,7 @@ import { ValidationError } from "../../../shared/error/validation.error.js";
 import {
     createPhaseSchema,
     phaseIdParamSchema,
+    phaseSlugParamSchema,
     updatePhaseSchema,
 } from "./phase.schema.js";
 
@@ -48,6 +49,7 @@ const phaseController = {
     async getPhases(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;
+            console.log(projectId)
             const result = await phaseService.getPhases(projectId);
             return response.status(200).json(result);
         } catch (error) {

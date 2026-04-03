@@ -11,10 +11,8 @@ export const createSiteLogSchema = z.object({
 });
 
 export const createCommentSchema = z.object({
-    text: z
-        .string()
-        .min(1, "Comment cannot be empty")
-        .max(1000, "Comment is too long"),
+    text: z.string().min(1, "Comment text cannot be empty"),
+    imageId: z.uuid("Invalid Image ID format").nullable().optional(),
 });
 
 export const phaseIdParamSchema = z.object({
@@ -28,3 +26,8 @@ export const imageIdParamSchema = z.object({
 export const commentIdParamSchema = z.object({
     commentId: z.uuid("Invalid Comment ID"),
 });
+
+export const sitelogIdParamSchema = z.object({
+    sitelogId: z.uuid("Invalid Site Log ID format"),
+});
+

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Removed useSearchParams
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,12 +29,17 @@ type FormValues = z.infer<typeof siteLogSchema>;
 const GRID = { p: "p-6", gap: "gap-6", gapSm: "gap-2", radius: "rounded-lg" };
 
 export default function AddSiteLogForm() {
-    const { orgSlug, projectSlug } = useParams<{ orgSlug: string; projectSlug: string }>();
+    // Extract phaseSlug from the URL parameters
+    const { orgSlug, projectSlug, phaseSlug } = useParams<{ 
+        orgSlug: string; 
+        projectSlug: string;
+        phaseSlug: string;
+    }>();
+    
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const phaseId = searchParams.get("phaseId");
 
-    const { mutate: addSiteLog, isPending: isMutating } = useAddSiteLog(orgSlug!, projectSlug!, phaseId);
+    // Pass phaseSlug to the hook
+    const { mutate: addSiteLog, isPending: isMutating } = useAddSiteLog(orgSlug!, projectSlug!, phaseSlug!);
     
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isUploading, setIsUploading] = useState(false);
@@ -45,7 +50,7 @@ export default function AddSiteLogForm() {
         defaultValues: {
             title: "",
             description: "",
-            workDate: new Date(), // Defaults to today as a Date object
+            workDate: new Date(),
         },
     });
 
@@ -67,8 +72,8 @@ export default function AddSiteLogForm() {
     };
 
     const onSubmit = async (data: FormValues) => {
-        if (!phaseId) {
-            setUploadError("Phase ID is missing. Cannot add log.");
+        if (!phaseSlug) {
+            setUploadError("Phase Slug is missing. Cannot add log.");
             return;
         }
 
@@ -76,18 +81,17 @@ export default function AddSiteLogForm() {
             setIsUploading(true);
             setUploadError(null);
 
-            // 1. Upload all selected files to Cloudinary
             const uploadPromises = selectedFiles.map(file => uploadToCloudinary(file));
             const imageUrls = await Promise.all(uploadPromises);
 
-            // 2. Submit the log to the backend
             addSiteLog({
                 title: data.title,
                 description: data.description,
                 workDate: data.workDate.toISOString(),
                 images: imageUrls,
             }, {
-                onSuccess: () => navigate(`/${orgSlug}/${projectSlug}/progress`)
+                // Redirect back to the detailed phase view
+                onSuccess: () => navigate(`/${orgSlug}/${projectSlug}/progress/${phaseSlug}`)
             });
 
         } catch (error) {
@@ -98,11 +102,12 @@ export default function AddSiteLogForm() {
 
     const isBusy = isUploading || isMutating;
 
-    if (!phaseId) {
+    // Safety check for phaseSlug
+    if (!phaseSlug) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] bg-stone-50 text-stone-500">
                 <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
-                <p className="font-medium text-stone-900">Missing Phase ID</p>
+                <p className="font-medium text-stone-900">Missing Phase Information</p>
                 <Button variant="link" onClick={() => navigate(-1)}>Go Back</Button>
             </div>
         );
@@ -113,18 +118,18 @@ export default function AddSiteLogForm() {
             <div className="max-w-3xl mx-auto">
                 
                 <button 
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate(`/${orgSlug}/${projectSlug}/progress/${phaseSlug}`)}
                     className="flex items-center gap-2 text-sm font-medium text-stone-500 hover:text-stone-900 mb-6 transition-none"
                 >
-                    <ArrowLeft className="w-4 h-4" /> Back to Progress
+                    <ArrowLeft className="w-4 h-4" /> Back to Phase Details
                 </button>
 
                 <div className="mb-4">
-                    <h1 className="text-3xl font-serif text-stone-900 tracking-tight">Add Site Log</h1>
+                    <h1 className="text-3xl font-display text-stone-900 tracking-tight">Add Site Log</h1>
                     <p className="text-sm font-sans text-stone-500 mt-2">Record site progress, upload photos, and flag issues.</p>
                 </div>
 
-                <div className={` ${GRID.p} ${GRID.radius} border-t rounded-none`}>
+                <div className={` ${GRID.p} ${GRID.radius} border-t border-stone-200 rounded-none`}>
                     <form onSubmit={handleSubmit(onSubmit)} className={`flex flex-col ${GRID.gap}`}>
                         
                         <div className={`grid grid-cols-1 md:grid-cols-3 ${GRID.gap}`}>
@@ -233,7 +238,7 @@ export default function AddSiteLogForm() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                onClick={() => navigate(-1)}
+                                onClick={() => navigate(`/${orgSlug}/${projectSlug}/progress/${phaseSlug}`)}
                                 disabled={isBusy}
                                 className="text-xs font-semibold text-stone-500 hover:text-stone-900 uppercase tracking-wider px-6"
                             >

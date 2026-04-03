@@ -12,7 +12,6 @@ export const projectAuthorize = async (
     try {
         const orgSlug = request.headers["x-tenant-slug"] as string;
         const projectSlug = request.headers["x-project-slug"] as string;
-
         if (!projectSlug || !orgSlug) {
             throw new UnAuthorizedError(
                 "You don't have permission to access this project",

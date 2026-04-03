@@ -64,12 +64,16 @@ const phaseService = {
                 paymentDeadline: data.paymentDeadline,
                 sequenceOrder: calculatedOrder,
                 status: "PAYMENT_PENDING",
+                slug: currentSlug,
+                slugBase: slugBase,
+                slugIndex: nextIndex,
             },
         });
 
         return {
             id: phase.id,
             name: phase.name,
+            slug: phase.slug,
             sequenceOrder: phase.sequenceOrder,
             status: phase.status,
         };
@@ -288,7 +292,7 @@ const phaseService = {
         const overallProgress =
             totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
-        return {
+        const val = {
             project: {
                 id: project.id,
                 name: project.name,
@@ -299,6 +303,7 @@ const phaseService = {
             },
             phases: mappedPhases,
         };
+        return val;
     },
 
     async getPhaseDetails(projectId: string, phaseId: string) {
@@ -387,15 +392,23 @@ const phaseService = {
                 },
             },
             include: {
+                // Fetch Requisitions and their nested Items to calculate spend
                 requisitions: {
-                    where: { status: "APPROVED" },
-                    select: { budget: true },
+                    include: {
+                        items: {
+                            where: { status: "ORDERED" },
+                            select: {
+                                quantity: true,
+                                estimatedUnitCost: true,
+                            },
+                        },
+                    },
                 },
                 siteLogs: {
                     orderBy: { workDate: "desc" },
                     include: {
                         author: { select: { userId: true } },
-                        images: true, // Fetch max 5 on frontend, but grab all here
+                        images: true, 
                         comments: {
                             orderBy: { createdAt: "asc" },
                             include: {
@@ -411,15 +424,20 @@ const phaseService = {
             throw new ValidationError("Phase not found");
         }
 
-        // 1. Calculate Financials
-        const spent = phase.requisitions.reduce(
-            (sum, req) => sum + Number(req.budget),
-            0,
-        );
+        // 1. Calculate Financials based on ORDERED items
+        let spent = 0;
+        phase.requisitions.forEach((req) => {
+            req.items.forEach((item) => {
+                const quantity = Number(item.quantity);
+                const unitCost = Number(item.estimatedUnitCost);
+                spent += (quantity * unitCost);
+            });
+        });
+
         const budget = Number(phase.budget);
         const remaining = budget - spent;
 
-        // 2. Resolve MongoDB Users (for SiteLogs and Comments)
+        // 2. Resolve MongoDB Users (Unchanged)
         const authorUserIds = new Set<string>();
         phase.siteLogs.forEach((log) => {
             authorUserIds.add(log.author.userId);
@@ -432,10 +450,9 @@ const phaseService = {
         }).lean();
         const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
-        // 3. Format the Output
+        // 3. Format Output (Unchanged)
         const mappedSiteLogs = phase.siteLogs.map((log) => {
             const logAuthor = userMap.get(log.author.userId);
-
             return {
                 id: log.id,
                 title: log.title,
@@ -455,7 +472,7 @@ const phaseService = {
                         id: comment.id,
                         text: comment.text,
                         createdAt: comment.createdAt,
-                        imageId: comment.imageId, // Pinpoints specific image if attached!
+                        imageId: comment.imageId,
                         author: {
                             name: commentAuthor ? commentAuthor.username : "Unknown",
                             profile: commentAuthor?.profileImage || null,

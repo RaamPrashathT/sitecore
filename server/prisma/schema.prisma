@@ -177,9 +177,9 @@ model Assignment {
 model Phase {
     id              String      @id @default(uuid())
     name            String
-    slug            String      @default("temp-slug")
-    slugBase        String      @default("temp-base")
-    slugIndex       Int         @default(0)
+    slug            String
+    slugBase        String
+    slugIndex       Int
     description     String?
     budget          Decimal
     paymentDeadline DateTime
