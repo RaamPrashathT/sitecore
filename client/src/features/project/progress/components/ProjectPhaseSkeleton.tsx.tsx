@@ -63,8 +63,8 @@ const ProjectPhaseSkeleton = () => {
 
                                 {/* Images Scroller Placeholder */}
                                 <div className="flex gap-4 overflow-hidden mb-4">
-                                    <Skeleton className="shrink-0 rounded-xl aspect-[4/3] w-[280px]" />
-                                    <Skeleton className="shrink-0 rounded-xl aspect-[4/3] w-[280px]" />
+                                    <Skeleton className="shrink-0 rounded-xl aspect-4/3 w-[280px]" />
+                                    <Skeleton className="shrink-0 rounded-xl aspect-4/3 w-[280px]" />
                                 </div>
 
                                 {/* Comments Section */}

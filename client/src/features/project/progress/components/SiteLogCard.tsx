@@ -76,7 +76,7 @@ const SiteLogCard = ({ log }: SiteLogCardProps) => {
                             {log.images.slice(0, 5).map((img, idx) => (
                                 <div
                                     key={img.id}
-                                    className="relative shrink-0 overflow-hidden rounded-xl aspect-[4/3] w-[280px] bg-stone-100 cursor-zoom-in"
+                                    className="relative shrink-0 overflow-hidden rounded-xl aspect-4/3 w-[280px] bg-stone-100 cursor-zoom-in"
                                 >
                                     <img
                                         src={img.url}

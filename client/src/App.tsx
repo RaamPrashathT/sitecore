@@ -189,7 +189,7 @@ function App() {
                                     path=":projectSlug/members/invite"
                                     element={<ProjectMemberInvitePage />}
                                 />
-                                {/* <Route path=":projectSlug/phase/:phaseId/requisition/new" element={<RequisitionCreationPage />} /> */}
+                                <Route path=":projectSlug/requisitions/:phaseSlug/new" element={<RequisitionCreationPage />} />
 
                                 {/* Pending */}
                                 <Route
