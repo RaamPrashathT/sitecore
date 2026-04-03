@@ -1,9 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
-import { Filter, Plus, Loader2, AlertCircle } from "lucide-react";
+import { Filter, Plus, AlertCircle, Settings } from "lucide-react";
 import { usePhaseDetails } from "../hooks/usePhaseDetails";
 import { Button } from "@/components/ui/button";
 import SiteLogCard from "./SiteLogCard";
+import ProjectPhaseSkeleton from "./ProjectPhaseSkeleton.tsx";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -28,9 +29,7 @@ const ProjectPhaseMain = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <Loader2 className="h-8 w-8 animate-spin text-green-700" />
-            </div>
+            <ProjectPhaseSkeleton />
         );
     }
 
@@ -54,16 +53,28 @@ const ProjectPhaseMain = () => {
     return (
         <main className="max-w-4xl mx-auto px-8 pb-32 pt-8">
             <section className="mb-8">
-                <div className="flex items-baseline gap-4 mb-2">
-                    <span className="font-display text-green-800 text-4xl opacity-40 tracking-tight">
-                        {formattedSequence}
-                    </span>
-                    <h1 className="font-display  text-4xl text-stone-900 tracking-tight">
-                        {phase.name}
-                    </h1>
-                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-[10px] font-bold uppercase tracking-widest self-center font-sans">
-                        {phase.status.replace("_", " ")} Phase
-                    </span>
+                <div className="flex justify-between items-center">
+                    <div className="flex items-baseline gap-4 mb-2">
+                        <span className="font-display text-green-800 text-4xl opacity-40 tracking-tight">
+                            {formattedSequence}
+                        </span>
+                        <h1 className="font-display  text-4xl text-stone-900 tracking-tight">
+                            {phase.name}
+                        </h1>
+                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-[10px] font-bold uppercase tracking-widest self-center font-sans">
+                            {phase.status.replace("_", " ")} Phase
+                        </span>
+                    </div>
+                    <div>
+                        <Button
+                            variant={"ghost"}
+                            onClick={() => navigate(`update-phase`)}
+                            className="flex items-center gap-2 group font-sans text-sm font-semibold uppercase tracking-widest text-green-700  border-transparent transition-all pb-1 hover:border hover:text-green-900 hover:bg-green-50 hover:border-green-700"
+                        >
+                            <Settings className="w-4 h-4" />
+                            Settings
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mt-8 py-6 border-y border-stone-200">

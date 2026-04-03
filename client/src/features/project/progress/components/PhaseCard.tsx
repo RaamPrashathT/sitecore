@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import type { PhaseProgress } from "../hooks/useProjectProgress";
 import { Check, ArrowRight, FileText, MessageSquare, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface PhaseCardProps {
     phase: PhaseProgress;
@@ -63,6 +64,7 @@ const getPhaseStyling = (status: string) => {
 };
 
 const PhaseCard = ({ phase }: PhaseCardProps) => {
+    const navigate = useNavigate();
     const styles = getPhaseStyling(phase.status);
     const formattedSequence = String(phase.sequenceOrder).padStart(2, "0");
 
@@ -120,7 +122,6 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                     }`}
                 >
                     {isPlanningState ? (
-                        /* Empty State for Planning Phases (Button Removed) */
                         <div className="text-center p-8">
                             {phase.description && (
                                 <p className="text-sm text-stone-500 font-sans mb-3">
@@ -138,27 +139,31 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                             {/* 1. Description Section */}
                             {phase.description && (
                                 <>
-                                    <p className="text-sm text-stone-600 font-sans leading-relaxed mb-6">
+                                    <p className="text-sm text-stone-600 font-sans leading-relaxed mb-4">
                                         {phase.description}
                                     </p>
-                                    {/* First Divider: ---- */}
-                                    <hr className="border-stone-100 mb-6" />
+                                    <hr className="border-stone-100 mb-4" />
                                 </>
                             )}
 
                             {/* 2. Latest Activity Header */}
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex justify-between items-center mb-4">
                                 <h3 className="font-sans text-xs uppercase tracking-widest text-stone-500 font-bold">
                                     Latest Activity
                                 </h3>
                                 {phase.status === "ACTIVE" && (
-                                    <button className="text-xs text-green-700 font-bold flex items-center gap-1 hover:underline">
-                                        <Plus className="w-3 h-3" /> Add Update
-                                    </button>
+                                    <Button
+                                        variant={"ghost"}
+                                        onClick={() => navigate(`${phase.slug}/create-log`)}
+                                        size={"xs"}
+                                        className="flex pt-1 items-center gap-2 group font-sans text-xs font-semibold uppercase tracking-widest text-green-700  border-transparent transition-all pb-1 hover:border hover:text-green-900 hover:bg-green-50 hover:border-green-700"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Log
+                                    </Button>
                                 )}
                             </div>
 
-                            {/* 3. Activity Logs List */}
                             <div className="space-y-4 flex-1">
                                 {phase.latestActivity.length > 0 ? (
                                     phase.latestActivity.map((log) => (
@@ -167,10 +172,14 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                                             className="group cursor-pointer pb-4 last:pb-0 border-b border-stone-100 last:border-0"
                                         >
                                             <p className="text-sm text-stone-800 font-sans group-hover:text-green-700 transition-colors leading-relaxed">
+                                                <Link
+                                                    to={`${phase.slug}`}
+                                                >
                                                 {log.title}
+                                                </Link>
                                             </p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <span className="text-[10px] text-stone-400 font-medium uppercase tracking-tighter">
+                                            <div className="flex items-center gap-2 mt-">
+                                                <span className="text-[12px] text-stone-400 font-medium  tracking-tighter">
                                                     {format(
                                                         new Date(log.workDate),
                                                         "MMM dd",
@@ -187,9 +196,7 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                                 )}
                             </div>
 
-                            {/* 4. Footer Metrics & Actions (Second Divider: ---) */}
                             <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between">
-                                {/* Left Side Icons (Counts) */}
                                 <div className="flex items-center gap-6 text-stone-400">
                                     <div
                                         className="flex items-center gap-2"

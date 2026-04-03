@@ -39,6 +39,8 @@ export interface PhaseDetailsResponse {
     id: string;
     slug: string;
     name: string;
+    description: string | null;
+    paymentDeadline: string;
     sequenceOrder: number;
     status: "PLANNING" | "PAYMENT_PENDING" | "ACTIVE" | "COMPLETED";
     startDate: string;
@@ -46,17 +48,16 @@ export interface PhaseDetailsResponse {
     siteLogs: PhaseSiteLog[];
 }
 
-
 export const usePhaseDetails = (
-    orgSlug?: string, 
-    projectSlug?: string, 
-    phaseSlug?: string
+    orgSlug?: string,
+    projectSlug?: string,
+    phaseSlug?: string,
 ) => {
     return useQuery({
         queryKey: ["phaseDetails", orgSlug, projectSlug, phaseSlug],
         queryFn: async () => {
             const { data } = await api.get<PhaseDetailsResponse>(
-                `/project/phase/${phaseSlug}/info`
+                `/project/phase/${phaseSlug}/info`,
             );
             return data;
         },

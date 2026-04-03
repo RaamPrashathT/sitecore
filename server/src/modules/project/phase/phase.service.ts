@@ -500,7 +500,7 @@ const phaseService = {
     
     async updatePhase(
         projectId: string,
-        phaseId: string,
+        phaseSlug: string, // 👇 Changed to phaseSlug
         data: {
             name?: string | undefined;
             description?: string | undefined;
@@ -511,8 +511,10 @@ const phaseService = {
     ) {
         const phase = await prisma.phase.findUnique({
             where: {
-                id: phaseId,
-                projectId: projectId,
+                slug_projectId: {
+                    slug: phaseSlug,
+                    projectId: projectId,
+                },
             },
         });
 
@@ -550,12 +552,13 @@ const phaseService = {
         );
 
         const updatedPhase = await prisma.phase.update({
-            where: { id: phaseId },
+            where: { id: phase.id },
             data: updatePayload,
         });
 
         return {
             id: updatedPhase.id,
+            slug: updatedPhase.slug, 
             name: updatedPhase.name,
             status: updatedPhase.status,
             budget: Number(updatedPhase.budget),

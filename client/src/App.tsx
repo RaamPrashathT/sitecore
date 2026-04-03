@@ -167,7 +167,7 @@ function App() {
                                         element={<PhaseCreationPage />}
                                     />
                                     <Route
-                                        path="progress/update-phase"
+                                        path="progress/:phaseSlug/update-phase"
                                         element={<UpdatePhasePage />}
                                     />
                                     <Route

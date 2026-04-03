@@ -1,27 +1,25 @@
 import { useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { usePhaseDetails, useUpdatePhase } from "../hooks/usePhase";
+import { usePhaseDetails } from "../hooks/usePhaseDetails";
+import { useUpdatePhase } from "../hooks/useUpdatePhase";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-    Field,
-    FieldLabel,
-    FieldDescription,
-    FieldError,
-} from "@/components/ui/field";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 
 import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 
 const updatePhaseSchema = z.object({
     name: z.string().min(1, "Phase name is required"),
     description: z.string().optional(),
-    budget: z.coerce.number().min(0, "Budget cannot be negative"),
+    budget: z
+        .number("Budget must be a valid number")
+        .min(0, "Budget cannot be negative"),
     startDate: z.string().min(1, "Start date is required"),
     paymentDeadline: z.string().min(1, "Payment deadline is required"),
 });
@@ -29,25 +27,24 @@ const updatePhaseSchema = z.object({
 type FormValues = z.infer<typeof updatePhaseSchema>;
 
 export default function UpdatePhaseForm() {
-    const { orgSlug, projectSlug } = useParams<{
+    const { orgSlug, projectSlug, phaseSlug } = useParams<{
         orgSlug: string;
         projectSlug: string;
+        phaseSlug: string;
     }>();
 
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const phaseId = searchParams.get("phaseId");
 
     const {
         data: phase,
         isLoading: isFetching,
         isError,
-    } = usePhaseDetails(orgSlug, projectSlug, phaseId);
+    } = usePhaseDetails(orgSlug, projectSlug, phaseSlug);
 
     const { mutate: updatePhase, isPending: isUpdating } = useUpdatePhase(
         orgSlug!,
         projectSlug!,
-        phaseId,
+        phaseSlug!,
     );
 
     const {
@@ -61,7 +58,7 @@ export default function UpdatePhaseForm() {
 
     useEffect(() => {
         if (phase) {
-            const formatDate = (value: any) => {
+            const formatDate = (value: string | Date | null | undefined) => {
                 if (!value) return "";
                 const d = new Date(value);
                 return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
@@ -70,7 +67,7 @@ export default function UpdatePhaseForm() {
             reset({
                 name: phase.name,
                 description: phase.description || "",
-                budget: phase.budget,
+                budget: phase.financials?.budget || 0,
                 startDate: formatDate(phase.startDate),
                 paymentDeadline: formatDate(phase.paymentDeadline),
             });
@@ -86,7 +83,9 @@ export default function UpdatePhaseForm() {
             },
             {
                 onSuccess: () =>
-                    navigate(`/${orgSlug}/${projectSlug}/progress`),
+                    navigate(
+                        `/${orgSlug}/${projectSlug}/progress/${phaseSlug}`,
+                    ),
             },
         );
     };
@@ -106,14 +105,9 @@ export default function UpdatePhaseForm() {
                 <p className="font-medium text-stone-900">
                     Failed to load phase details.
                 </p>
-                <p className="text-sm">
-                    Please ensure the Phase ID is correct.
-                </p>
             </div>
         );
     }
-
-    const isLocked = phase.status === "ACTIVE" || phase.status === "COMPLETED";
 
     return (
         <div className="min-h-screen bg-stone-50 p-6 font-sans">
@@ -125,7 +119,7 @@ export default function UpdatePhaseForm() {
                     <ArrowLeft className="w-4 h-4" />
                     Back to Progress
                 </button>
-=
+
                 <div className="mb-8 flex items-end justify-between">
                     <div>
                         <h1 className="text-3xl font-display text-stone-900 tracking-tight">
@@ -135,15 +129,9 @@ export default function UpdatePhaseForm() {
                             Modify details for {phase.name}.
                         </p>
                     </div>
-
-                    {isLocked && (
-                        <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 text-xs font-semibold px-2 py-1 rounded">
-                            {phase.status} — Partially Locked
-                        </span>
-                    )}
                 </div>
 
-                <div className="border-y">
+                <div className="border-y border-stone-200 py-6">
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="flex flex-col gap-6"
@@ -153,27 +141,22 @@ export default function UpdatePhaseForm() {
                             <Input {...register("name")} />
                             <FieldError>{errors.name?.message}</FieldError>
                         </Field>
+
                         <Field>
                             <FieldLabel>Description</FieldLabel>
                             <Textarea {...register("description")} />
+                            <FieldError>
+                                {errors.description?.message}
+                            </FieldError>
                         </Field>
 
                         <Field>
                             <FieldLabel>Estimated Budget (₹)</FieldLabel>
                             <Input
                                 type="number"
-                                {...register("budget")}
-                                disabled={isLocked}
+                                {...register("budget", { valueAsNumber: true })}
                                 className="font-mono"
                             />
-
-                            {isLocked && (
-                                <FieldDescription>
-                                    Budget cannot be changed while active or
-                                    completed.
-                                </FieldDescription>
-                            )}
-
                             <FieldError>{errors.budget?.message}</FieldError>
                         </Field>
 
@@ -183,7 +166,6 @@ export default function UpdatePhaseForm() {
                                 <Input
                                     type="date"
                                     {...register("startDate")}
-                                    disabled={isLocked}
                                     className="font-mono"
                                 />
                                 <FieldError>
@@ -209,15 +191,15 @@ export default function UpdatePhaseForm() {
                                 type="button"
                                 variant="ghost"
                                 onClick={() => navigate(-1)}
-                                className="text-xs uppercase tracking-wider"
+                                className="text-xs uppercase tracking-wider text-stone-500"
                             >
                                 Cancel
                             </Button>
 
                             <Button
                                 type="submit"
-                                disabled={isUpdating || (!isDirty && !isLocked)}
-                                className="bg-green-700 hover:bg-green-800 text-white text-xs uppercase tracking-wider"
+                                disabled={isUpdating || !isDirty}
+                                className="bg-green-700 hover:bg-green-800 text-white text-xs uppercase tracking-wider transition-none"
                             >
                                 {isUpdating && (
                                     <Loader2 className="w-4 h-4 animate-spin mr-2" />

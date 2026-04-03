@@ -120,11 +120,11 @@ const phaseController = {
         try {
             const projectId = request.project!.id;
 
-            const validatedParams = phaseIdParamSchema.safeParse(
+            const validatedParams = phaseSlugParamSchema.safeParse(
                 request.params,
             );
             if (!validatedParams.success) {
-                throw new ValidationError("Invalid Phase ID format");
+                throw new ValidationError("Invalid Phase Slug format");
             }
 
             const validatedData = updatePhaseSchema.safeParse(request.body);
@@ -134,7 +134,7 @@ const phaseController = {
 
             const result = await phaseService.updatePhase(
                 projectId,
-                validatedParams.data.phaseId,
+                validatedParams.data.phaseSlug,
                 validatedData.data,
             );
 

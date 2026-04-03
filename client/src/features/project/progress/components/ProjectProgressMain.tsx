@@ -1,8 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useProjectProgress } from "../hooks/useProjectProgress";
-import { Loader2, AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhaseCard from "./PhaseCard";
+import ProjectProgressSkeleton from "./ProjectProgressSkeleton";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -25,9 +26,7 @@ const ProjectProgressMain = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <Loader2 className="h-8 w-8 animate-spin text-green-700" />
-            </div>
+            <ProjectProgressSkeleton />
         );
     }
 
