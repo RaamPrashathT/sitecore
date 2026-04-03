@@ -14,8 +14,15 @@ export const getPaymentPendingSchema = z.object({
     searchQuery: z.string().max(500),
 });
 
+
 export const createRequisitionSchema = z.object({
+    title: z.string().min(1, "Requisition title is required"),
     items: z.array(requisitionItemSchema).min(1, "A requisition must contain at least one item"),
+});
+
+export const requisitionSlugParamSchema = z.object({
+    phaseSlug: z.string().min(1, "Phase slug is required"),
+    requisitionSlug: z.string().min(1, "Requisition slug is required"),
 });
 
 export const phaseIdParamSchema = z.object({

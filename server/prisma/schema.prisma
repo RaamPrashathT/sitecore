@@ -253,6 +253,10 @@ model Comment {
 
 model Requisition {
     id          String            @id @default(uuid())
+    title       String
+    slug        String
+    slugBase    String
+    slugIndex   Int
     status      RequisitionStatus @default(DRAFT)
     phaseId     String
     phase       Phase             @relation(fields: [phaseId], references: [id], onDelete: Cascade)
@@ -262,6 +266,8 @@ model Requisition {
     items     RequisitionItem[]
     createdAt DateTime          @default(now())
     updatedAt DateTime          @updatedAt
+
+    @@unique([slug, phaseId])
 }
 
 model RequisitionItem {

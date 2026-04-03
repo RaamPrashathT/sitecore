@@ -7,6 +7,7 @@ import {
     getPaymentPendingSchema,
     phaseIdParamSchema,
     requisitionIdParamSchema,
+    requisitionSlugParamSchema,
 } from "./requisition.schema.js";
 
 const requisitionController = {
@@ -33,7 +34,7 @@ const requisitionController = {
                 projectId,
                 validatedParams.data.phaseId,
                 requestedBy,
-                validatedData.data.items,
+                validatedData.data,
             );
 
             return response.status(201).json(result);
@@ -61,6 +62,31 @@ const requisitionController = {
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
+        }
+    },
+
+    async getRequisitionDetails(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+
+            const validatedParams = requisitionSlugParamSchema.safeParse(request.params);
+            if (!validatedParams.success) {
+                throw new ValidationError("Invalid URL format for requisition");
+            }
+
+            const result = await requisitionService.getRequisitionDetails(
+                projectId,
+                validatedParams.data.phaseSlug,
+                validatedParams.data.requisitionSlug
+            );
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(404).json({ message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ message: "Internal server error" });
         }
     },
 
@@ -121,7 +147,7 @@ const requisitionController = {
             if (error instanceof ValidationError) {
                 return response.status(400).json({ message: error.message });
             }
-            logger.error(error.message);
+            logger.error(error);
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
