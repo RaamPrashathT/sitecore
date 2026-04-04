@@ -1,6 +1,4 @@
-import {
-    flexRender,
-} from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table";
 import type { Table as ReactTableType } from "@tanstack/react-table";
 import {
     Table,
@@ -10,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { CatalogueWithQuotes } from "@/hooks/useGetCatalogs";
+import type { CatalogueWithQuotes } from "@/features/project/requisition/hooks/useGetRequisitionCatalogue";
 
 interface RequisitionTableProps {
     table: ReactTableType<CatalogueWithQuotes>;
@@ -18,18 +16,15 @@ interface RequisitionTableProps {
 
 const RequisitionTable = ({ table }: RequisitionTableProps) => {
     return (
-        <div>
-            <Table className="">
-                <TableHeader className="pl-2">
+        <div className="bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden">
+            <Table className="w-full text-left border-collapse">
+                <TableHeader className="bg-slate-50 border-b border-slate-200">
                     {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow
-                            key={headerGroup.id}
-                            className="p-0 pl-2 bg-slate-100 border-none"
-                        >
+                        <TableRow key={headerGroup.id} className="border-none hover:bg-transparent">
                             {headerGroup.headers.map((header) => (
                                 <TableHead
                                     key={header.id}
-                                    className="text-lg p-0 text-md text-gray-600  first:rounded-l-xl first:pl-4 last:rounded-r-xl "
+                                    className="py-4 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-500"
                                 >
                                     {flexRender(
                                         header.column.columnDef.header,
@@ -40,17 +35,14 @@ const RequisitionTable = ({ table }: RequisitionTableProps) => {
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody className="p-0">
+                <TableBody className="divide-y divide-slate-200">
                     {table.getRowModel().rows.map((row) => (
                         <TableRow
                             key={row.id}
-                            className="p-0 hover:bg-green-50"
+                            className="p-0 hover:bg-slate-50/50 transition-colors border-none"
                         >
                             {row.getVisibleCells().map((cell) => (
-                                <TableCell
-                                    key={cell.id}
-                                    className="p-0  first:rounded-l-xl last:rounded-r-xl "
-                                >
+                                <TableCell key={cell.id} className="p-0 align-top">
                                     {flexRender(
                                         cell.column.columnDef.cell,
                                         cell.getContext(),

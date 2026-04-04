@@ -350,6 +350,140 @@ const requisitionService = {
             data: { status: "REJECTED" },
         });
     },
+
+    async getRequisitionCatalogue(
+        projectId: string,
+        phaseSlug: string,
+        pageIndex: number,
+        pageSize: number,
+        searchQuery: string
+    ) {
+        // 1. Fetch the Phase to calculate financial allocation
+        const phase = await prisma.phase.findUnique({
+            where: { 
+                slug_projectId: { slug: phaseSlug, projectId: projectId } 
+            },
+            include: {
+                project: { select: { organizationId: true } },
+                requisitions: {
+                    // Count all budgets that are active, pending, or drafted
+                    where: { status: { not: "REJECTED" } },
+                    select: { budget: true }
+                }
+            }
+        });
+
+        if (!phase) {
+            throw new ValidationError("Phase not found");
+        }
+
+        // Calculate Remaining Budget
+        const usedBudget = phase.requisitions.reduce((sum, req) => sum + Number(req.budget), 0);
+        const remainingBudget = Number(phase.budget) - usedBudget;
+
+        // 2. Fetch the Catalogue with nested Supplier Quotes
+        const skip = pageIndex * pageSize;
+        const whereClause: any = {
+            organizationId: phase.project.organizationId,
+        };
+
+        if (searchQuery) {
+            whereClause.OR = [
+                { name: { contains: searchQuery, mode: "insensitive" } },
+                { supplierQuotes: { some: { supplier: { contains: searchQuery, mode: "insensitive" } } } }
+            ];
+        }
+
+        const [catalogueData, count] = await Promise.all([
+            prisma.catalogue.findMany({
+                where: whereClause,
+                include: {
+                    supplierQuotes: true
+                },
+                skip: skip,
+                take: pageSize,
+                orderBy: { name: "asc" }
+            }),
+            prisma.catalogue.count({ where: whereClause })
+        ]);
+
+        return {
+            phase: {
+                id: phase.id,
+                name: phase.name,
+                budget: Number(phase.budget),
+                remainingBudget: remainingBudget
+            },
+            catalogue: {
+                data: catalogueData.map(c => ({
+                    id: c.id,
+                    name: c.name,
+                    category: c.category,
+                    unit: c.unit,
+                    defaultLeadTime: c.defaultLeadTime,
+                    organizationId: c.organizationId,
+                    supplierQuotes: c.supplierQuotes.map(sq => ({
+                        id: sq.id,
+                        supplier: sq.supplier,
+                        standardRate: Number(sq.standardRate),
+                        leadTime: sq.leadTime,
+                        catalogueId: sq.catalogueId
+                    }))
+                })),
+                count
+            }
+        };
+    },
+    async getAllPhaseRequisitions(projectId: string, phaseSlug: string) {
+        const phase = await prisma.phase.findUnique({
+            where: {
+                slug_projectId: { slug: phaseSlug, projectId: projectId }
+            },
+            include: {
+                requisitions: {
+                    orderBy: { createdAt: "desc" },
+                    include: {
+                        items: {
+                            include: {
+                                catalogue: true,
+                                assignedSupplier: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!phase) {
+            throw new ValidationError("Phase not found.");
+        }
+
+        return {
+            id: phase.id,
+            name: phase.name,
+            slug: phase.slug,
+            requisitions: phase.requisitions.map((req) => ({
+                id: req.id,
+                title: req.title,
+                slug: req.slug,
+                status: req.status,
+                budget: Number(req.budget),
+                createdAt: req.createdAt,
+                items: req.items.map((item) => ({
+                    id: item.id,
+                    itemName: item.catalogue.name,
+                    category: item.catalogue.category,
+                    unit: item.catalogue.unit,
+                    quantity: Number(item.quantity),
+                    estimatedUnitCost: Number(item.estimatedUnitCost),
+                    totalEstimatedCost: Number(item.quantity) * Number(item.estimatedUnitCost),
+                    status: item.status,
+                    supplierName: item.assignedSupplier?.supplier || "No specific supplier",
+                    standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : null
+                }))
+            }))
+        };
+    },
 };
 
 export default requisitionService;

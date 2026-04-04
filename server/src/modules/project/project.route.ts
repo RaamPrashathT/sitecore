@@ -33,12 +33,14 @@ projectRouter.get("/paymentPendingPhases", authorize, orgAuthorize, requiredRole
 projectRouter.put("/phase/payment_approval", authorize, orgAuthorize, requiredRole("ADMIN"), phaseController.paymentApproval)
 projectRouter.get("/phase/:phaseSlug/info", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getPhaseInfo);
 
+projectRouter.get( "/phase/:phaseSlug/requisition-catalogue",  authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getRequisitionCatalogue);
 projectRouter.get("/phase/:phaseSlug/requisition/:requisitionSlug", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getRequisitionDetails);
 projectRouter.get("/requisitions", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getProjectRequisitions);
 projectRouter.post("/phase/:phaseId/requisition", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), requisitionController.createRequisition);
 projectRouter.post("/requisition/:requisitionId/approve", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.approveRequisition);
 projectRouter.post("/requisition/:requisitionId/reject", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.rejectRequisition);
 projectRouter.get("/pendingRequisitions", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.getPendingRequisitions);
+projectRouter.get("/phase/:phaseSlug/all-requisitions", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getAllPhaseRequisitions);
 
 projectRouter.post("/phase/:phaseSlug/sitelog", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), sitelogController.createSiteLog);
 projectRouter.post("/sitelog/:sitelogId/comment", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), sitelogController.createComment);

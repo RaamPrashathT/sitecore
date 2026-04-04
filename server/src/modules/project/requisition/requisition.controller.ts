@@ -67,6 +67,7 @@ const requisitionController = {
 
     async getRequisitionDetails(request: Request, response: Response) {
         try {
+            console.log("hi==================")
             const projectId = request.project!.id;
 
             const validatedParams = requisitionSlugParamSchema.safeParse(request.params);
@@ -178,6 +179,56 @@ const requisitionController = {
             return response
                 .status(500)
                 .json({ message: "Internal server error" });
+        }
+    },
+    // Add this inside your requisitionController object:
+    async getRequisitionCatalogue(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+            const phaseSlug = request.params.phaseSlug as string;
+            
+            const index = Number.parseInt(request.query.index as string) || 0;
+            const size = Number.parseInt(request.query.size as string) || 24;
+            const search = (request.query.search as string) || "";
+
+            if (!phaseSlug) {
+                throw new ValidationError("Phase slug is required");
+            }
+
+            const result = await requisitionService.getRequisitionCatalogue(
+                projectId,
+                phaseSlug,
+                index,
+                size,
+                search
+            );
+
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ message: "Internal server error" });
+        }
+    },  
+    async getAllPhaseRequisitions(request: Request, response: Response) {
+        try {
+            const projectId = request.project!.id;
+            const phaseSlug = request.params.phaseSlug as string;
+
+            if (!phaseSlug) {
+                throw new ValidationError("Phase slug is required");
+            }
+
+            const result = await requisitionService.getAllPhaseRequisitions(projectId, phaseSlug);
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(404).json({ message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ message: "Internal server error" });
         }
     },
 };

@@ -50,6 +50,7 @@ import CreateLogPage from "./pages/project/CreateLogPage";
 import ProjectRequisitionPage from "./pages/project/ProjectRequisitionPage";
 import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
 import ProjectPhaseMain from "./features/project/progress/components/ProjectPhaseMain";
+import RequisitionDetailsPage from "./pages/project/RequisitionDetailsPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -156,12 +157,10 @@ function App() {
                                         path="progress"
                                         element={<ProjectProgressMain />}
                                     />
-
                                     <Route
                                         path="progress/:phaseSlug"
                                         element={<ProjectPhaseMain />}
                                     />
-
                                     <Route
                                         path="progress/create-phase"
                                         element={<PhaseCreationPage />}
@@ -174,23 +173,31 @@ function App() {
                                         path="progress/:phaseSlug/create-log"
                                         element={<CreateLogPage />}
                                     />
+
                                     <Route
                                         path="requisitions"
                                         element={<ProjectRequisitionPage />}
                                     />
+                                    {/* Move Requisition Creation HERE */}
+                                    <Route
+                                        path="requisitions/:phaseSlug/new"
+                                        element={<RequisitionCreationPage />}
+                                    />
+                                    <Route
+                                        path="requisitions/:phaseSlug/:reqSlug"
+                                        element={<RequisitionDetailsPage />}
+                                    />
+
                                     <Route
                                         path="members"
                                         element={<ProjectMembersMain />}
                                     />
+                                    {/* Move Invite HERE */}
+                                    <Route
+                                        path="members/invite"
+                                        element={<ProjectMemberInvitePage />}
+                                    />
                                 </Route>
-
-                                {/* Action Routes inside a project */}
-                                <Route
-                                    path=":projectSlug/members/invite"
-                                    element={<ProjectMemberInvitePage />}
-                                />
-                                <Route path=":projectSlug/requisitions/:phaseSlug/new" element={<RequisitionCreationPage />} />
-
                                 {/* Pending */}
                                 <Route
                                     path="pending-requisitions"

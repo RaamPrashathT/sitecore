@@ -1,9 +1,9 @@
-import ProjectRequisitionMain from "@/features/project/requisition/components/ProjectRequisitionMain";
+import ProjectRequisitionsMain from "@/features/project/requisition/components/overview/ProjectRequisitionsMain";
 
 const ProjectRequisitionPage = () => {
     return (
         <div>
-            <ProjectRequisitionMain />
+            <ProjectRequisitionsMain />
         </div>
     );
 };

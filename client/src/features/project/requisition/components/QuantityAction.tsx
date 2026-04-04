@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Minus, Plus } from "lucide-react";
 import { useCartData } from "../hooks/cartStore";
@@ -38,122 +37,68 @@ const QuantityActionRow = ({
 
     const handleIncrement = () => {
         if (quantity === 0) {
-            addItem({
-                catalogueId,
-                supplierId,
-                name,
-                supplierName,
-                unit,
-                rate,
-                quantity: 1,
-            });
+            addItem({ catalogueId, supplierId, name, supplierName, unit, rate, quantity: 1 });
         } else {
-            updateQuantity({
-                catalogueId,
-                supplierId,
-                quantity: quantity + 1,
-            });
+            updateQuantity({ catalogueId, supplierId, quantity: quantity + 1 });
         }
     };
 
     const handleDecrement = () => {
-        if (!catalogueId || !supplierId) {
-            return;
-        }
+        if (!catalogueId || !supplierId) return;
         if (quantity <= 1) {
-            removeItem({
-                catalogueId,
-                supplierId,
-            });
+            removeItem({ catalogueId, supplierId });
         } else {
-            updateQuantity({
-                catalogueId,
-                supplierId,
-                quantity: quantity - 1,
-            });
+            updateQuantity({ catalogueId, supplierId, quantity: quantity - 1 });
         }
     };
 
+    // Restored your original handleChange logic
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
+        // Allow parsing of the typed value, default to 0 if empty/invalid
         const val = Math.max(0, Number.parseInt(e.target.value) || 0);
 
         if (val === 0) {
-            removeItem({
-                catalogueId,
-                supplierId,
-            });
+            removeItem({ catalogueId, supplierId });
         } else if (quantity === 0) {
-            addItem({
-                catalogueId,
-                supplierId,
-                name,
-                supplierName,
-                unit,
-                rate,
-                quantity: val,
-            });
+            addItem({ catalogueId, supplierId, name, supplierName, unit, rate, quantity: val });
         } else {
-            updateQuantity({
-                catalogueId,
-                supplierId,
-                quantity: val,
-            });
+            updateQuantity({ catalogueId, supplierId, quantity: val });
         }
     };
 
-    if (variant === "compact") {
-        return (
-            <div className="flex items-center w-full max-w-[130px]">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-r-none h-8 w-8 p-0 bg-transparent"
-                    onClick={handleDecrement}
-                >
-                    <Minus size={14} />
-                </Button>
+    const isCompact = variant === "compact";
 
-                <Input
-                    className="h-8 rounded-none text-center px-1 focus-visible:ring-0 focus:ring-0 focus:ring-offset-0  bg-transparent"
-                    value={quantity === 0 ? "" : quantity}
-                    onChange={handleChange}
-                    placeholder="0"
-                />
-
-                <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-l-none h-8 w-8 p-0  bg-transparent"
-                    onClick={handleIncrement}
-                >
-                    <Plus size={14} />
-                </Button>
-            </div>
-        );
-    }
     return (
-        <div className="flex items-center w-full max-w-[150px]">
-            <Button
-                variant={"outline"}
-                className="rounded-none px-2"
+        <div className={`flex items-center justify-center gap-x-${isCompact ? '1' : '3'}`}>
+            <button
                 onClick={handleDecrement}
+                className="text-slate-400 hover:text-emerald-700 transition-transform active:scale-90 p-1"
             >
-                <Minus size={16} />
-            </Button>
+                <Minus size={isCompact ? 14 : 18} strokeWidth={2.5} />
+            </button>
+            
+            {/* Restored Input but styled to look like plain text until focused */}
             <Input
-                className="focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 outline-none rounded-none text-center w-full"
+                type="text"
+                inputMode="numeric"
                 value={quantity === 0 ? "" : quantity}
                 onChange={handleChange}
                 placeholder="0"
+                className={`
+                    ${isCompact ? 'w-10 h-7 text-sm' : 'w-12 h-8 text-base'} 
+                    text-center font-mono border-none shadow-none bg-transparent 
+                    outline-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 
+                    ${quantity > 0 ? 'text-emerald-700 font-bold' : 'text-slate-400 font-medium'}
+                `}
             />
-            <Button
-                variant={"outline"}
-                className="rounded-none px-2"
+
+            <button
                 onClick={handleIncrement}
+                className="text-slate-400 hover:text-emerald-700 transition-transform active:scale-90 p-1"
             >
-                <Plus size={16} />
-            </Button>
+                <Plus size={isCompact ? 14 : 18} strokeWidth={2.5} />
+            </button>
         </div>
     );
 };

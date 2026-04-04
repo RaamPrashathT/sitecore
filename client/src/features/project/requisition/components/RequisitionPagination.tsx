@@ -1,5 +1,5 @@
 import type { Table as ReactTableType } from "@tanstack/react-table";
-import type { CatalogueWithQuotes } from "@/hooks/useGetCatalogs";
+import type { CatalogueWithQuotes } from "@/features/project/requisition/hooks/useGetRequisitionCatalogue";
 import {
     Pagination,
     PaginationContent,

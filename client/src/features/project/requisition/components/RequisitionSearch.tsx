@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import type { CatalogueWithQuotes } from "@/hooks/useGetCatalogs";
+import type { CatalogueWithQuotes } from "@/features/project/requisition/hooks/useGetRequisitionCatalogue";
 import type { Table as ReactTableType } from "@tanstack/react-table";
 
 interface RequisitionSearchProps {

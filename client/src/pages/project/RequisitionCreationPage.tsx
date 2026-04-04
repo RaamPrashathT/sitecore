@@ -6,11 +6,14 @@ import { useEffect } from "react";
 
 const RequisitionCreationPage = () => {
     const clearCart = useCartData(state => state.clearCart);
-    clearCart();
+    
+    // 👇 The floating clearCart() that used to be here MUST be deleted.
 
     useEffect(() => {
+        // Clear cart on mount
         clearCart();
 
+        // Clear cart on unmount
         return () => {
             clearCart();
         }
