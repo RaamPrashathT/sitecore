@@ -4,21 +4,13 @@ import type { SetDashboardItemsType } from "./dashboard.schema.js";
 const dashboardService = {
     async getDashboardItems(
         organizationId: string,
-        pageIndex: number,
-        pageSize: number,
         searchQuery: string,
     ) {
-        const skip = pageIndex * pageSize;
-
         const whereClause: any = {
             status: "UNORDERED",
             requisition: {
                 status: "APPROVED",
-                phase: {
-                    project: {
-                        organizationId,
-                    },
-                },
+                phase: { project: { organizationId } },
             },
         };
 
@@ -91,8 +83,6 @@ const dashboardService = {
                         },
                     },
                 },
-                take: pageSize,
-                skip: skip,
                 orderBy: {
                     requisition: {
                         phase: {
@@ -127,7 +117,7 @@ const dashboardService = {
             inventory: item.assignedSupplier?.inventory ?? 0,
         }));
 
-        console.log(data)
+        console.log(data);
         return {
             data,
             count,
@@ -163,11 +153,8 @@ const dashboardService = {
     async getEngineerDashboardItems(
         engineerId: string,
         organizationId: string,
-        pageIndex: number,
-        pageSize: number,
         searchQuery: string,
     ) {
-        const skip = pageIndex * pageSize;
 
         const whereClause: any = {
             status: "ACTIVE",
@@ -188,8 +175,6 @@ const dashboardService = {
         const [result, count] = await Promise.all([
             prisma.phase.findMany({
                 where: whereClause,
-                take: pageSize,
-                skip: skip,
                 select: {
                     id: true,
                     name: true,
@@ -269,11 +254,9 @@ const dashboardService = {
     async getClientDashboardItems(
         clientId: string,
         organizationId: string,
-        pageIndex: number,
-        pageSize: number,
         searchQuery: string,
     ) {
-        const skip = pageIndex * pageSize;
+        
 
         const whereClause: any = {
             status: "PAYMENT_PENDING",
@@ -307,12 +290,10 @@ const dashboardService = {
                     },
                     paymentDeadline: true,
                 },
-                take: pageSize,
-                skip: skip,
             }),
             prisma.phase.count({
                 where: whereClause,
-            })
+            }),
         ]);
 
         const items = result.map((phase) => ({
@@ -350,7 +331,7 @@ const dashboardService = {
                 orderBy: { paymentDeadline: "asc" },
                 take: 5, // Just grab the top 5 for the sidebar
             }),
-    
+
             // 2. Fetch Requisitions waiting on Admin Approval
             prisma.requisition.findMany({
                 where: {
@@ -371,7 +352,7 @@ const dashboardService = {
                 take: 5,
             }),
         ]);
-    
+
         return {
             pendingPayments: pendingPayments.map((p) => ({
                 id: p.id,
@@ -391,7 +372,7 @@ const dashboardService = {
                 type: "MATERIAL_ORDER",
             })),
         };
-    }
+    },
 };
 
 export default dashboardService;

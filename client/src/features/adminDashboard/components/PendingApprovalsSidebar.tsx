@@ -2,7 +2,7 @@ import { useMembership } from "@/hooks/useMembership";
 import { usePendingApprovalsSummary } from "../hooks/usePendingApprovalSummary";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, CreditCard, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const PendingApprovalsSidebar = () => {
@@ -20,8 +20,8 @@ const PendingApprovalsSidebar = () => {
     }
 
     return (
-        <aside className="col-span-12 lg:col-span-4 flex flex-col h-full space-y-8">
-            <h2 className="text-xl font-bold text-foreground tracking-tight">
+        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">
                 Pending Approvals
             </h2>
 
@@ -37,7 +37,7 @@ const PendingApprovalsSidebar = () => {
                         </span>
                     </div>
 
-                    <Card className="shadow-none p-0">
+                    <Card className="shadow-none p-0 overflow-hidden">
                         <div className="divide-y divide-border flex flex-col">
                             {summary?.pendingRequisitions.length === 0 ? (
                                 <div className="p-4 text-xs text-center text-muted-foreground bg-muted/20">
@@ -50,9 +50,6 @@ const PendingApprovalsSidebar = () => {
                                         to={`/requisitions/${req.id}`} 
                                         className="flex items-center p-3 hover:bg-muted/50 transition-colors group"
                                     >
-                                        <div className="w-8 h-8 rounded-md bg-blue-50 flex items-center justify-center shrink-0 mr-3">
-                                            <FileText className="w-4 h-4 text-blue-600" />
-                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-foreground truncate">
                                                 {req.title}
@@ -80,7 +77,7 @@ const PendingApprovalsSidebar = () => {
                         </span>
                     </div>
 
-                    <Card className="shadow-none p-0">
+                    <Card className="shadow-none p-0 overflow-hidden">
                         <div className="divide-y divide-border flex flex-col">
                             {summary?.pendingPayments.length === 0 ? (
                                 <div className="p-4 text-xs text-center text-muted-foreground bg-muted/20">
@@ -93,9 +90,6 @@ const PendingApprovalsSidebar = () => {
                                         to={`/payments/${payment.id}`} 
                                         className="flex items-center p-3 hover:bg-muted/50 transition-colors group"
                                     >
-                                        <div className="w-8 h-8 rounded-md bg-amber-50 flex items-center justify-center shrink-0 mr-3">
-                                            <CreditCard className="w-4 h-4 text-amber-600" />
-                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-foreground truncate">
                                                 {payment.title}

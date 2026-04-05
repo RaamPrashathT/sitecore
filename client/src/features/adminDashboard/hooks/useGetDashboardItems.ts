@@ -28,29 +28,20 @@ export interface DashboardItemType extends DashboardItemSchema {
     status: string;
 }
 
-const getDashboardItems = async (
-    pageIndex: number,
-    pageSize: number,
-    searchQuery: string = "",
-) => {
+const getDashboardItems = async (searchQuery: string = "") => {
     const response = await api.get<DashboardItemInputSchema>(
-        `/dashboard?index=${pageIndex}&size=${pageSize}&search=${searchQuery}`
+        `/dashboard?search=${searchQuery}`
     );
     return response.data;
 };
-
 export const useGetDashboardItems = (
     organizationId: string | undefined,
-    pageIndex: number = 0,
-    pageSize: number = 10,
     searchQuery: string = "",
 ) => {
     return useQuery({
-        queryKey: ["dashboardItems", organizationId, pageIndex, pageSize, searchQuery],
+        queryKey: ["dashboardItems", organizationId, searchQuery],
         queryFn: () =>
             getDashboardItems(
-                pageIndex,
-                pageSize,
                 searchQuery,
             ),
         enabled: !!organizationId,

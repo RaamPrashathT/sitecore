@@ -23,6 +23,7 @@ interface AdminDashboardPaginationProps {
     table: ReactTableType<DashboardItemType>;
 }
 
+// ... keep getPaginationNumbers function exactly as is ...
 const getPaginationNumbers = (pageIndex: number, pageCount: number) => {
     const currentPage = pageIndex + 1; 
     const totalPages = pageCount;
@@ -49,16 +50,16 @@ const AdminDashboardPagination = ({ table }: AdminDashboardPaginationProps) => {
     const paginationNumbers = getPaginationNumbers(pageIndex, pageCount);
 
     return (
-        <div className="flex flex-row relative">
-            <Field className="flex flex-row w-70 items-center gap-x-1">
-                <FieldLabel>Rows per page:</FieldLabel>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+            <Field className="flex flex-row items-center gap-x-3">
+                <FieldLabel className="text-sm text-muted-foreground whitespace-nowrap">Rows per page:</FieldLabel>
                 
                 <Select 
                     defaultValue={pageSize.toString()} 
                     value={pageSize.toString()}
                     onValueChange={(value) => table.setPageSize(Number(value))}
                 >
-                    <SelectTrigger className="" size="sm" id="select-rows-per-page">
+                    <SelectTrigger className="w-20 h-8" size="sm" id="select-rows-per-page">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="start">
@@ -72,7 +73,7 @@ const AdminDashboardPagination = ({ table }: AdminDashboardPaginationProps) => {
                 </Select>
             </Field>
             
-            <Pagination className="pr-80">
+            <Pagination className="w-auto mx-0">
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious

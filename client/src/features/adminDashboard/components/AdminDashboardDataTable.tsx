@@ -11,17 +11,14 @@ const AdminDashboardDataTable = ({ table }: AdminDashboardDataTableProps) => {
 
     if (rows.length === 0) {
         return (
-            <div
-                className="flex flex-col items-center justify-center py-20 text-stone-400"
-                style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}
-            >
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <p className="text-sm">No items to display</p>
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-2xl mx-auto flex flex-col gap-3">
+        <div className="w-full flex flex-col gap-4">
             {rows.map((row) => (
                 <AdminDashboardCard key={row.id} row={row} />
             ))}
