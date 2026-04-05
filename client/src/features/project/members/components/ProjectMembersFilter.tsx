@@ -1,8 +1,5 @@
-import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import type { FilterType } from "./ProjectMembersMain";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 interface FilterBarProps {
     readonly activeFilter: FilterType;
@@ -13,7 +10,7 @@ interface FilterBarProps {
 }
 
 const filters: { id: FilterType; label: string }[] = [
-    { id: "ALL", label: "All" },
+    { id: "ALL", label: "All Members" },
     { id: "CLIENT", label: "Clients" },
     { id: "ENGINEER", label: "Engineers" },
     { id: "ADMIN", label: "Admins" },
@@ -24,55 +21,37 @@ export default function MembersFilterBar({
     setActiveFilter,
     searchQuery,
     setSearchQuery,
-    counts,
 }: FilterBarProps) {
-    const navigate = useNavigate();
     return (
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4">
-            <div className="flex flex-wrap gap-1  p-1 rounded-lg">
+        <section className="mb-8 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-8 overflow-x-auto w-full md:w-auto no-scrollbar">
                 {filters.map((f) => {
                     const isActive = activeFilter === f.id;
                     return (
                         <button
                             key={f.id}
                             onClick={() => setActiveFilter(f.id)}
-                            className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
+                            className={`pb-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
                                 isActive
-                                    ? "bg-white text-green-700 shadow-sm ring-1 ring-gray-200"
-                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-200/80"
+                                    ? "text-[#006d30] font-bold border-b-2 border-[#006d30]"
+                                    : "text-[#737c7f] hover:text-[#2b3437]"
                             }`}
                         >
                             {f.label}
-                            <span
-                                className={`text-[11px] px-1.5 py-0.5 rounded-md ${
-                                    isActive
-                                        ? "bg-green-50 text-green-700"
-                                        : "bg-gray-100 text-gray-500"
-                                }`}
-                            >
-                                {counts[f.id]}
-                            </span>
                         </button>
                     );
                 })}
             </div>
 
-            <div className="flex items-center gap-3 w-full lg:w-auto">
-                <div className="relative flex-1 lg:w-72 shrink-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                        placeholder="Search members..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 h-9 w-full text-sm  bg-white"
-                    />
-                </div>
-                <Button 
-                    onClick={() => navigate("invite")}
-                className="h-9 bg-green-700 hover:bg-green-800 text-white px-6">
-                    Invite
-                </Button>
+            <div className="relative w-full md:w-80">
+                <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-[#737c7f] h-5 w-5" />
+                <input
+                    placeholder="Search members by name or role..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent border-0 border-b border-[#abb3b7]/40 focus:border-[#006d30] focus:ring-0 pl-8 pb-2 text-sm placeholder:text-[#abb3b7] transition-all outline-none"
+                />
             </div>
-        </div>
+        </section>
     );
 }

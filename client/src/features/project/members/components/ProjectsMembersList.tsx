@@ -1,4 +1,3 @@
-import { Mail, Phone } from "lucide-react";
 import type { UIMember, FilterType } from "./ProjectMembersMain";
 import { UserAvatar } from "@/components/Avatar";
 
@@ -7,51 +6,48 @@ interface MembersListProps {
     readonly activeFilter: FilterType;
 }
 
-
 const groupLabels = {
-    CLIENT: "Clients",
+    ADMIN: "Administrators",
     ENGINEER: "Engineers",
-    ADMIN: "Admins",
+    CLIENT: "Clients",
 };
-
 
 export default function MembersList({ members, activeFilter }: MembersListProps) {
     if (members.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-24 text-center">
-                <p className="text-sm font-medium text-gray-900">No members found</p>
-                <p className="text-sm text-gray-500 mt-1">Try adjusting your search or filter criteria.</p>
+                <p className="text-sm font-medium text-[#2b3437]">No members found</p>
+                <p className="text-sm text-[#737c7f] mt-1">Try adjusting your search or filter criteria.</p>
             </div>
         );
     }
 
     const groupsToRender =
         activeFilter === "ALL"
-            ? (["CLIENT", "ENGINEER", "ADMIN"] as const)
+            ? (["ADMIN", "ENGINEER", "CLIENT"] as const)
             : [activeFilter];
 
     return (
-        <div className="flex flex-col">
+        <div className="space-y-4">
             {groupsToRender.map((type) => {
                 const groupMembers = members.filter((m) => m.type === type);
                 if (groupMembers.length === 0) return null;
 
                 return (
-                    <div key={type} className="flex flex-col">
-                        {activeFilter === "ALL" && (
-                            <div className="bg-gray-50 px-6 py-2 rounded-lg">
-                                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                                    {groupLabels[type as keyof typeof groupLabels]}
-                                </h3>
-                            </div>
-                        )}
+                    <section key={type}>
+                        <div className="flex items-center gap-4">
+                            <h2 className="font-serif font-medium tracking-wide text-[#2b3437]/60 uppercase text-xs">
+                                {groupLabels[type as keyof typeof groupLabels]}
+                            </h2>
+                            <div className="h-[1px] flex-grow bg-[#abb3b7]/20"></div>
+                        </div>
 
-                        <div className="divide-y divide-gray-100">
+                        <div className="space-y-4">
                             {groupMembers.map((m) => (
                                 <MemberListItem key={m.userId} member={m} />
                             ))}
                         </div>
-                    </div>
+                    </section>
                 );
             })}
         </div>
@@ -60,53 +56,34 @@ export default function MembersList({ members, activeFilter }: MembersListProps)
 
 function MemberListItem({ member }: { readonly member: UIMember }) {
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-4 hover:bg-gray-50/50 transition-colors">
-            
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="group flex flex-col md:flex-row items-center gap-6 py-4 ">
+            <div className="shrink-0 relative">
                 <UserAvatar name={member.name} image={member.profileImage} />
-                <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-medium text-gray-900 truncate">
-                        {member.name}
-                    </span>
-                    <span className="text-xs text-gray-500 truncate mt-0.5 capitalize">
-                        {member.role.toLowerCase() || "Member"}
-                    </span>
+            </div>
+
+            <div className="grow grid grid-cols-1 md:grid-cols-3 gap-3 items-center w-full">
+                <div className="col-span-1">
+                    <h3 className="font-semibold text-[#2b3437] text-lg">{member.name}</h3>
+                </div>
+                <div className="col-span-1">
+                    {member.email ? (
+                        <a href={`mailto:${member.email}`} className="text-sm text-[#737c7f] lowercase hover:text-[#006d30] transition-colors">
+                            {member.email}
+                        </a>
+                    ) : (
+                        <span className="text-sm text-[#737c7f]/50 italic">No email provided</span>
+                    )}
+                </div>
+                <div className="col-span-1 text-right md:text-left">
+                    {member.phone ? (
+                        <a href={`tel:${member.phone}`} className="text-sm font-mono text-[#2b3437] tracking-tighter hover:text-[#006d30] transition-colors">
+                            {member.phone}
+                        </a>
+                    ) : (
+                        <span className="text-sm text-[#737c7f]/50 italic">No phone provided</span>
+                    )}
                 </div>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-8 flex-1 min-w-0">
-                {member.email ? (
-                    <a
-                        href={`mailto:${member.email}`}
-                        className="flex items-center gap-2 text-[13px] text-gray-600 hover:text-green-700 truncate group flex-1"
-                    >
-                        <Mail className="h-3.5 w-3.5 text-gray-400 group-hover:text-green-700 shrink-0" />
-                        <span className="truncate">{member.email}</span>
-                    </a>
-                ) : (
-                    <span className="flex items-center gap-2 text-[13px] text-gray-400 italic flex-1">
-                        <Mail className="h-3.5 w-3.5 opacity-40 shrink-0" />
-                        No email provided
-                    </span>
-                )}
-
-                {member.phone ? (
-                    <a
-                        href={`tel:${member.phone}`}
-                        className="flex items-center gap-2 text-[13px] text-gray-600 hover:text-green-700 truncate group w-32 shrink-0"
-                    >
-                        <Phone className="h-3.5 w-3.5 text-gray-400 group-hover:text-green-700 shrink-0" />
-                        <span className="truncate">{member.phone}</span>
-                    </a>
-                ) : (
-                    <span className="flex items-center gap-2 text-[13px] text-gray-400 italic w-32 shrink-0">
-                        <Phone className="h-3.5 w-3.5 opacity-40 shrink-0" />
-                        No phone number provided
-                    </span>
-                )}
-            </div>
-
-            
         </div>
     );
 }
