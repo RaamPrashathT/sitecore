@@ -148,6 +148,24 @@ const dashboardController = {
                 .json({ message: "Something went wrong" });
         }
     },
+    async getPendingApprovalsSummary(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant?.orgId;
+            if (!organizationId)
+                throw new ValidationError("Organization ID required");
+
+            const result =
+                await dashboardService.getPendingApprovalsSummary(
+                    organizationId,
+                );
+            return response.status(200).json(result);
+        } catch (error) {
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Failed to fetch pending approvals" });
+        }
+    },
 };
 
 export default dashboardController;

@@ -6,12 +6,41 @@ import { orgAuthorize } from "../../shared/middleware/orgAuthorize.middleware.js
 
 const dashboardRouter = Router();
 
-dashboardRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), dashboardController.getDashboardItems)
+dashboardRouter.get(
+    "/",
+    authorize,
+    orgAuthorize,
+    requiredRole("ADMIN"),
+    dashboardController.getDashboardItems,
+);
 
-dashboardRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), dashboardController.setDashboardItems)
+dashboardRouter.post(
+    "/",
+    authorize,
+    orgAuthorize,
+    requiredRole("ADMIN"),
+    dashboardController.setDashboardItems,
+);
 
-dashboardRouter.get("/engineer", authorize, orgAuthorize, requiredRole("ENGINEER"), dashboardController.getEngineerDashboardItems)
+dashboardRouter.get(
+    "/engineer",
+    authorize,
+    orgAuthorize,
+    requiredRole("ENGINEER"),
+    dashboardController.getEngineerDashboardItems,
+);
 
-dashboardRouter.get("/client", authorize, orgAuthorize, dashboardController.getClientDashboardItems)
-
+dashboardRouter.get(
+    "/client",
+    authorize,
+    orgAuthorize,
+    dashboardController.getClientDashboardItems,
+);
+dashboardRouter.get(
+    "/pending-approvals",
+    authorize,
+    orgAuthorize,
+    requiredRole("ADMIN"),
+    dashboardController.getPendingApprovalsSummary,
+);
 export default dashboardRouter;

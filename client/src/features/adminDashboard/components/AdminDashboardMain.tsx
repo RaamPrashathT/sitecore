@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { columns } from "./AdminDashboardColumns";
-import OrderButton from "./OrderButton";
 import SearchTableControl from "./SearchTableControl";
 import AdminDashboardPagination from "./AdminDashboardPagination";
 import AdminDashboardSkeleton from "./AdminDashboardSkeleton";
@@ -56,8 +55,6 @@ const AdminDashboardMain = () => {
         },
     });
 
-    const selectedIds = table.getSelectedRowModel().rows.map(r => r.original.id);
-
     const isInitialLoading = membershipLoading || (dashboardItemsLoading && !dashboardItems);
 
     if (isInitialLoading) return <AdminDashboardSkeleton />;
@@ -65,24 +62,15 @@ const AdminDashboardMain = () => {
     
     return (
         <section className="col-span-12 lg:col-span-8 flex flex-col h-full">
-            {/* Header Area */}
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-foreground tracking-tight">Materials to Fulfill</h2>
-                <div className="flex gap-2 items-center">
-                    <span className="px-3 py-1 bg-secondary text-secondary-foreground text-[10px] font-mono uppercase tracking-widest rounded-full">
-                        Phase Priority View
-                    </span>
-                </div>
+                <div className="flex flex-row justify-between">
+                <SearchTableControl table={table} />
+            </div>
             </div>
 
             {/* Controls */}
-            <div className="flex flex-row justify-between items-center pb-6 border-b border-border mb-6">
-                <SearchTableControl table={table} />
-                <OrderButton 
-                    selectedIds={selectedIds} 
-                    clearSelection={() => table.resetRowSelection()} 
-                />
-            </div>
+            
 
             {/* Main Content List */}
             <div className="flex-1">

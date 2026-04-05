@@ -328,6 +328,70 @@ const dashboardService = {
             count,
         };
     },
+
+    async getPendingApprovalsSummary(organizationId: string) {
+        const [pendingPayments, pendingRequisitions] = await Promise.all([
+            // 1. Fetch Phases waiting on Client Payment
+            prisma.phase.findMany({
+                where: {
+                    status: "PAYMENT_PENDING",
+                    isPaid: false,
+                    project: { organizationId },
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    budget: true,
+                    project: {
+                        select: { name: true },
+                    },
+                },
+                orderBy: { paymentDeadline: "asc" },
+                take: 5, // Just grab the top 5 for the sidebar
+            }),
+    
+            // 2. Fetch Requisitions waiting on Admin Approval
+            prisma.requisition.findMany({
+                where: {
+                    status: "PENDING_APPROVAL",
+                    phase: { project: { organizationId } },
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    budget: true,
+                    requestedBy: true,
+                    phase: {
+                        select: { name: true },
+                    },
+                },
+                orderBy: { createdAt: "asc" },
+                take: 5,
+            }),
+        ]);
+    
+        return {
+            pendingPayments: pendingPayments.map((p) => ({
+                id: p.id,
+                title: p.name,
+                projectName: p.project.name,
+                slug: p.slug,
+                amount: Number(p.budget),
+                type: "VENDOR_PAYMENT",
+            })),
+            pendingRequisitions: pendingRequisitions.map((r) => ({
+                id: r.id,
+                title: r.title,
+                phaseName: r.phase.name,
+                slug: r.slug,
+                amount: Number(r.budget),
+                requestedBy: r.requestedBy,
+                type: "MATERIAL_ORDER",
+            })),
+        };
+    }
 };
 
 export default dashboardService;
