@@ -88,18 +88,25 @@ export const userService = {
     },
 
     async acceptInvitation(token: string, userId: string, userEmail: string) {
+        // 1. Fetch invitation with nested project slugs
         const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
                 status: "PENDING",
                 expiresAt: { gt: new Date() },
             },
-            include: { projects: true },
+            include: {
+                projects: {
+                    include: {
+                        project: { select: { slug: true } },
+                    },
+                },
+            },
         });
 
         if (!invitation) {
             throw new UnAuthorizedError(
-                "Invalid, expired, or already claimed invitation.",
+                "Invalid, expired, or already claimed invitation",
             );
         }
 
@@ -108,6 +115,12 @@ export const userService = {
                 `Account Mismatch: Please log in with ${invitation.email}`,
             );
         }
+
+        // 2. Fetch Organization slug separately
+        const organization = await prisma.organization.findUnique({
+            where: { id: invitation.organizationId },
+            select: { slug: true },
+        });
 
         await prisma.$transaction(async (tx) => {
             await tx.invitation.update({
@@ -131,11 +144,8 @@ export const userService = {
                     organizationId: invitation.organizationId,
                     role: invitation.role,
                 },
-                update: {
-                    role: invitation.role,
-                },
+                update: {},
             });
-
             for (const proj of invitation.projects) {
                 await tx.assignment.upsert({
                     where: {
@@ -146,29 +156,49 @@ export const userService = {
                         projectId: proj.projectId,
                         role: invitation.role,
                     },
-                    update: {
-                        role: invitation.role,
-                    },
+                    update: {},
                 });
             }
+        });
+
+        // 3. Setup slugs and notify!
+        const orgSlug = organization?.slug || "";
+        const projectSlug = invitation.projects[0]?.project.slug || "";
+
+        await notify({
+            type: "PROJECT_INVITATION_ACCEPTED",
+            title: "Team Invitation Accepted",
+            body: `${userEmail} has accepted the invitation and joined the project team.`,
+            entityType: "INVITATION",
+            entityId: invitation.id,
+            orgId: invitation.organizationId,
+            projectId: invitation.projects[0]?.projectId,
+            actionUrl: `/${orgSlug}/${projectSlug}/members`,
         });
 
         return {
             success: true,
             message: "Invitation accepted successfully.",
             id: invitation.id,
-            projectId: invitation.projects[0]?.projectId, 
+            projectId: invitation.projects[0]?.projectId,
             organizationId: invitation.organizationId,
         };
     },
 
     async declineInvitation(token: string, userId: string, userEmail: string) {
+        // 1. Fetch invitation with nested project slugs
         const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
                 status: "PENDING",
             },
-            include: { projects: true },
+            include: {
+                projects: {
+                    include: {
+                        project: { select: { slug: true } },
+                    },
+                },
+            },
         });
 
         if (!invitation) {
@@ -183,6 +213,12 @@ export const userService = {
             );
         }
 
+        // 2. Fetch Organization slug separately
+        const organization = await prisma.organization.findUnique({
+            where: { id: invitation.organizationId },
+            select: { slug: true },
+        });
+
         await prisma.invitation.update({
             where: { id: invitation.id },
             data: {
@@ -190,12 +226,27 @@ export const userService = {
             },
         });
 
+        // 3. Setup slugs and notify!
+        const orgSlug = organization?.slug || "";
+        const projectSlug = invitation.projects[0]?.project.slug || "";
+
+        await notify({
+            type: "PROJECT_INVITATION_REJECTED",
+            title: "Invitation Declined",
+            body: `${userEmail} has declined the invitation to join the project.`,
+            entityType: "INVITATION",
+            entityId: invitation.id,
+            orgId: invitation.organizationId,
+            projectId: invitation.projects[0]?.projectId,
+            actionUrl: `/${orgSlug}/${projectSlug}/members`,
+        });
+
         return {
             success: true,
-            message: "Invitation accepted successfully.",
+            message: "Invitation declined successfully.",
             id: invitation.id,
-            projectId: invitation.projects[0]?.projectId, 
+            projectId: invitation.projects[0]?.projectId,
             organizationId: invitation.organizationId,
-        };    
+        };
     },
 };
