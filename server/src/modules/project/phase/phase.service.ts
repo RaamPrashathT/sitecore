@@ -1,4 +1,5 @@
 import { ValidationError } from "../../../shared/error/validation.error.js";
+import { notify } from "../../../shared/lib/notify.js";
 import { prisma } from "../../../shared/lib/prisma.js";
 
 const phaseService = {
@@ -408,7 +409,7 @@ const phaseService = {
                     orderBy: { workDate: "desc" },
                     include: {
                         author: { select: { userId: true } },
-                        images: true, 
+                        images: true,
                         comments: {
                             orderBy: { createdAt: "asc" },
                             include: {
@@ -430,7 +431,7 @@ const phaseService = {
             req.items.forEach((item) => {
                 const quantity = Number(item.quantity);
                 const unitCost = Number(item.estimatedUnitCost);
-                spent += (quantity * unitCost);
+                spent += quantity * unitCost;
             });
         });
 
@@ -474,7 +475,9 @@ const phaseService = {
                         createdAt: comment.createdAt,
                         imageId: comment.imageId,
                         author: {
-                            name: commentAuthor ? commentAuthor.username : "Unknown",
+                            name: commentAuthor
+                                ? commentAuthor.username
+                                : "Unknown",
                             profile: commentAuthor?.profileImage || null,
                         },
                     };
@@ -497,7 +500,7 @@ const phaseService = {
             siteLogs: mappedSiteLogs,
         };
     },
-    
+
     async updatePhase(
         projectId: string,
         phaseSlug: string, // 👇 Changed to phaseSlug
@@ -558,7 +561,7 @@ const phaseService = {
 
         return {
             id: updatedPhase.id,
-            slug: updatedPhase.slug, 
+            slug: updatedPhase.slug,
             name: updatedPhase.name,
             status: updatedPhase.status,
             budget: Number(updatedPhase.budget),
@@ -609,6 +612,7 @@ const phaseService = {
     async approvePayment(projectId: string, phaseId: string) {
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
+            include: { project: { include: { organization: true } } }, // <-- Need slugs for actionUrl
         });
 
         if (!phase) throw new ValidationError("Phase not found");
@@ -626,11 +630,24 @@ const phaseService = {
                 startDate: new Date(),
             },
         });
+
+        // SEND NOTIFICATION
+        await notify({
+            type: "PHASE_STATUS_CHANGED",
+            title: "Phase is now Active",
+            body: `Payment received for ${phase.name}. Engineers can now begin site logs and material orders.`,
+            entityType: "PHASE",
+            entityId: phase.id,
+            projectId: phase.projectId,
+            orgId: phase.project.organizationId,
+            actionUrl: `/${phase.project.organization.slug}/${phase.project.slug}/progress/${phase.slug}`,
+        });
     },
 
     async completePhase(projectId: string, phaseId: string) {
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
+            include: { project: { include: { organization: true } } }, // <-- Need slugs for actionUrl
         });
 
         if (!phase) throw new ValidationError("Phase not found");
@@ -641,10 +658,7 @@ const phaseService = {
         }
 
         const pendingRequisition = await prisma.requisition.findFirst({
-            where: {
-                phaseId: phaseId,
-                status: "PENDING_APPROVAL",
-            },
+            where: { phaseId: phaseId, status: "PENDING_APPROVAL" },
         });
         if (pendingRequisition) {
             throw new ValidationError(
@@ -653,10 +667,7 @@ const phaseService = {
         }
 
         const unorderedItem = await prisma.requisitionItem.findFirst({
-            where: {
-                requisition: { phaseId: phaseId },
-                status: "UNORDERED",
-            },
+            where: { requisition: { phaseId: phaseId }, status: "UNORDERED" },
         });
         if (unorderedItem) {
             throw new ValidationError(
@@ -667,6 +678,18 @@ const phaseService = {
         await prisma.phase.update({
             where: { id: phaseId },
             data: { status: "COMPLETED" },
+        });
+
+        // SEND NOTIFICATION
+        await notify({
+            type: "PHASE_STATUS_CHANGED",
+            title: "Phase Completed",
+            body: `Milestone Achieved: ${phase.name} has been officially completed!`,
+            entityType: "PHASE",
+            entityId: phase.id,
+            projectId: phase.projectId,
+            orgId: phase.project.organizationId,
+            actionUrl: `/${phase.project.organization.slug}/${phase.project.slug}/progress/${phase.slug}`,
         });
     },
 

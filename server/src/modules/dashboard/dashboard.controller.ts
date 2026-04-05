@@ -66,30 +66,20 @@ const dashboardController = {
         try {
             const organizationId = request.tenant?.orgId;
             const engineerId = request.session?.userId;
-            const searchQuery = (request.query.search as string) || "";
 
-            const validatedData = getDashboardItemsSchema.safeParse({
-                organizationId,
-                searchQuery,
-            });
-
-            if (!validatedData.success)
-                throw new ValidationError("Invalid Request");
+            if (!organizationId || !engineerId) {
+                return response.status(401).json({ message: "Unauthorized" });
+            }
 
             const result = await dashboardService.getEngineerDashboardItems(
-                engineerId!,
-                validatedData.data.organizationId,
-                validatedData.data.searchQuery,
+                engineerId,
+                organizationId
             );
 
             return response.status(200).json(result);
         } catch (error) {
-            if (error instanceof ValidationError)
-                return response.status(400).json({ message: error.message });
             logger.error(error);
-            return response
-                .status(500)
-                .json({ message: "Something went wrong" });
+            return response.status(500).json({ message: "Internal server error" });
         }
     },
 
@@ -97,30 +87,20 @@ const dashboardController = {
         try {
             const organizationId = request.tenant?.orgId;
             const clientId = request.session?.userId;
-            const searchQuery = (request.query.search as string) || "";
 
-            const validatedData = getDashboardItemsSchema.safeParse({
-                organizationId,
-                searchQuery,
-            });
-
-            if (!validatedData.success)
-                throw new ValidationError("Invalid Request");
+            if (!organizationId || !clientId) {
+                return response.status(401).json({ message: "Unauthorized" });
+            }
 
             const result = await dashboardService.getClientDashboardItems(
-                clientId!,
-                validatedData.data.organizationId,
-                validatedData.data.searchQuery,
+                clientId,
+                organizationId
             );
 
             return response.status(200).json(result);
         } catch (error) {
-            if (error instanceof ValidationError)
-                return response.status(400).json({ message: error.message });
             logger.error(error);
-            return response
-                .status(500)
-                .json({ message: "Something went wrong" });
+            return response.status(500).json({ message: "Internal server error" });
         }
     },
 

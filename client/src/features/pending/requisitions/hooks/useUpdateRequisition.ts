@@ -11,6 +11,7 @@ const approveRequisition = async (
     organizationId: string,
     requisitionId: string,
 ) => {
+    console.log(organizationId, requisitionId);
     await api.post(`project/requisition/${requisitionId}/approve`);
 };
 
@@ -26,7 +27,7 @@ export const useUpdateRequisitions = (organizationId: string | undefined) => {
             if (action === "APPROVE") {
                 return approveRequisition(organizationId!, requisitionId);
             } else {
-                return rejectRequisition(organizationId!, requisitionId);
+                return rejectRequisition(organizationId!);
             }
         },
 

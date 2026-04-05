@@ -1,3 +1,4 @@
+import { notify } from "../../shared/lib/notify.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import type { SetDashboardItemsType } from "./dashboard.schema.js";
 
@@ -177,157 +178,233 @@ const dashboardService = {
     async getEngineerDashboardItems(
         engineerId: string,
         organizationId: string,
-        searchQuery: string,
     ) {
-        const whereClause: any = {
-            status: "ACTIVE",
-            project: {
-                organizationId: organizationId,
-                assignments: {
-                    some: {
-                        userId: engineerId,
-                    },
-                },
+        const projects = await prisma.project.findMany({
+            where: {
+                organizationId,
+                assignments: { some: { userId: engineerId } },
             },
-        };
-
-        if (searchQuery) {
-            whereClause.name = { contains: searchQuery, mode: "insensitive" };
-        }
-
-        const [result, count] = await Promise.all([
-            prisma.phase.findMany({
-                where: whereClause,
-                select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                    budget: true,
-                    project: {
-                        select: {
-                            name: true,
+            include: {
+                phases: {
+                    include: {
+                        requisitions: {
+                            orderBy: { createdAt: "desc" },
                         },
-                    },
-                    requisitions: {
-                        where: {
-                            status: "APPROVED",
-                        },
-                        select: {
-                            items: {
-                                select: {
-                                    id: true,
-                                    quantity: true,
-                                    estimatedUnitCost: true,
-                                    status: true,
-                                    catalogue: {
-                                        select: {
-                                            name: true,
-                                            unit: true,
-                                        },
-                                    },
-                                    assignedSupplier: {
-                                        select: {
-                                            supplier: true,
-                                        },
-                                    },
+                        siteLogs: {
+                            orderBy: { createdAt: "desc" },
+                            take: 5,
+                            include: {
+                                comments: {
+                                    orderBy: { createdAt: "desc" },
+                                    take: 3,
                                 },
                             },
                         },
                     },
                 },
-                orderBy: {
-                    createdAt: "desc",
-                },
-            }),
-            prisma.phase.count({
-                where: whereClause,
-            }),
-        ]);
-
-        const flattenedPhases = result.map((phase) => {
-            const flatItems = phase.requisitions.flatMap((req) =>
-                req.items.map((item) => ({
-                    id: item.id,
-                    quantity: Number(item.quantity),
-                    estimatedUnitCost: Number(item.estimatedUnitCost),
-                    status: item.status as "ORDERED" | "UNORDERED",
-                    itemName: item.catalogue.name,
-                    unit: item.catalogue.unit,
-                    supplierName:
-                        item.assignedSupplier?.supplier || "Pending Assignment",
-                })),
-            );
-
-            return {
-                id: phase.id,
-                name: phase.name,
-                description: phase.description,
-                budget: Number(phase.budget),
-                projectName: phase.project.name,
-                items: flatItems,
-            };
+            },
         });
 
+        const activeProjects: any[] = [];
+        const actionablePhases: any[] = [];
+        const recentRequisitions: any[] = [];
+        const allLogs: any[] = [];
+
+        for (const project of projects) {
+            let activePhase = null;
+
+            for (const phase of project.phases) {
+                if (phase.status === "ACTIVE") {
+                    activePhase = phase;
+
+                    // A. Alert: Active Phase but NO Requisition drafted yet
+                    if (phase.requisitions.length === 0) {
+                        actionablePhases.push({
+                            phaseId: phase.id,
+                            phaseName: phase.name,
+                            projectName: project.name,
+                            projectSlug: project.slug,
+                            phaseSlug: phase.slug,
+                        });
+                    }
+                }
+
+                // B. Requisitions Tracker
+                for (const req of phase.requisitions) {
+                    recentRequisitions.push({
+                        id: req.id,
+                        title: req.title,
+                        status: req.status,
+                        createdAt: req.createdAt,
+                        slug: req.slug,
+                        phaseName: phase.name,
+                        projectName: project.name,
+                    });
+                }
+
+                for (const log of phase.siteLogs) {
+                    allLogs.push({
+                        id: log.id,
+                        title: log.title,
+                        createdAt: log.createdAt,
+                        phaseName: phase.name,
+                        projectName: project.name,
+                        comments: log.comments.map((c: any) => ({
+                            id: c.id,
+                            text: c.text || c.content,
+                            createdAt: c.createdAt,
+                        })),
+                    });
+                }
+            }
+
+            if (project.status === "ACTIVE") {
+                activeProjects.push({
+                    id: project.id,
+                    name: project.name,
+                    slug: project.slug,
+                    activePhase: activePhase
+                        ? {
+                              name: activePhase.name,
+                              deadline: activePhase.paymentDeadline || null,
+                          }
+                        : null,
+                });
+            }
+        }
+
+        // Sort globally by newest first
+        recentRequisitions.sort(
+            (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+        );
+        allLogs.sort(
+            (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+        );
+
         return {
-            data: flattenedPhases,
-            count,
+            activeProjects,
+            actionablePhases,
+            recentRequisitions: recentRequisitions.slice(0, 8), // Top 8 recent reqs
+            recentLogs: allLogs.slice(0, 10), // Top 10 recent logs across sites
         };
     },
 
-    async getClientDashboardItems(
-        clientId: string,
-        organizationId: string,
-        searchQuery: string,
-    ) {
-        const whereClause: any = {
-            status: "PAYMENT_PENDING",
-            isPaid: false,
-            project: {
-                organizationId: organizationId,
+    // Inside dashboard.service.ts
+
+    async getClientDashboardItems(clientId: string, organizationId: string) {
+        // 1. Fetch all projects assigned to the client, deeply including phases, requisitions, and logs
+        const projects = await prisma.project.findMany({
+            where: {
+                organizationId,
                 assignments: {
-                    some: {
-                        userId: clientId,
-                    },
+                    some: { userId: clientId },
                 },
             },
-        };
-
-        if (searchQuery) {
-            whereClause.name = { contains: searchQuery, mode: "insensitive" };
-        }
-
-        const [result, count] = await Promise.all([
-            prisma.phase.findMany({
-                where: whereClause,
-                select: {
-                    id: true,
-                    name: true,
-                    budget: true,
-                    project: {
-                        select: {
-                            name: true,
-                            estimatedBudget: true,
+            include: {
+                phases: {
+                    include: {
+                        requisitions: {
+                            include: {
+                                items: {
+                                    where: { status: "ORDERED" },
+                                    include: { assignedSupplier: true },
+                                },
+                            },
+                        },
+                        siteLogs: {
+                            orderBy: { createdAt: "desc" },
+                            take: 1,
                         },
                     },
-                    paymentDeadline: true,
+                    orderBy: { startDate: "asc" },
                 },
-            }),
-            prisma.phase.count({
-                where: whereClause,
-            }),
-        ]);
+            },
+        });
 
-        const items = result.map((phase) => ({
-            id: phase.id,
-            name: phase.name,
-            budget: Number(phase.budget),
-            projectName: phase.project.name,
-            estimatedBudget: Number(phase.project.estimatedBudget),
-            paymentDeadline: phase.paymentDeadline,
-        }));
+        const pendingPayments: any[] = [];
+        const projectSummaries: any[] = [];
+
+        // 2. Process the data
+        for (const project of projects) {
+            let totalOrderedCost = 0;
+            let activePhase = null;
+            let latestLog = null;
+
+            for (const phase of project.phases) {
+                // A. Check for pending payments
+                if (phase.status === "PAYMENT_PENDING" && !phase.isPaid) {
+                    pendingPayments.push({
+                        id: phase.id,
+                        phaseName: phase.name,
+                        projectName: project.name,
+                        budget: Number(phase.budget),
+                        paymentDeadline: phase.paymentDeadline,
+                        slug: phase.slug,
+                    });
+                }
+
+                // B. Find the Active Phase and its latest log
+                if (phase.status === "ACTIVE" && !activePhase) {
+                    activePhase = phase;
+                    latestLog = phase.siteLogs[0] || null;
+                }
+
+                // C. Calculate ordered cost for this phase
+                for (const req of phase.requisitions) {
+                    for (const item of req.items) {
+                        const priceToUse = item.assignedSupplier?.truePrice
+                            ? Number(item.assignedSupplier.truePrice)
+                            : Number(item.estimatedUnitCost);
+                        totalOrderedCost += priceToUse * Number(item.quantity);
+                    }
+                }
+            }
+
+            // D. Calculate Completion % (Money-wise)
+            const estimatedBudget = Number(project.estimatedBudget) || 1; // Prevent div by 0
+            const completionPercentage = Math.min(
+                100,
+                Math.round((totalOrderedCost / estimatedBudget) * 100),
+            );
+
+            projectSummaries.push({
+                id: project.id,
+                name: project.name,
+                slug: project.slug,
+                status: project.status,
+                estimatedBudget: Number(project.estimatedBudget),
+                totalOrderedCost,
+                completionPercentage,
+                activePhase: activePhase
+                    ? {
+                          id: activePhase.id,
+                          name: activePhase.name,
+                      }
+                    : null,
+                latestLog: latestLog
+                    ? {
+                          id: latestLog.id,
+                          title: latestLog.title,
+                          createdAt: latestLog.createdAt,
+                      }
+                    : null,
+            });
+        }
+
+        // Sort pending payments by urgency (closest deadline first)
+        pendingPayments.sort(
+            (a, b) =>
+                new Date(a.paymentDeadline).getTime() -
+                new Date(b.paymentDeadline).getTime(),
+        );
+
         return {
-            data: items,
-            count,
+            pendingPayments,
+            projects: projectSummaries,
         };
     },
 
@@ -508,22 +585,47 @@ const dashboardService = {
         };
     },
     async approvePendingPayment(organizationId: string, phaseId: string) {
-        // Verify it belongs to the org first
+        // 1. Verify it belongs to the org and grab all the slugs we need for the URL
         const phase = await prisma.phase.findFirst({
-            where: { id: phaseId, project: { organizationId } }
+            where: { id: phaseId, project: { organizationId } },
+            include: {
+                project: {
+                    select: {
+                        id: true,
+                        slug: true,
+                        name: true,
+                        organization: {
+                            select: { slug: true },
+                        },
+                    },
+                },
+            },
         });
 
         if (!phase) throw new Error("Phase not found");
 
-        // Mark it as paid and active
-        return await prisma.phase.update({
+        // 2. Mark it as paid and active
+        const updatedPhase = await prisma.phase.update({
             where: { id: phaseId },
             data: {
                 isPaid: true,
-                status: "ACTIVE" 
-            }
+                status: "ACTIVE",
+            },
         });
-    }
+
+        await notify({
+            type: "PHASE_STATUS_CHANGED",
+            title: "Phase Payment Approved",
+            body: `Payment for ${phase.name} (${phase.project.name}) has been approved. The phase is now ACTIVE.`,
+            entityType: "PHASE",
+            entityId: phase.id,
+            projectId: phase.project.id,
+            orgId: organizationId,
+            actionUrl: `/${phase.project.organization.slug}/${phase.project.slug}/progress/${phase.slug}`,
+        });
+
+        return updatedPhase;
+    },
 };
 
 export default dashboardService;

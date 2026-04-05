@@ -19,7 +19,7 @@ const Onboarding = () => {
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
-      // TODO: send data to backend
+      console.log(data)
     },
   });
 

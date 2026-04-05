@@ -1,69 +1,71 @@
 import api from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 
-export interface EngineerDashboardItem {
-    id: string;
-    quantity: number;
-    estimatedUnitCost: number;
-    status: "ORDERED" | "UNORDERED";
-    itemName: string;
-    unit: string;
-    supplierName: string;
-}
+// --- Interfaces Mapping to the Backend ---
 
-export interface EngineerDashboardPhase {
+export interface ActiveProject {
     id: string;
     name: string;
-    description: string | null;
-    budget: number;
+    slug: string;
+    activePhase: {
+        name: string;
+        deadline: string | null;
+    } | null;
+}
+
+export interface ActionablePhase {
+    phaseId: string;
+    phaseName: string;
     projectName: string;
-    items: EngineerDashboardItem[];
+    projectSlug: string;
+    phaseSlug: string;
+}
+
+export interface RecentRequisition {
+    id: string;
+    title: string;
+    status: "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED"; // Add your exact statuses here
+    createdAt: string;
+    slug: string;
+    phaseName: string;
+    projectName: string;
+}
+
+export interface LogComment {
+    id: string;
+    text: string;
+    createdAt: string;
+}
+
+export interface RecentLog {
+    id: string;
+    title: string;
+    createdAt: string;
+    phaseName: string;
+    projectName: string;
+    comments: LogComment[];
 }
 
 export interface EngineerDashboardResponse {
-    data: EngineerDashboardPhase[];
-    count: number;
+    activeProjects: ActiveProject[];
+    actionablePhases: ActionablePhase[];
+    recentRequisitions: RecentRequisition[];
+    recentLogs: RecentLog[];
 }
 
+// --- Fetcher ---
 
-const getDashboardItems = async (
-    organizationId: string,
-    pageIndex: number,
-    pageSize: number,
-    searchQuery: string = "",
-) => {
-    const response = await api.get<EngineerDashboardResponse>(
-        `/dashboard/engineer?index=${pageIndex}&size=${pageSize}&search=${searchQuery}`,
-        {
-            headers: {
-                "x-organization-id": organizationId,
-            },
-        },
-    );
+const getEngineerDashboardItems = async () => {
+    // Interceptor handles the tenant slug automatically!
+    const response = await api.get<EngineerDashboardResponse>(`/dashboard/engineer`);
     return response.data;
 };
 
-export const useGetEngineerDashboardItems = (
-    organizationId: string | undefined,
-    pageIndex: number = 0,
-    pageSize: number = 10,
-    searchQuery: string = "",
-) => {
+// --- Hook ---
+
+export const useGetEngineerDashboardItems = () => {
     return useQuery({
-        queryKey: [
-            "dashboardItems",
-            organizationId,
-            pageIndex,
-            pageSize,
-            searchQuery,
-        ],
-        queryFn: () =>
-            getDashboardItems(
-                organizationId!,
-                pageIndex,
-                pageSize,
-                searchQuery,
-            ),
-        enabled: !!organizationId,
+        queryKey: ["engineerDashboardItems"],
+        queryFn: getEngineerDashboardItems,
     });
 };

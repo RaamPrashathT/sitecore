@@ -22,7 +22,6 @@ import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
 import ClientPage from "./pages/adminPages/clients/ClientPage";
 
-import ProjectPage from "./pages/project/ProjectPage";
 import CreateProjectPage from "./pages/project/CreateProjectPage";
 import ProjectListPage from "./pages/project/ProjectListPage";
 import PhaseCreationPage from "./pages/project/PhaseCreationPage";

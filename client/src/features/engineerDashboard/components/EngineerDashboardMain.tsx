@@ -1,69 +1,57 @@
-import { useState } from "react";
-import { EngineerColumns as columns } from "./EngineerDashboardColumns";
-import { useDebounce } from "@/hooks/useDebounce";
 import { useGetEngineerDashboardItems } from "../hooks/useEngineerDashboardItem";
-import { useMembership } from "@/hooks/useMembership";
-import { getCoreRowModel, getFilteredRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import EngineerDashboardDataTable from "./EngineerDashboardTable";
-import EngineerSearch from "./EngineerDashboardSearch";
-import EngineerDashboardPagination from "./EngineerDashboardPagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import EngineerActions from "./EngineerActions";
+import EngineerProjects from "./EngineerProjects";
+import EngineerLogs from "./EngineerLogs";
 
-const EngineerDashboard = () => {
-    const [globalFilter, setGlobalFilter] = useState<string>("");
-    const debouncedSearch = useDebounce(globalFilter, 200);
+const EngineerDashboardMain = () => {
+    const { data: dashboardData, isLoading, error } = useGetEngineerDashboardItems();
 
-    const [pagination, setPagination] = useState({
-        pageIndex: 0,
-        pageSize: 24,
-    });
-
-    const { data: membership, isLoading: membershipLoading } = useMembership();
-    const { data: dashboardItems, isLoading: dashboardItemsLoading } =
-        useGetEngineerDashboardItems(
-            membership?.id,
-            pagination.pageIndex,
-            pagination.pageSize,
-            debouncedSearch,
+    if (isLoading) {
+        return (
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-8 py-8 grid grid-cols-1 md:grid-cols-10 gap-8">
+                <div className="md:col-span-6 space-y-8">
+                    <Skeleton className="h-64 w-full rounded-xl" />
+                    <Skeleton className="h-96 w-full rounded-xl" />
+                </div>
+                <div className="md:col-span-4 space-y-8">
+                    <Skeleton className="h-80 w-full rounded-xl" />
+                </div>
+            </div>
         );
+    }
 
-    const table = useReactTable({
-        data: dashboardItems?.data ?? [],
-        rowCount: dashboardItems?.count ?? 0,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        onPaginationChange: setPagination,
-        getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        onGlobalFilterChange: setGlobalFilter,
-        manualFiltering: true,
-        manualSorting: true,
-        manualPagination: true,
-        getRowId: (row) => row.id,
-        state: {
-            globalFilter,
-            pagination,
-        },
-    });
-
-    const isInitialLoading =
-        membershipLoading || (dashboardItemsLoading && !dashboardItems);
-
-    if (isInitialLoading) return <>Loading...</>;
-    if (!membership || !dashboardItems) return <div>No access</div>;
+    if (error || !dashboardData) {
+        return <div className="p-8 text-center text-muted-foreground">Unable to load dashboard data.</div>;
+    }
 
     return (
-        <div className="px-4 flex flex-col h-full">
-            <div className=" py-2 flex justify-end">
-                <EngineerSearch table={table} />
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 pb-12 pt-4">
+            
+            {/* Header */}
+            <div className="mb-8 border-b border-border/50 pb-6">
+                <h1 className="text-3xl font-extrabold tracking-tighter text-foreground">Command Center</h1>
             </div>
-            <div>
-                <EngineerDashboardDataTable table={table} />
-            </div>
-            <div className="mt-auto mb-4">
-                <EngineerDashboardPagination table={table} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
+                
+                {/* Left Column: 60% */}
+                <div className="lg:col-span-6 space-y-10">
+                    <EngineerActions 
+                        actionablePhases={dashboardData.actionablePhases} 
+                        recentRequisitions={dashboardData.recentRequisitions} 
+                    />
+                    <EngineerLogs logs={dashboardData.recentLogs} />
+                </div>
+
+                {/* Right Column: 40% */}
+                <div className="lg:col-span-4 space-y-8">
+                    <EngineerProjects projects={dashboardData.activeProjects} />
+                </div>
+
             </div>
         </div>
     );
 };
 
-export default EngineerDashboard;
+export default EngineerDashboardMain;

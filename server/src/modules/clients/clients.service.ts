@@ -7,6 +7,7 @@ import { MissingError } from "../../shared/error/missing.error.js";
 import { Types } from "mongoose";
 import { sendInviteEmail } from "../../shared/lib/emails/sendClientInvitation.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
+import { notify } from "../../shared/lib/notify.js";
 
 const clientService = {
     async getClients(
@@ -29,11 +30,11 @@ const clientService = {
                     select: {
                         projects: {
                             select: {
-                                assignments: true
-                            }
-                        }
-                    }
-                }
+                                assignments: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -173,7 +174,6 @@ const clientService = {
             };
         });
 
-
         return {
             organization: {
                 id: organization.id,
@@ -186,13 +186,20 @@ const clientService = {
     },
 
     async acceptInvitation(token: string, userId: string, userEmail: string) {
+        // 1. Removed 'organization' from include because the relation isn't in the schema
         const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
                 status: "PENDING",
                 expiresAt: { gt: new Date() },
             },
-            include: { projects: true },
+            include: {
+                projects: {
+                    include: {
+                        project: { select: { slug: true } },
+                    },
+                },
+            },
         });
 
         if (!invitation) {
@@ -206,6 +213,12 @@ const clientService = {
                 `Account Mismatch: Please log in with ${invitation.email}`,
             );
         }
+
+        // 2. Fetch the Organization slug separately using the organizationId
+        const organization = await prisma.organization.findUnique({
+            where: { id: invitation.organizationId },
+            select: { slug: true }
+        });
 
         await prisma.$transaction(async (tx) => {
             await tx.invitation.update({
@@ -245,8 +258,22 @@ const clientService = {
                 });
             }
         });
+
+        const orgSlug = organization?.slug || "";
+        const projectSlug = invitation.projects[0]?.project.slug || "";
+
+        await notify({
+            type: "PROJECT_INVITATION_ACCEPTED",
+            title: "Client Invitation Accepted",
+            body: `${userEmail} has accepted the invitation and joined the project.`,
+            entityType: "INVITATION",
+            entityId: invitation.id,
+            orgId: invitation.organizationId,
+            actionUrl: `/${orgSlug}/${projectSlug}/members`, 
+        });
+
         return { success: true, message: "Welcome to the organization." };
-    },
+    }
 };
 
 export default clientService;

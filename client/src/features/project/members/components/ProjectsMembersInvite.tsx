@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import api from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import z from "zod";
 
@@ -32,6 +32,7 @@ const ProjectsMembersInvite = () => {
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -84,49 +85,51 @@ const ProjectsMembersInvite = () => {
                                 Select Role
                             </FieldLabel>
 
-                            <RadioGroup
-                                onValueChange={(value) => {
-                                    // react-hook-form bridge
-                                    register("role").onChange({
-                                        target: { value },
-                                    });
-                                }}
-                                className="flex flex-col gap-3"
-                            >
-                                {/* CLIENT */}
-                                <label className="flex items-start gap-3 cursor-pointer">
-                                    <RadioGroupItem
-                                        value="CLIENT"
-                                        id="client"
-                                    />
-                                    <div>
-                                        <p className="text-sm font-medium text-[#2b3437]">
-                                            Client
-                                        </p>
-                                        <p className="text-xs text-[#737c7f]">
-                                            External stakeholder with limited
-                                            access
-                                        </p>
-                                    </div>
-                                </label>
+                            <Controller
+                                name="role"
+                                control={control}
+                                render={({ field }) => (
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="flex flex-col gap-3"
+                                    >
+                                        {/* CLIENT */}
+                                        <label className="flex items-start gap-3 cursor-pointer">
+                                            <RadioGroupItem
+                                                value="CLIENT"
+                                                id="client"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium text-[#2b3437]">
+                                                    Client
+                                                </p>
+                                                <p className="text-xs text-[#737c7f]">
+                                                    External stakeholder with
+                                                    limited access
+                                                </p>
+                                            </div>
+                                        </label>
 
-                                {/* ENGINEER */}
-                                <label className="flex items-start gap-3 cursor-pointer">
-                                    <RadioGroupItem
-                                        value="ENGINEER"
-                                        id="engineer"
-                                    />
-                                    <div>
-                                        <p className="text-sm font-medium text-[#2b3437]">
-                                            Engineer
-                                        </p>
-                                        <p className="text-xs text-[#737c7f]">
-                                            Internal team member with full
-                                            access
-                                        </p>
-                                    </div>
-                                </label>
-                            </RadioGroup>
+                                        {/* ENGINEER */}
+                                        <label className="flex items-start gap-3 cursor-pointer">
+                                            <RadioGroupItem
+                                                value="ENGINEER"
+                                                id="engineer"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium text-[#2b3437]">
+                                                    Engineer
+                                                </p>
+                                                <p className="text-xs text-[#737c7f]">
+                                                    Internal team member with
+                                                    full access
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </RadioGroup>
+                                )}
+                            />
 
                             {errors.role && (
                                 <FieldError className="text-[#9e422c] text-xs mt-1">

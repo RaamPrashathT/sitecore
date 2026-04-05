@@ -9,7 +9,7 @@ interface NotificationItemProps {
     notification: NotificationSchema;
 }
 
-const getRedirectLink = (notificationType: string, entityId: string, projectId: string | null, orgSlug: string | undefined): string => {
+const getRedirectLink = (notificationType: string, _entityId: string, projectId: string | null, orgSlug: string | undefined): string => {
     const redirectMap: Record<string, string> = {
         REQUISITION_SUBMITTED: `/${orgSlug}/${projectId}/requisitions`,
         REQUISITION_APPROVED: `/${orgSlug}/${projectId}/requisitions`,

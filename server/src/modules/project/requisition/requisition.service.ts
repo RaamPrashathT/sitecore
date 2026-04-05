@@ -1,83 +1,9 @@
 import { ValidationError } from "../../../shared/error/validation.error.js";
+import { notify } from "../../../shared/lib/notify.js";
 import { prisma } from "../../../shared/lib/prisma.js";
 import { User } from "../../../shared/models/user.js";
 
 const requisitionService = {
-    async createRequisition(
-        projectId: string,
-        phaseId: string,
-        requestedBy: string,
-        data: {
-            title: string;
-            items: Array<{
-                catalogueId: string;
-                quantity: number;
-                estimatedUnitCost: number;
-                assignedSupplierId?: string | undefined;
-            }>;
-        }
-    ) {
-        const phase = await prisma.phase.findUnique({
-            where: { id: phaseId, projectId: projectId },
-        });
-
-        if (!phase) {
-            throw new ValidationError("Phase not found or does not belong to this project.");
-        }
-
-        const slugBase = data.title.toLowerCase().trim().replace(/[\s\W-]+/g, '-').replace(/^-+|-+$/g, '');
-        const lastReq = await prisma.requisition.findFirst({
-            where: { phaseId: phaseId, slugBase: slugBase },
-            orderBy: { slugIndex: "desc" },
-        });
-
-        const nextIndex = lastReq ? lastReq.slugIndex + 1 : 1;
-        const currentSlug = nextIndex === 1 ? slugBase : `${slugBase}-${nextIndex}`;
-
-        const totalBudget = data.items.reduce((sum, item) => {
-            return sum + item.quantity * item.estimatedUnitCost;
-        }, 0);
-
-        const requisition = await prisma.requisition.create({
-            data: {
-                title: data.title,
-                slug: currentSlug,
-                slugBase: slugBase,
-                slugIndex: nextIndex,
-                phaseId: phaseId,
-                requestedBy: requestedBy,
-                budget: totalBudget,
-                status: "PENDING_APPROVAL",
-                items: {
-                    createMany: {
-                        data: data.items.map((item) => {
-                            const itemData: any = {
-                                catalogueId: item.catalogueId,
-                                quantity: item.quantity,
-                                estimatedUnitCost: item.estimatedUnitCost,
-                                status: "UNORDERED",
-                            };
-                            if (item.assignedSupplierId !== undefined) {
-                                itemData.assignedSupplierId = item.assignedSupplierId;
-                            }
-                            return itemData;
-                        }),
-                    },
-                },
-            },
-            include: { items: true },
-        });
-
-        return {
-            id: requisition.id,
-            title: requisition.title,
-            slug: requisition.slug,
-            status: requisition.status,
-            budget: Number(requisition.budget),
-            itemCount: requisition.items.length,
-        };
-    },
-
     async getProjectRequisitions(projectId: string) {
         const phases = await prisma.phase.findMany({
             where: { projectId: projectId },
@@ -86,7 +12,12 @@ const requisitionService = {
                 requisitions: {
                     orderBy: { createdAt: "desc" },
                     include: {
-                        items: { include: { catalogue: true, assignedSupplier: true } },
+                        items: {
+                            include: {
+                                catalogue: true,
+                                assignedSupplier: true,
+                            },
+                        },
                     },
                 },
             },
@@ -116,14 +47,18 @@ const requisitionService = {
         });
     },
 
-    async getRequisitionDetails(projectId: string, phaseSlug: string, requisitionSlug: string) {
+    async getRequisitionDetails(
+        projectId: string,
+        phaseSlug: string,
+        requisitionSlug: string,
+    ) {
         const requisition = await prisma.requisition.findFirst({
             where: {
                 slug: requisitionSlug,
                 phase: {
                     slug: phaseSlug,
-                    projectId: projectId
-                }
+                    projectId: projectId,
+                },
             },
             include: {
                 phase: { select: { name: true, slug: true } },
@@ -131,26 +66,32 @@ const requisitionService = {
                     include: {
                         catalogue: true,
                         assignedSupplier: true,
-                    }
-                }
-            }
+                    },
+                },
+            },
         });
 
         if (!requisition) {
-            throw new ValidationError("Requisition not found in this project phase.");
+            throw new ValidationError(
+                "Requisition not found in this project phase.",
+            );
         }
 
-        const items = requisition.items.map(item => ({
+        const items = requisition.items.map((item) => ({
             id: item.id,
             itemName: item.catalogue.name,
             category: item.catalogue.category,
             unit: item.catalogue.unit,
             quantity: Number(item.quantity),
             estimatedUnitCost: Number(item.estimatedUnitCost),
-            totalEstimatedCost: Number(item.quantity) * Number(item.estimatedUnitCost),
+            totalEstimatedCost:
+                Number(item.quantity) * Number(item.estimatedUnitCost),
             status: item.status,
-            supplierName: item.assignedSupplier?.supplier || "No specific supplier",
-            standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : null
+            supplierName:
+                item.assignedSupplier?.supplier || "No specific supplier",
+            standardRate: item.assignedSupplier
+                ? Number(item.assignedSupplier.standardRate)
+                : null,
         }));
 
         return {
@@ -161,10 +102,10 @@ const requisitionService = {
             budget: Number(requisition.budget),
             createdAt: requisition.createdAt,
             phase: requisition.phase,
-            items: items
+            items: items,
         };
     },
-    
+
     async getPendingRequisitions(
         organizationId: string,
         pageIndex: number,
@@ -305,10 +246,111 @@ const requisitionService = {
         };
     },
 
+    async createRequisition(
+        projectId: string,
+        phaseId: string,
+        requestedBy: string,
+        data: {
+            title: string;
+            items: Array<{
+                catalogueId: string;
+                quantity: number;
+                estimatedUnitCost: number;
+                assignedSupplierId?: string | undefined;
+            }>;
+        },
+    ) {
+        // 1. Update the query to include the organization so we can get its slug
+        const phase = await prisma.phase.findUnique({
+            where: { id: phaseId, projectId: projectId },
+            include: { project: { include: { organization: true } } },
+        });
+
+        if (!phase) {
+            throw new ValidationError(
+                "Phase not found or does not belong to this project.",
+            );
+        }
+
+        const slugBase = data.title
+            .toLowerCase()
+            .trim()
+            .replace(/[\s\W-]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+        const lastReq = await prisma.requisition.findFirst({
+            where: { phaseId: phaseId, slugBase: slugBase },
+            orderBy: { slugIndex: "desc" },
+        });
+
+        const nextIndex = lastReq ? lastReq.slugIndex + 1 : 1;
+        const currentSlug =
+            nextIndex === 1 ? slugBase : `${slugBase}-${nextIndex}`;
+
+        const totalBudget = data.items.reduce((sum, item) => {
+            return sum + item.quantity * item.estimatedUnitCost;
+        }, 0);
+
+        const requisition = await prisma.requisition.create({
+            data: {
+                title: data.title,
+                slug: currentSlug,
+                slugBase: slugBase,
+                slugIndex: nextIndex,
+                phaseId: phaseId,
+                requestedBy: requestedBy,
+                budget: totalBudget,
+                status: "PENDING_APPROVAL",
+                items: {
+                    createMany: {
+                        data: data.items.map((item) => {
+                            const itemData: any = {
+                                catalogueId: item.catalogueId,
+                                quantity: item.quantity,
+                                estimatedUnitCost: item.estimatedUnitCost,
+                                status: "UNORDERED",
+                            };
+                            if (item.assignedSupplierId !== undefined) {
+                                itemData.assignedSupplierId =
+                                    item.assignedSupplierId;
+                            }
+                            return itemData;
+                        }),
+                    },
+                },
+            },
+            include: { items: true },
+        });
+
+        // 2. SEND NOTIFICATION (Alerts Admin to approve)
+        await notify({
+            type: "REQUISITION_SUBMITTED",
+            title: "Material Request Pending",
+            body: `${data.title} has been submitted for ${phase.name} and requires approval.`,
+            entityType: "REQUISITION",
+            entityId: requisition.id,
+            projectId: projectId,
+            orgId: phase.project.organizationId,
+            actionUrl: `/${phase.project.organization.slug}/requisitions/${requisition.slug}`, // Routes Admin to Acceptance Page
+        });
+
+        return {
+            id: requisition.id,
+            title: requisition.title,
+            slug: requisition.slug,
+            status: requisition.status,
+            budget: Number(requisition.budget),
+            itemCount: requisition.items.length,
+        };
+    },
+
     async approveRequisition(requisitionId: string) {
+        // 1. Get the requisition WITH the phase and project slugs
         const requisition = await prisma.requisition.findFirst({
-            where: {
-                id: requisitionId,
+            where: { id: requisitionId },
+            include: {
+                phase: {
+                    include: { project: { include: { organization: true } } },
+                },
             },
         });
 
@@ -326,12 +368,28 @@ const requisitionService = {
             where: { id: requisitionId },
             data: { status: "APPROVED" },
         });
+
+        // 2. SEND NOTIFICATION (Alerts Engineer it was approved)
+        await notify({
+            type: "REQUISITION_APPROVED",
+            title: "Requisition Approved",
+            body: `Your request "${requisition.title}" for ${requisition.phase.name} has been approved!`,
+            entityType: "REQUISITION",
+            entityId: requisition.id,
+            projectId: requisition.phase.projectId,
+            orgId: requisition.phase.project.organizationId,
+            actionUrl: `/${requisition.phase.project.organization.slug}/${requisition.phase.project.slug}/requisitions/${requisition.phase.slug}/${requisition.slug}`,
+        });
     },
 
-    async rejectRequisition( requisitionId: string) {
+    async rejectRequisition(requisitionId: string) {
+        // 1. Get the requisition WITH the phase and project slugs
         const requisition = await prisma.requisition.findFirst({
-            where: {
-                id: requisitionId,
+            where: { id: requisitionId },
+            include: {
+                phase: {
+                    include: { project: { include: { organization: true } } },
+                },
             },
         });
 
@@ -349,6 +407,18 @@ const requisitionService = {
             where: { id: requisitionId },
             data: { status: "REJECTED" },
         });
+
+        // 2. SEND NOTIFICATION (Alerts Engineer it was rejected)
+        await notify({
+            type: "REQUISITION_REJECTED",
+            title: "Requisition Rejected",
+            body: `Your request "${requisition.title}" was declined. Please review and resubmit if necessary.`,
+            entityType: "REQUISITION",
+            entityId: requisition.id,
+            projectId: requisition.phase.projectId,
+            orgId: requisition.phase.project.organizationId,
+            actionUrl: `/${requisition.phase.project.organization.slug}/${requisition.phase.project.slug}/requisitions/${requisition.phase.slug}/${requisition.slug}`,
+        });
     },
 
     async getRequisitionCatalogue(
@@ -356,21 +426,21 @@ const requisitionService = {
         phaseSlug: string,
         pageIndex: number,
         pageSize: number,
-        searchQuery: string
+        searchQuery: string,
     ) {
         // 1. Fetch the Phase to calculate financial allocation
         const phase = await prisma.phase.findUnique({
-            where: { 
-                slug_projectId: { slug: phaseSlug, projectId: projectId } 
+            where: {
+                slug_projectId: { slug: phaseSlug, projectId: projectId },
             },
             include: {
                 project: { select: { organizationId: true } },
                 requisitions: {
                     // Count all budgets that are active, pending, or drafted
                     where: { status: { not: "REJECTED" } },
-                    select: { budget: true }
-                }
-            }
+                    select: { budget: true },
+                },
+            },
         });
 
         if (!phase) {
@@ -378,7 +448,10 @@ const requisitionService = {
         }
 
         // Calculate Remaining Budget
-        const usedBudget = phase.requisitions.reduce((sum, req) => sum + Number(req.budget), 0);
+        const usedBudget = phase.requisitions.reduce(
+            (sum, req) => sum + Number(req.budget),
+            0,
+        );
         const remainingBudget = Number(phase.budget) - usedBudget;
 
         // 2. Fetch the Catalogue with nested Supplier Quotes
@@ -390,7 +463,16 @@ const requisitionService = {
         if (searchQuery) {
             whereClause.OR = [
                 { name: { contains: searchQuery, mode: "insensitive" } },
-                { supplierQuotes: { some: { supplier: { contains: searchQuery, mode: "insensitive" } } } }
+                {
+                    supplierQuotes: {
+                        some: {
+                            supplier: {
+                                contains: searchQuery,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                },
             ];
         }
 
@@ -398,13 +480,13 @@ const requisitionService = {
             prisma.catalogue.findMany({
                 where: whereClause,
                 include: {
-                    supplierQuotes: true
+                    supplierQuotes: true,
                 },
                 skip: skip,
                 take: pageSize,
-                orderBy: { name: "asc" }
+                orderBy: { name: "asc" },
             }),
-            prisma.catalogue.count({ where: whereClause })
+            prisma.catalogue.count({ where: whereClause }),
         ]);
 
         return {
@@ -412,32 +494,32 @@ const requisitionService = {
                 id: phase.id,
                 name: phase.name,
                 budget: Number(phase.budget),
-                remainingBudget: remainingBudget
+                remainingBudget: remainingBudget,
             },
             catalogue: {
-                data: catalogueData.map(c => ({
+                data: catalogueData.map((c) => ({
                     id: c.id,
                     name: c.name,
                     category: c.category,
                     unit: c.unit,
                     defaultLeadTime: c.defaultLeadTime,
                     organizationId: c.organizationId,
-                    supplierQuotes: c.supplierQuotes.map(sq => ({
+                    supplierQuotes: c.supplierQuotes.map((sq) => ({
                         id: sq.id,
                         supplier: sq.supplier,
                         standardRate: Number(sq.standardRate),
                         leadTime: sq.leadTime,
-                        catalogueId: sq.catalogueId
-                    }))
+                        catalogueId: sq.catalogueId,
+                    })),
                 })),
-                count
-            }
+                count,
+            },
         };
     },
     async getAllPhaseRequisitions(projectId: string, phaseSlug: string) {
         const phase = await prisma.phase.findUnique({
             where: {
-                slug_projectId: { slug: phaseSlug, projectId: projectId }
+                slug_projectId: { slug: phaseSlug, projectId: projectId },
             },
             include: {
                 requisitions: {
@@ -447,11 +529,11 @@ const requisitionService = {
                             include: {
                                 catalogue: true,
                                 assignedSupplier: true,
-                            }
-                        }
-                    }
-                }
-            }
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         if (!phase) {
@@ -476,12 +558,17 @@ const requisitionService = {
                     unit: item.catalogue.unit,
                     quantity: Number(item.quantity),
                     estimatedUnitCost: Number(item.estimatedUnitCost),
-                    totalEstimatedCost: Number(item.quantity) * Number(item.estimatedUnitCost),
+                    totalEstimatedCost:
+                        Number(item.quantity) * Number(item.estimatedUnitCost),
                     status: item.status,
-                    supplierName: item.assignedSupplier?.supplier || "No specific supplier",
-                    standardRate: item.assignedSupplier ? Number(item.assignedSupplier.standardRate) : null
-                }))
-            }))
+                    supplierName:
+                        item.assignedSupplier?.supplier ||
+                        "No specific supplier",
+                    standardRate: item.assignedSupplier
+                        ? Number(item.assignedSupplier.standardRate)
+                        : null,
+                })),
+            })),
         };
     },
 };

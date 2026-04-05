@@ -7,7 +7,7 @@ import PendingPaymentPagination from "./PendingPaymentPagination";
 import PendingPaymentTable from "./PendingPaymentTable";
 import { usePendingPhaseList } from "../hooks/usePendingPhaseList";
 import { PendingPaymentColumns as columns } from "./PendingPaymentColumns";
-import PendingPaymentEmpty from "./PendingPaymentEmpty";
+// import PendingPaymentEmpty from "./PendingPaymentEmpty";
 
 const PendingPaymentMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");

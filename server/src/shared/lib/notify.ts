@@ -5,6 +5,7 @@ interface NotifyInput {
     type: NotificationType;
     title: string;
     body?: string;
+    actionUrl?: string; // <-- NEW: Added actionUrl
     entityType: NotificationEntityType;
     entityId: string;
     projectId?: string | undefined;
@@ -20,7 +21,7 @@ export async function notify(input: NotifyInput) {
         : [];
 
     const assignedUserIds = assignments.map((a) => a.userId);
-    const assignmentByUserId = Object.fromEntries(assignments.map((a) => [a.userId, a.id]));
+    // const assignmentByUserId = Object.fromEntries(assignments.map((a) => [a.userId, a.id]));
 
     const memberships = await prisma.membership.findMany({
         where: {
@@ -41,6 +42,7 @@ export async function notify(input: NotifyInput) {
             type: input.type,
             title: input.title,
             body: input.body ?? null,
+            actionUrl: input.actionUrl ?? null,
             entityType: input.entityType,
             entityId: input.entityId,
             projectId: input.projectId ?? null,
@@ -48,7 +50,6 @@ export async function notify(input: NotifyInput) {
             recipients: {
                 create: memberships.map((m) => ({
                     membershipId: m.id,
-                    assignmentId: assignmentByUserId[m.userId] ?? null,
                 })),
             },
         },
