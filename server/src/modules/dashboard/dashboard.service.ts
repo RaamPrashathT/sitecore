@@ -2,10 +2,7 @@ import { prisma } from "../../shared/lib/prisma.js";
 import type { SetDashboardItemsType } from "./dashboard.schema.js";
 
 const dashboardService = {
-    async getDashboardItems(
-        organizationId: string,
-        searchQuery: string,
-    ) {
+    async getDashboardItems(organizationId: string, searchQuery: string) {
         const whereClause: any = {
             status: "UNORDERED",
             requisition: {
@@ -124,30 +121,57 @@ const dashboardService = {
         };
     },
 
-    async setDashboardItems({
-        requisitionItemIds,
+    async orderItem({
+        requisitionItemId,
+        deductInventoryQty,
         organizationId,
-    }: SetDashboardItemsType) {
-        const result = await prisma.requisitionItem.updateMany({
-            where: {
-                id: {
-                    in: requisitionItemIds,
-                },
-                requisition: {
-                    status: "APPROVED",
-                    phase: {
-                        project: {
-                            organizationId,
+    }: {
+        requisitionItemId: string;
+        deductInventoryQty: number;
+        organizationId: string;
+    }) {
+        // Use a transaction to ensure both operations succeed or fail together
+        return await prisma.$transaction(async (tx) => {
+            // 1. Verify the item belongs to the org and is currently UNORDERED
+            const item = await tx.requisitionItem.findFirst({
+                where: {
+                    id: requisitionItemId,
+                    status: "UNORDERED",
+                    requisition: {
+                        status: "APPROVED",
+                        phase: {
+                            project: { organizationId },
                         },
                     },
                 },
-            },
-            data: {
-                status: "ORDERED",
-            },
-        });
+                include: { assignedSupplier: true },
+            });
 
-        return result;
+            if (!item) {
+                throw new Error(
+                    "Requisition item not found or already ordered",
+                );
+            }
+
+            // 2. Mark the requisition item as ORDERED
+            const updatedItem = await tx.requisitionItem.update({
+                where: { id: requisitionItemId },
+                data: { status: "ORDERED" },
+            });
+
+            if (deductInventoryQty > 0 && item.assignedSupplierId) {
+                await tx.supplierQuote.update({
+                    where: { id: item.assignedSupplierId },
+                    data: {
+                        inventory: {
+                            decrement: deductInventoryQty,
+                        },
+                    },
+                });
+            }
+
+            return updatedItem;
+        });
     },
 
     async getEngineerDashboardItems(
@@ -155,7 +179,6 @@ const dashboardService = {
         organizationId: string,
         searchQuery: string,
     ) {
-
         const whereClause: any = {
             status: "ACTIVE",
             project: {
@@ -256,8 +279,6 @@ const dashboardService = {
         organizationId: string,
         searchQuery: string,
     ) {
-        
-
         const whereClause: any = {
             status: "PAYMENT_PENDING",
             isPaid: false,
@@ -373,6 +394,136 @@ const dashboardService = {
             })),
         };
     },
+
+    async getRequisitionBySlug(organizationId: string, reqSlug: string) {
+        const requisition = await prisma.requisition.findFirst({
+            where: {
+                slug: reqSlug,
+                phase: {
+                    project: { organizationId },
+                },
+            },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                status: true,
+                budget: true,
+                requestedBy: true,
+                createdAt: true,
+                phase: {
+                    select: {
+                        name: true,
+                        project: {
+                            select: { name: true },
+                        },
+                    },
+                },
+                items: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        estimatedUnitCost: true,
+                        status: true,
+                        catalogue: {
+                            select: {
+                                name: true,
+                                unit: true,
+                            },
+                        },
+                        assignedSupplier: {
+                            select: {
+                                supplier: true,
+                                truePrice: true,
+                                standardRate: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!requisition) {
+            throw new Error("Requisition not found");
+        }
+
+        // Flatten the data for a clean frontend response
+        return {
+            id: requisition.id,
+            title: requisition.title,
+            slug: requisition.slug,
+            status: requisition.status,
+            budget: Number(requisition.budget),
+            requestedBy: requisition.requestedBy,
+            createdAt: requisition.createdAt,
+            phaseName: requisition.phase.name,
+            projectName: requisition.phase.project.name,
+            items: requisition.items.map((item) => ({
+                id: item.id,
+                itemName: item.catalogue.name,
+                unit: item.catalogue.unit,
+                quantity: Number(item.quantity),
+                estimatedUnitCost: Number(item.estimatedUnitCost),
+                status: item.status,
+                supplierName: item.assignedSupplier?.supplier,
+                truePrice: item.assignedSupplier
+                    ? Number(item.assignedSupplier.truePrice)
+                    : undefined,
+                standardRate: item.assignedSupplier
+                    ? Number(item.assignedSupplier.standardRate)
+                    : undefined,
+            })),
+        };
+    },
+
+    async getPendingPaymentById(organizationId: string, phaseId: string) {
+        const phase = await prisma.phase.findFirst({
+            where: {
+                id: phaseId,
+                project: { organizationId },
+            },
+            select: {
+                id: true,
+                name: true,
+                budget: true,
+                paymentDeadline: true,
+                status: true,
+                isPaid: true,
+                project: {
+                    select: { name: true },
+                },
+            },
+        });
+
+        if (!phase) throw new Error("Payment not found");
+
+        return {
+            id: phase.id,
+            phaseName: phase.name,
+            projectName: phase.project.name,
+            budget: Number(phase.budget),
+            paymentDeadline: phase.paymentDeadline,
+            status: phase.status,
+            isPaid: phase.isPaid,
+        };
+    },
+    async approvePendingPayment(organizationId: string, phaseId: string) {
+        // Verify it belongs to the org first
+        const phase = await prisma.phase.findFirst({
+            where: { id: phaseId, project: { organizationId } }
+        });
+
+        if (!phase) throw new Error("Phase not found");
+
+        // Mark it as paid and active
+        return await prisma.phase.update({
+            where: { id: phaseId },
+            data: {
+                isPaid: true,
+                status: "ACTIVE" 
+            }
+        });
+    }
 };
 
 export default dashboardService;

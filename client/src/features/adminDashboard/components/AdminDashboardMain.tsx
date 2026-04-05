@@ -31,23 +31,24 @@ const AdminDashboardMain = () => {
         getSortedRowModel: getSortedRowModel(),
         onGlobalFilterChange: setGlobalFilter,
         manualFiltering: true, // Backend handles filtering
-        onRowSelectionChange: setRowSelection, 
+        onRowSelectionChange: setRowSelection,
         getRowId: (row) => row.id,
         state: {
             globalFilter,
-            rowSelection, 
+            rowSelection,
         },
     });
 
-    const isInitialLoading = membershipLoading || (dashboardItemsLoading && !dashboardItems);
+    const isInitialLoading =
+        membershipLoading || (dashboardItemsLoading && !dashboardItems);
 
     if (isInitialLoading) return <AdminDashboardSkeleton />;
     if (!membership || !dashboardItems) return <div>No access</div>;
-    
+
     return (
-        <section className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h2 className="text-2xl font-bold text-foreground tracking-tight">
+        <section className="col-span-12 lg:col-span-8 flex flex-col gap-6 px-4 lg:px-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                <h2 className="text-2xl font-bold text-foreground tracking-tight ">
                     Materials to Fulfill
                 </h2>
                 <SearchTableControl table={table} />

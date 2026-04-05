@@ -7,7 +7,9 @@ import { Link } from "react-router-dom";
 
 const PendingApprovalsSidebar = () => {
     const { data: membership } = useMembership();
-    const { data: summary, isLoading } = usePendingApprovalsSummary(membership?.id);
+    const { data: summary, isLoading } = usePendingApprovalsSummary(
+        membership?.id,
+    );
 
     if (isLoading) {
         return (
@@ -20,7 +22,7 @@ const PendingApprovalsSidebar = () => {
     }
 
     return (
-        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
+        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6 sm:pr-4 sm:p-0 p-4">
             <h2 className="text-2xl font-bold text-foreground tracking-tight">
                 Pending Approvals
             </h2>
@@ -45,9 +47,9 @@ const PendingApprovalsSidebar = () => {
                                 </div>
                             ) : (
                                 summary?.pendingRequisitions.map((req) => (
-                                    <Link 
-                                        key={req.id} 
-                                        to={`/requisitions/${req.id}`} 
+                                    <Link
+                                        key={req.id}
+                                        to={`requisitions/${req.slug}`}
                                         className="flex items-center p-3 hover:bg-muted/50 transition-colors group"
                                     >
                                         <div className="flex-1 min-w-0">
@@ -55,7 +57,9 @@ const PendingApprovalsSidebar = () => {
                                                 {req.title}
                                             </p>
                                             <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                                ${req.amount.toLocaleString()} <span className="mx-1">•</span> {req.phaseName}
+                                                ${req.amount.toLocaleString()}{" "}
+                                                <span className="mx-1">•</span>{" "}
+                                                {req.phaseName}
                                             </p>
                                         </div>
                                         <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors ml-2 shrink-0" />
@@ -79,33 +83,28 @@ const PendingApprovalsSidebar = () => {
 
                     <Card className="shadow-none p-0 overflow-hidden">
                         <div className="divide-y divide-border flex flex-col">
-                            {summary?.pendingPayments.length === 0 ? (
-                                <div className="p-4 text-xs text-center text-muted-foreground bg-muted/20">
-                                    No pending client payments.
-                                </div>
-                            ) : (
-                                summary?.pendingPayments.map((payment) => (
-                                    <Link 
-                                        key={payment.id} 
-                                        to={`/payments/${payment.id}`} 
-                                        className="flex items-center p-3 hover:bg-muted/50 transition-colors group"
-                                    >
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-foreground truncate">
-                                                {payment.title}
-                                            </p>
-                                            <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                                ${payment.amount.toLocaleString()} <span className="mx-1">•</span> {payment.projectName}
-                                            </p>
-                                        </div>
-                                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors ml-2 shrink-0" />
-                                    </Link>
-                                ))
-                            )}
+                            {summary?.pendingPayments.map((payment) => (
+                                <Link
+                                    key={payment.id}
+                                    to={`payments/${payment.id}`} // <-- CHANGED TO .id
+                                    className="flex items-center p-3 hover:bg-muted/50 transition-colors group"
+                                >
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-foreground truncate">
+                                            {payment.title}
+                                        </p>
+                                        <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
+                                            ${payment.amount.toLocaleString()}{" "}
+                                            <span className="mx-1">•</span>{" "}
+                                            {payment.projectName}
+                                        </p>
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors ml-2 shrink-0" />
+                                </Link>
+                            ))}
                         </div>
                     </Card>
                 </section>
-                
             </div>
         </aside>
     );

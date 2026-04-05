@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import {
     getDashboardItemsSchema,
-    setDashboardItemsSchema,
+    orderItemSchema,
 } from "./dashboard.schema.js";
 import { logger } from "../../shared/lib/logger.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
@@ -18,7 +18,8 @@ const dashboardController = {
                 searchQuery,
             });
 
-            if (!validatedData.success) throw new ValidationError("Invalid Request");
+            if (!validatedData.success)
+                throw new ValidationError("Invalid Request");
 
             const result = await dashboardService.getDashboardItems(
                 validatedData.data.organizationId,
@@ -27,26 +28,28 @@ const dashboardController = {
 
             return response.status(200).json(result);
         } catch (error) {
-            if (error instanceof ValidationError) return response.status(400).json({ message: error.message });
+            if (error instanceof ValidationError)
+                return response.status(400).json({ message: error.message });
             logger.error(error);
-            return response.status(500).json({ message: "Something went wrong" });
+            return response
+                .status(500)
+                .json({ message: "Something went wrong" });
         }
     },
 
-    async setDashboardItems(request: Request, response: Response) {
+    async orderItem(request: Request, response: Response) {
         try {
-            const validatedData = setDashboardItemsSchema.safeParse({
-                requisitionItemIds: request.body.requisitionItemIds,
+            const validatedData = orderItemSchema.safeParse({
+                requisitionItemId: request.body.requisitionItemId,
+                deductInventoryQty: request.body.deductInventoryQty,
                 organizationId: request.tenant?.orgId,
             });
 
             if (!validatedData.success) {
-                throw new ValidationError("Invalid Organization ID");
+                throw new ValidationError("Invalid Order Data");
             }
-            const result = await dashboardService.setDashboardItems(
-                validatedData.data,
-            );
 
+            const result = await dashboardService.orderItem(validatedData.data);
             return response.status(200).json(result);
         } catch (error) {
             if (error instanceof ValidationError) {
@@ -70,7 +73,8 @@ const dashboardController = {
                 searchQuery,
             });
 
-            if (!validatedData.success) throw new ValidationError("Invalid Request");
+            if (!validatedData.success)
+                throw new ValidationError("Invalid Request");
 
             const result = await dashboardService.getEngineerDashboardItems(
                 engineerId!,
@@ -80,9 +84,12 @@ const dashboardController = {
 
             return response.status(200).json(result);
         } catch (error) {
-             if (error instanceof ValidationError) return response.status(400).json({ message: error.message });
-             logger.error(error);
-             return response.status(500).json({ message: "Something went wrong" });
+            if (error instanceof ValidationError)
+                return response.status(400).json({ message: error.message });
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Something went wrong" });
         }
     },
 
@@ -97,7 +104,8 @@ const dashboardController = {
                 searchQuery,
             });
 
-            if (!validatedData.success) throw new ValidationError("Invalid Request");
+            if (!validatedData.success)
+                throw new ValidationError("Invalid Request");
 
             const result = await dashboardService.getClientDashboardItems(
                 clientId!,
@@ -107,12 +115,15 @@ const dashboardController = {
 
             return response.status(200).json(result);
         } catch (error) {
-            if (error instanceof ValidationError) return response.status(400).json({ message: error.message });
+            if (error instanceof ValidationError)
+                return response.status(400).json({ message: error.message });
             logger.error(error);
-            return response.status(500).json({ message: "Something went wrong" });
+            return response
+                .status(500)
+                .json({ message: "Something went wrong" });
         }
     },
-    
+
     async getPendingApprovalsSummary(request: Request, response: Response) {
         try {
             const organizationId = request.tenant?.orgId;
@@ -129,6 +140,75 @@ const dashboardController = {
             return response
                 .status(500)
                 .json({ message: "Failed to fetch pending approvals" });
+        }
+    },
+    async getRequisitionBySlug(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant?.orgId;
+            const reqSlug = request.params.reqSlug as string;
+
+            if (!organizationId) {
+                return response.status(401).json({ message: "Unauthorized" });
+            }
+
+            const result = await dashboardService.getRequisitionBySlug(
+                organizationId,
+                reqSlug,
+            );
+            return response.status(200).json(result);
+        } catch (error: any) {
+            if (error.message === "Requisition not found") {
+                return response.status(404).json({ message: error.message });
+            }
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    },
+
+    async getPendingPaymentById(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant?.orgId;
+            const phaseId = request.params.phaseId as string;
+
+            if (!organizationId) {
+                return response.status(401).json({ message: "Unauthorized" });
+            }
+
+            const result = await dashboardService.getPendingPaymentById(
+                organizationId,
+                phaseId,
+            );
+            return response.status(200).json(result);
+        } catch (error: any) {
+            if (error.message === "Payment not found") {
+                return response.status(404).json({ message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ message: "Internal server error" });
+        }
+    },
+
+    async approvePendingPayment(request: Request, response: Response) {
+        try {
+            const organizationId = request.tenant?.orgId;
+            const phaseId = request.body.id;
+
+            if (!organizationId) {
+                return response.status(401).json({ message: "Unauthorized" });
+            }
+
+            const result = await dashboardService.approvePendingPayment(
+                organizationId,
+                phaseId,
+            );
+            return response.status(200).json(result);
+        } catch (error: any) {
+            logger.error(error);
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 };

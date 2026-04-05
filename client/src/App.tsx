@@ -51,6 +51,8 @@ import ProjectRequisitionPage from "./pages/project/ProjectRequisitionPage";
 import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
 import ProjectPhaseMain from "./features/project/progress/components/ProjectPhaseMain";
 import RequisitionDetailsPage from "./pages/project/RequisitionDetailsPage";
+import IndividualPaymentAcceptancePage from "./pages/adminPages/dashboard/IndividualPaymentAcceptancePage";
+import IndividualRequisitionAcceptancePage from "./pages/adminPages/dashboard/IndividualRequisitionAcceptancepage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -101,6 +103,7 @@ function App() {
                                     path="notifications"
                                     element={<NotificationPage />}
                                 />
+
                                 {/* Catalogue */}
                                 <Route
                                     path="catalogue"
@@ -132,7 +135,18 @@ function App() {
                                     path="clients/invite"
                                     element={<ClientInvitePage />}
                                 />
-
+                                <Route
+                                    path="payments/:phaseId"
+                                    element={
+                                        <IndividualPaymentAcceptancePage />
+                                    }
+                                />
+                                <Route
+                                    path="requisitions/:reqSlug"
+                                    element={
+                                        <IndividualRequisitionAcceptancePage />
+                                    }
+                                />
                                 {/* Projects */}
                                 <Route
                                     path="projects"
@@ -198,6 +212,7 @@ function App() {
                                         element={<ProjectMemberInvitePage />}
                                     />
                                 </Route>
+
                                 {/* Pending */}
                                 <Route
                                     path="pending-requisitions"

@@ -19,7 +19,7 @@ dashboardRouter.post(
     authorize,
     orgAuthorize,
     requiredRole("ADMIN"),
-    dashboardController.setDashboardItems,
+    dashboardController.orderItem,
 );
 
 dashboardRouter.get(
@@ -42,5 +42,28 @@ dashboardRouter.get(
     orgAuthorize,
     requiredRole("ADMIN"),
     dashboardController.getPendingApprovalsSummary,
+);
+
+dashboardRouter.get(
+    "/requisition/slug/:reqSlug", 
+    authorize, 
+    orgAuthorize, 
+    dashboardController.getRequisitionBySlug
+);
+
+dashboardRouter.get(
+    "/payment/id/:phaseId", 
+    authorize, 
+    orgAuthorize, 
+    requiredRole("ADMIN"),
+    dashboardController.getPendingPaymentById
+);
+
+dashboardRouter.put(
+    "/phase/payment_approval",
+    authorize,
+    orgAuthorize,
+    requiredRole("ADMIN"),
+    dashboardController.approvePendingPayment
 );
 export default dashboardRouter;
