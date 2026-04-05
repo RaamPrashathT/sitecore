@@ -21,7 +21,7 @@ const AdminDashboardMain = () => {
 
     const [pagination, setPagination] = useState({
         pageIndex: 0,
-        pageSize: 24,
+        pageSize: 10, // Adjusted default to fit the larger cards better
     });
     
     const [rowSelection, setRowSelection] = useState({});
@@ -58,28 +58,42 @@ const AdminDashboardMain = () => {
 
     const selectedIds = table.getSelectedRowModel().rows.map(r => r.original.id);
 
-    const isInitialLoading =
-        membershipLoading || (dashboardItemsLoading && !dashboardItems);
+    const isInitialLoading = membershipLoading || (dashboardItemsLoading && !dashboardItems);
 
     if (isInitialLoading) return <AdminDashboardSkeleton />;
     if (!membership || !dashboardItems) return <div>No access</div>;
     
     return (
-        <div className="px-4 flex flex-col h-full">
-            <div className="flex flex-row justify-between items-center py-2">
+        <section className="col-span-12 lg:col-span-8 flex flex-col h-full">
+            {/* Header Area */}
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-foreground tracking-tight">Materials to Fulfill</h2>
+                <div className="flex gap-2 items-center">
+                    <span className="px-3 py-1 bg-secondary text-secondary-foreground text-[10px] font-mono uppercase tracking-widest rounded-full">
+                        Phase Priority View
+                    </span>
+                </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex flex-row justify-between items-center pb-6 border-b border-border mb-6">
+                <SearchTableControl table={table} />
                 <OrderButton 
                     selectedIds={selectedIds} 
                     clearSelection={() => table.resetRowSelection()} 
                 />
-                <SearchTableControl table={table} />
             </div>
-            <div>
+
+            {/* Main Content List */}
+            <div className="flex-1">
                 <AdminDashboardDataTable table={table} />
             </div>
-            <div className="mt-auto mb-4">
+
+            {/* Pagination */}
+            <div className="mt-8 mb-4">
                 <AdminDashboardPagination table={table} />
             </div>
-        </div>
+        </section>
     );
 };
 
