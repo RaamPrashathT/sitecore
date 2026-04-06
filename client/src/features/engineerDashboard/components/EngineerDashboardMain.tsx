@@ -29,8 +29,8 @@ const EngineerDashboardMain = () => {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-8 pb-12 pt-4">
             
             {/* Header */}
-            <div className="mb-8 border-b border-border/50 pb-6">
-                <h1 className="text-3xl font-extrabold tracking-tighter text-foreground">Command Center</h1>
+            <div className=" pb-6">
+                <h1 className="text-3xl font-display font-semibold tracking-tighter text-foreground">Command Center</h1>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">

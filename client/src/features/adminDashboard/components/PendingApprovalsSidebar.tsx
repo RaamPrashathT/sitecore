@@ -57,7 +57,7 @@ const PendingApprovalsSidebar = () => {
                                                 {req.title}
                                             </p>
                                             <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                                ${req.amount.toLocaleString()}{" "}
+                                            ₹{req.amount.toLocaleString("en-IN")}{" "}
                                                 <span className="mx-1">•</span>{" "}
                                                 {req.phaseName}
                                             </p>
@@ -94,7 +94,7 @@ const PendingApprovalsSidebar = () => {
                                             {payment.title}
                                         </p>
                                         <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                            ${payment.amount.toLocaleString()}{" "}
+                                        ₹{payment.amount.toLocaleString("en-IN")}{" "}
                                             <span className="mx-1">•</span>{" "}
                                             {payment.projectName}
                                         </p>

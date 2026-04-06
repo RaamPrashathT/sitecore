@@ -3,8 +3,6 @@ import {
     UserRoundCheck,
     ScrollText,
     Users,
-    ClipboardClock,
-    ClipboardPlus,
     Mail,
     ChartArea,
     Bell,
@@ -107,8 +105,6 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             },
             {
                 Pending: [
-                    { title: "Payments", url: "/pending-payments", icon: ClipboardClock },
-                    { title: "Requests", url: "/pending-requisitions", icon: ClipboardPlus },
                     { title: "Invitations", url: "/pending-invitations", icon: Mail },
                 ],
             }

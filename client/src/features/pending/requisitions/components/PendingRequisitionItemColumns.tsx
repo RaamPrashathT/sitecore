@@ -54,7 +54,7 @@ export const PendingRequisitionItemColumns = [
         header: "Total Cost",
         cell: (info) => (
             <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
-                ₹{info.getValue().toFixed(2)}
+                ₹{info.getValue() * info.row.original.quantity}
             </div>
         ),
     }),
@@ -62,7 +62,7 @@ export const PendingRequisitionItemColumns = [
         header: "Total Profit",
         cell: (info) => (
             <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
-                ₹{(info.getValue() - ((info.row.original.truePrice || 0) * info.row.original.quantity)).toFixed(2)}
+                ₹{(((info.row.original.truePrice || 0) * info.row.original.quantity) -info.getValue() )}
             </div>  
         ),
     }),

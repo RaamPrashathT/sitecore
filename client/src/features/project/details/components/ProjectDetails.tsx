@@ -28,7 +28,7 @@ const GRID = {
 const getStatusColor = (status: string) => {
     switch (status) {
         case "COMPLETED": return "bg-green-100 text-green-800 border-green-200";
-        case "ACTIVE": return "bg-blue-50 text-blue-700 border-blue-200";
+        case "ACTIVE": return "bg-green-50 text-green-700 border-green-200";
         case "PAYMENT_PENDING": return "bg-yellow-50 text-yellow-700 border-yellow-200";
         case "PLANNING": return "bg-slate-100 text-slate-600 border-slate-200";
         default: return "bg-slate-100 text-slate-600";

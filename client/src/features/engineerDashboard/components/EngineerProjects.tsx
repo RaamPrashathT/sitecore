@@ -18,7 +18,7 @@ const EngineerProjects = ({ projects }: EngineerProjectsProps) => {
                     </div>
                 ) : (
                     projects.map((project) => (
-                        <div key={project.id} className="bg-card p-5 rounded-xl border-l-4 border-l-primary shadow-sm hover:translate-x-1 transition-transform cursor-pointer">
+                        <div key={project.id} className="bg-card p-5 rounded-xl shadow-sm hover:translate-x-1 transition-transform cursor-pointer">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <h3 className="font-bold text-lg text-foreground truncate">{project.name}</h3>
