@@ -5,6 +5,7 @@ import { usePhaseDetails } from "../hooks/usePhaseDetails";
 import { Button } from "@/components/ui/button";
 import SiteLogCard from "./SiteLogCard";
 import ProjectPhaseSkeleton from "./ProjectPhaseSkeleton.tsx";
+import { useMembership } from "@/hooks/useMembership.ts";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -14,6 +15,8 @@ const formatCurrency = (amount: number) =>
     }).format(amount);
 
 const ProjectPhaseMain = () => {
+    const { data: membership, isLoading: isMembershipLoading } =
+        useMembership();
     const navigate = useNavigate();
     const { orgSlug, projectSlug, phaseSlug } = useParams<{
         orgSlug: string;
@@ -28,9 +31,7 @@ const ProjectPhaseMain = () => {
     } = usePhaseDetails(orgSlug, projectSlug, phaseSlug);
 
     if (isLoading) {
-        return (
-            <ProjectPhaseSkeleton />
-        );
+        return <ProjectPhaseSkeleton />;
     }
 
     if (isError || !phase) {
@@ -66,14 +67,17 @@ const ProjectPhaseMain = () => {
                         </span>
                     </div>
                     <div>
-                        <Button
-                            variant={"ghost"}
-                            onClick={() => navigate(`update-phase`)}
-                            className="flex items-center gap-2 group font-sans text-sm font-semibold uppercase tracking-widest text-green-700  border-transparent transition-all pb-1 hover:border hover:text-green-900 hover:bg-green-50 hover:border-green-700"
-                        >
-                            <Settings className="w-4 h-4" />
-                            Settings
-                        </Button>
+                        {(membership?.role === "ADMIN" ||
+                            membership?.role === "ENGINEER") && (
+                            <Button
+                                variant={"ghost"}
+                                onClick={() => navigate(`update-phase`)}
+                                className="flex items-center gap-2 group font-sans text-sm font-semibold uppercase tracking-widest text-green-700  border-transparent transition-all pb-1 hover:border hover:text-green-900 hover:bg-green-50 hover:border-green-700"
+                            >
+                                <Settings className="w-4 h-4" />
+                                Settings
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -113,14 +117,11 @@ const ProjectPhaseMain = () => {
                 </div>
 
                 <div className="flex justify-between items-center mt-6">
-                    <div className="flex gap-4">
-                        <button className="flex items-center gap-2 px-4 py-2 border border-stone-300 rounded-lg text-sm font-sans text-stone-600 hover:bg-stone-50 transition-colors">
-                            <Filter className="w-4 h-4" />
-                            Filter Logs
-                        </button>
+                    <div className="flex gap-4 font-display text-3xl">
+                        Updates:
                     </div>
 
-                    {phase.status === "ACTIVE" && (
+                    {(phase.status === "ACTIVE" && (membership?.role === "ADMIN" || membership?.role === "ENGINEER")) && (
                         <>
                             <Button
                                 variant={"ghost"}

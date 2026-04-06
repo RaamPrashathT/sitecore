@@ -16,11 +16,6 @@ export default function NotificationPage() {
                         <h1 className="text-2xl md:text-3xl font-display text-gray-900 tracking-tight">
                             Notifications
                         </h1>
-                        {unreadCount > 0 && (
-                            <span className="font-mono text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">
-                                {unreadCount} Unread
-                            </span>
-                        )}
                     </div>
 
                 </div>

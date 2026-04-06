@@ -293,83 +293,102 @@ const dashboardService = {
         };
     },
 
-    // Inside dashboard.service.ts
-
-    async getClientDashboardItems(clientId: string, organizationId: string) {
-        // 1. Fetch all projects assigned to the client, deeply including phases, requisitions, and logs
+    async getClientDashboardItems(organizationId: string, userId: string) {
         const projects = await prisma.project.findMany({
             where: {
                 organizationId,
                 assignments: {
-                    some: { userId: clientId },
-                },
+                    some: { userId, role: "CLIENT" }
+                }
             },
             include: {
                 phases: {
                     include: {
+                        siteLogs: true, 
+                        
                         requisitions: {
                             include: {
                                 items: {
-                                    where: { status: "ORDERED" },
-                                    include: { assignedSupplier: true },
-                                },
-                            },
-                        },
-                        siteLogs: {
-                            orderBy: { createdAt: "desc" },
-                            take: 1,
-                        },
-                    },
-                    orderBy: { startDate: "asc" },
-                },
-            },
+                                    include: { 
+                                        assignedSupplier: { select: { truePrice: true } } 
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         const pendingPayments: any[] = [];
         const projectSummaries: any[] = [];
 
-        // 2. Process the data
         for (const project of projects) {
-            let totalOrderedCost = 0;
+            let totalOrderedCost = 0; 
             let activePhase = null;
-            let latestLog = null;
+            let completedPhases = 0;
+            const allLogs: any[] = [];
 
             for (const phase of project.phases) {
-                // A. Check for pending payments
                 if (phase.status === "PAYMENT_PENDING" && !phase.isPaid) {
                     pendingPayments.push({
                         id: phase.id,
                         phaseName: phase.name,
                         projectName: project.name,
                         budget: Number(phase.budget),
-                        paymentDeadline: phase.paymentDeadline,
+                        phaseSlug: phase.slug,
+                        projectSlug: project.slug,
+                        paymentDeadline: phase.paymentDeadline.toISOString(),
                         slug: phase.slug,
                     });
                 }
 
-                // B. Find the Active Phase and its latest log
-                if (phase.status === "ACTIVE" && !activePhase) {
-                    activePhase = phase;
-                    latestLog = phase.siteLogs[0] || null;
+                // B. Check phase statuses
+                if (phase.status === "ACTIVE") {
+                    activePhase = { id: phase.id, name: phase.name };
+                }
+                if (phase.status === "COMPLETED") {
+                    completedPhases++;
                 }
 
-                // C. Calculate ordered cost for this phase
+                // C. Collect ALL site logs for THIS specific phase
+                for (const log of phase.siteLogs) {
+                    allLogs.push({
+                        id: log.id,
+                        title: log.title,
+                        phaseSlug: phase.slug,       // <-- CHANGED: Pull directly from the 'phase' object
+                        projectSlug: project.slug,   // <-- CHANGED: Pull directly from the 'project' object
+                        createdAt: log.createdAt,
+                        phaseName: phase.name 
+                    });
+                }
+
                 for (const req of phase.requisitions) {
                     for (const item of req.items) {
-                        const priceToUse = item.assignedSupplier?.truePrice
+                        const price = item.assignedSupplier?.truePrice
                             ? Number(item.assignedSupplier.truePrice)
                             : Number(item.estimatedUnitCost);
-                        totalOrderedCost += priceToUse * Number(item.quantity);
+                            
+                        totalOrderedCost += (price * Number(item.quantity));
                     }
                 }
             }
 
-            // D. Calculate Completion % (Money-wise)
-            const estimatedBudget = Number(project.estimatedBudget) || 1; // Prevent div by 0
-            const completionPercentage = Math.min(
-                100,
-                Math.round((totalOrderedCost / estimatedBudget) * 100),
-            );
+            const recentLogs = allLogs
+                .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+                .map(log => ({
+                    id: log.id,
+                    title: log.title,
+                    phaseSlug: log.phaseSlug,
+                    projectSlug: log.projectSlug,
+                    createdAt: log.createdAt.toISOString(),
+                    phaseName: log.phaseName
+                }));
+
+            // 4. Calculate a rough completion percentage based on completed phases
+            const completionPercentage = project.phases.length > 0
+                ? Math.round((completedPhases / project.phases.length) * 100) 
+                : 0;
 
             projectSummaries.push({
                 id: project.id,
@@ -379,32 +398,14 @@ const dashboardService = {
                 estimatedBudget: Number(project.estimatedBudget),
                 totalOrderedCost,
                 completionPercentage,
-                activePhase: activePhase
-                    ? {
-                          id: activePhase.id,
-                          name: activePhase.name,
-                      }
-                    : null,
-                latestLog: latestLog
-                    ? {
-                          id: latestLog.id,
-                          title: latestLog.title,
-                          createdAt: latestLog.createdAt,
-                      }
-                    : null,
+                activePhase,
+                recentLogs 
             });
         }
 
-        // Sort pending payments by urgency (closest deadline first)
-        pendingPayments.sort(
-            (a, b) =>
-                new Date(a.paymentDeadline).getTime() -
-                new Date(b.paymentDeadline).getTime(),
-        );
-
         return {
             pendingPayments,
-            projects: projectSummaries,
+            projects: projectSummaries
         };
     },
 

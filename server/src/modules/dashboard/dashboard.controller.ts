@@ -73,34 +73,38 @@ const dashboardController = {
 
             const result = await dashboardService.getEngineerDashboardItems(
                 engineerId,
-                organizationId
+                organizationId,
             );
 
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);
-            return response.status(500).json({ message: "Internal server error" });
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 
     async getClientDashboardItems(request: Request, response: Response) {
         try {
             const organizationId = request.tenant?.orgId;
-            const clientId = request.session?.userId;
+            const userId = request.session?.userId;
 
-            if (!organizationId || !clientId) {
+            if (!organizationId || !userId) {
                 return response.status(401).json({ message: "Unauthorized" });
             }
 
             const result = await dashboardService.getClientDashboardItems(
-                clientId,
-                organizationId
+                organizationId,
+                userId,
             );
 
             return response.status(200).json(result);
         } catch (error) {
             logger.error(error);
-            return response.status(500).json({ message: "Internal server error" });
+            return response
+                .status(500)
+                .json({ message: "Something went wrong" });
         }
     },
 
@@ -166,7 +170,9 @@ const dashboardController = {
                 return response.status(404).json({ message: error.message });
             }
             logger.error(error);
-            return response.status(500).json({ message: "Internal server error" });
+            return response
+                .status(500)
+                .json({ message: "Internal server error" });
         }
     },
 

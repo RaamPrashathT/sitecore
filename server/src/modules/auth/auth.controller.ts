@@ -58,7 +58,7 @@ const authController = {
                 });
                 logger.info("User registered (frictionless)", {
                     traceId: request.traceId,
-                    service: "auth-service",
+                    service: "sitecore-service",
                     endpoint: request.originalUrl,
                     responseTime: response.locals.responseTime,
                     method: "POST",
@@ -73,7 +73,7 @@ const authController = {
 
             logger.info("User registered (OTP sent)", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -88,7 +88,7 @@ const authController = {
         } catch (error) {
             logger.error("Registration failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -156,7 +156,7 @@ const authController = {
 
             logger.info("OTP verified", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -169,7 +169,7 @@ const authController = {
         } catch (error) {
             logger.error("OTP verification failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -240,7 +240,7 @@ const authController = {
             console.log(response.locals.responseTime);
             logger.info("User login success", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -253,7 +253,7 @@ const authController = {
         } catch (error) {
             logger.error("Login failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -314,7 +314,7 @@ const authController = {
 
             logger.info("OTP resent", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -328,7 +328,7 @@ const authController = {
         } catch (error) {
             logger.error("Resend OTP failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -364,7 +364,7 @@ const authController = {
 
             logger.info("User logout success", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -378,7 +378,7 @@ const authController = {
         } catch (error) {
             logger.error("Logout failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -399,7 +399,7 @@ const authController = {
         try {
             logger.info("User identity fetched", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "GET",
@@ -414,7 +414,7 @@ const authController = {
         } catch (error) {
             logger.error("Fetch user identity failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "GET",
@@ -471,7 +471,7 @@ const authController = {
             });
             logger.info("2FA verification success", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -484,7 +484,7 @@ const authController = {
         } catch (error) {
             logger.error("2FA verification failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "POST",
@@ -518,7 +518,7 @@ const authController = {
         try {
             logger.info("Google OAuth initiated", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "GET",
@@ -530,7 +530,7 @@ const authController = {
         } catch (error) {
             logger.error("Google OAuth init failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "GET",
@@ -708,7 +708,7 @@ const authController = {
             }
             logger.info("Google OAuth login success", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "GET",
@@ -719,7 +719,7 @@ const authController = {
         } catch (error) {
             logger.error("Google OAuth callback failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 responseTime: response.locals.responseTime,
                 method: "GET",

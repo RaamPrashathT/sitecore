@@ -168,7 +168,11 @@ function App() {
 
                                     <Route
                                         path="progress"
-                                        element={<ProjectProgressMain />}
+                                        element={
+                                            <div className="bg-stone-50">
+                                                <ProjectProgressMain />
+                                            </div>
+                                        }
                                     />
                                     <Route
                                         path="progress/:phaseSlug"

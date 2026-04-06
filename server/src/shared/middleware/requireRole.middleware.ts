@@ -16,7 +16,7 @@ export const requiredRole =
 
             logger.error("Role authorization failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 method: request.method,
                 userId: request.session?.userId,
@@ -30,7 +30,7 @@ export const requiredRole =
         } catch (error) {
             logger.error("Role middleware error", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 method: request.method,
                 userId: request.session?.userId,

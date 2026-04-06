@@ -1,8 +1,6 @@
 import api from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 
-// --- Interfaces mapping to the new Backend Response ---
-
 export interface PendingPayment {
     id: string;
     phaseName: string;
@@ -22,6 +20,7 @@ export interface ProjectSummary {
     name: string;
     slug: string;
     status: string;
+
     estimatedBudget: number;
     totalOrderedCost: number;
     completionPercentage: number;
@@ -29,11 +28,14 @@ export interface ProjectSummary {
         id: string;
         name: string;
     } | null;
-    latestLog: {
+    recentLogs: {
         id: string;
         title: string;
         createdAt: string;
-    } | null;
+        phaseName: string;
+        phaseSlug: string;
+        projectSlug: string;
+    }[];
 }
 
 export interface ClientDashboardResponse {
@@ -46,33 +48,27 @@ export interface ProcessedClientDashboardResponse {
     projects: ProjectSummary[];
 }
 
-// --- Fetcher ---
-
 const getClientDashboardItems = async () => {
-    // Note: No headers attached here! Your Axios interceptor injects the tenant slug.
-    const response = await api.get<ClientDashboardResponse>(`/dashboard/client`);
+    const response =
+        await api.get<ClientDashboardResponse>(`/dashboard/client`);
     return response.data;
 };
 
-// --- Hook ---
-
 export const useGetClientDashboardItems = () => {
     return useQuery({
-        // Since interceptors handle the tenant, we just need a simple key
         queryKey: ["clientDashboardItems"],
         queryFn: getClientDashboardItems,
         select: (data): ProcessedClientDashboardResponse => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Process the payments to add urgency and days left
             const processedPayments = data.pendingPayments.map((payment) => {
                 const dropDeadDate = new Date(payment.paymentDeadline);
                 dropDeadDate.setHours(0, 0, 0, 0);
-                
+
                 const diffTime = dropDeadDate.getTime() - today.getTime();
                 const diffDate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+ 
                 let status: "OVERDUE" | "URGENT" | "DUE" | "UPCOMING";
 
                 if (diffDate < 0) {

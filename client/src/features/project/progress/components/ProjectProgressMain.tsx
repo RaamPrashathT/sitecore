@@ -4,6 +4,7 @@ import { AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhaseCard from "./PhaseCard";
 import ProjectProgressSkeleton from "./ProjectProgressSkeleton";
+import { useMembership } from "@/hooks/useMembership";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -13,6 +14,8 @@ const formatCurrency = (amount: number) =>
     }).format(amount);
 
 const ProjectProgressMain = () => {
+    const { data: membership, isLoading: isMembershipLoading } =
+        useMembership();
     const navigate = useNavigate();
     const { orgSlug, projectSlug } = useParams<{
         orgSlug: string;
@@ -24,10 +27,8 @@ const ProjectProgressMain = () => {
         projectSlug,
     );
 
-    if (isLoading) {
-        return (
-            <ProjectProgressSkeleton />
-        );
+    if (isLoading || isMembershipLoading) {
+        return <ProjectProgressSkeleton />;
     }
 
     if (isError || !data) {
@@ -77,15 +78,17 @@ const ProjectProgressMain = () => {
                             </p>
                         </div>
                     </div>
-
-                    <Button
-                        variant={"ghost"}
-                        onClick={() => navigate(`create-phase`)}
-                        className="flex items-center gap-2 group font-sans text-sm font-semibold uppercase tracking-widest text-green-700  border-transparent transition-all pb-1 hover:border hover:text-green-900 hover:bg-green-50 hover:border-green-700"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Create Phase
-                    </Button>
+                    {(membership?.role === "ADMIN" ||
+                        membership?.role === "ENGINEER") && (
+                        <Button
+                            variant={"ghost"}
+                            onClick={() => navigate(`create-phase`)}
+                            className="flex items-center gap-2 group font-sans text-sm font-semibold uppercase tracking-widest text-green-700  border-transparent transition-all pb-1 hover:border hover:text-green-900 hover:bg-green-50 hover:border-green-700"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create Phase
+                        </Button>
+                    )}
                 </div>
             </section>
 

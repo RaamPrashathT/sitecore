@@ -3,6 +3,8 @@ import type { PhaseProgress } from "../hooks/useProjectProgress";
 import { Check, ArrowRight, FileText, MessageSquare, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useMembership } from "@/hooks/useMembership";
+import { Spinner } from "@/components/ui/spinner";
 
 interface PhaseCardProps {
     phase: PhaseProgress;
@@ -64,6 +66,7 @@ const getPhaseStyling = (status: string) => {
 };
 
 const PhaseCard = ({ phase }: PhaseCardProps) => {
+    const {data: membership, isLoading: membershipLoading} = useMembership()
     const navigate = useNavigate();
     const styles = getPhaseStyling(phase.status);
     const formattedSequence = String(phase.sequenceOrder).padStart(2, "0");
@@ -76,6 +79,9 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
     const isPlanningState =
         phase.status === "PLANNING" || phase.status === "PAYMENT_PENDING";
 
+    if(membershipLoading) {
+        return <Spinner />
+    }
     return (
         <article className={`relative ${styles.articleOpacity}`}>
             <div className="absolute -left-12 top-0 flex items-center justify-center w-6 h-6 z-10 bg-stone-50 rounded-full">
@@ -151,7 +157,7 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                                 <h3 className="font-sans text-xs uppercase tracking-widest text-stone-500 font-bold">
                                     Latest Activity
                                 </h3>
-                                {phase.status === "ACTIVE" && (
+                                {( phase.status === "ACTIVE" && (membership?.role === "ADMIN" || membership?.role === "ENGINEER")) && (
                                     <Button
                                         variant={"ghost"}
                                         onClick={() => navigate(`${phase.slug}/create-log`)}

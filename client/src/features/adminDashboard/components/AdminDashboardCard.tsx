@@ -56,10 +56,7 @@ const AdminDashboardCard = ({ row }: DashboardItemCardProps) => {
 
     return (
         <Card className={`relative overflow-hidden p-4 sm:px-5 sm:py-4 transition-all duration-150 hover:border-green-700/30 hover:shadow-sm ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
-            {/* Urgency left-border accent */}
-            {isUrgent && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-destructive rounded-l-md" />}
-            {isDueSoon && !isUrgent && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500 rounded-l-md" />}
-
+            
             <div className="flex flex-col gap-5 min-w-0 ml-1 sm:ml-2">
                 
                 {/* TOP ROW: Info & Metrics */}

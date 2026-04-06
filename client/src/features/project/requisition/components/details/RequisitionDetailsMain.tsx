@@ -126,14 +126,6 @@ const RequisitionDetailsMain = () => {
                 </Link>
             </div>
 
-            <header className="mb-12">
-                <h1 className="font-serif italic text-4xl text-stone-900 tracking-tight mb-2">
-                    {phaseData.name} Ledger
-                </h1>
-                <p className="text-stone-500 uppercase tracking-widest text-xs font-semibold">
-                    Master Overview • {phaseData.requisitions.length} Requisition(s)
-                </p>
-            </header>
 
             <div className="space-y-12">
                 {phaseData.requisitions.length === 0 ? (
@@ -147,7 +139,7 @@ const RequisitionDetailsMain = () => {
                             <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-3 mb-1">
-                                        <h2 className="font-serif italic text-2xl text-stone-900">{req.slug.toUpperCase()}</h2>
+                                        <h2 className="font-serif  text-2xl text-stone-900">{req.slug.toUpperCase()}</h2>
                                         <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-bold ${
                                             req.status === "APPROVED" ? "bg-emerald-100 text-emerald-800" :
                                             req.status === "REJECTED" ? "bg-red-100 text-red-800" :
@@ -157,7 +149,7 @@ const RequisitionDetailsMain = () => {
                                             {req.status.replace("_", " ")}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-stone-500 font-medium">{req.title} • {format(new Date(req.createdAt), 'MMM dd, yyyy')}</p>
+                                    <p className="text-xs text-stone-500 font-medium">{format(new Date(req.createdAt), 'MMM dd, yyyy')}</p>
                                 </div>
                                 <div className="md:text-right">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-0.5">Total Cost</p>

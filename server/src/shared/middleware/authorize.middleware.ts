@@ -28,7 +28,7 @@ export const authorize = async (
     } catch (error) {
         logger.error("Authorization failed", {
             traceId: request.traceId,
-            service: "auth-service",
+            service: "sitecore-service",
             endpoint: request.originalUrl,
             method: request.method,
             userId: request.session?.userId,

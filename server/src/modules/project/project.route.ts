@@ -13,7 +13,7 @@ const projectRouter = Router();
 projectRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), coreController.createProject);
 projectRouter.get("/", authorize, orgAuthorize, coreController.getProjects);
 projectRouter.get("/members", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), coreController.getMembers);
-projectRouter.post("/invitation", authorize, orgAuthorize, requiredRole("ADMIN"), projectAuthorize, coreController.createInvitation);
+projectRouter.post("/invitation", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER"]), projectAuthorize, coreController.createInvitation);
 projectRouter.get("/details", authorize, orgAuthorize, projectAuthorize, coreController.getProjectDetails);
 projectRouter.put("/", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.updateProject);
 projectRouter.post("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.assignMember);

@@ -18,7 +18,7 @@ export const loadSession = async (
         } catch(error) {
             logger.error("Session load failed", {
                 traceId: request.traceId,
-                service: "auth-service",
+                service: "sitecore-service",
                 endpoint: request.originalUrl,
                 method: request.method,
                 statusCode: 500,
@@ -31,7 +31,7 @@ export const loadSession = async (
     } catch (error) {
         logger.error("Invalid session JSON", {
             traceId: request.traceId,
-            service: "auth-service",
+            service: "sitecore-service",
             endpoint: request.originalUrl,
             method: request.method,
             userId: request.session?.userId,

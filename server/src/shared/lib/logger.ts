@@ -31,7 +31,7 @@ const structuredFormat = winston.format.combine(
             timestamp: info.timestamp,
             level: info.level.toUpperCase(),
 
-            service: info.service || "unknown-service",
+            service: info.service || "sitecore-service",
             instance: info.instance || "local",
             environment:
                 info.environment || process.env.NODE_ENV || "development",

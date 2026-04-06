@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, UserPlus } from "lucide-react";
-import { useProjectMembers } from "../hooks/useProjectMembers"; 
+import { useProjectMembers } from "../hooks/useProjectMembers";
 import MembersFilterBar from "./ProjectMembersFilter";
 import MembersList from "./ProjectsMembersList";
 import { Button } from "@/components/ui/button";
+import { useMembership } from "@/hooks/useMembership";
 
 export type FilterType = "ALL" | "CLIENT" | "ENGINEER" | "ADMIN";
 
@@ -19,19 +20,35 @@ export interface UIMember {
 }
 
 export const ProjectMembersMain = () => {
-    const { orgSlug, projectSlug } = useParams<{ orgSlug: string; projectSlug: string }>();
+    const { data: membership, isLoading: membershipLoading } = useMembership();
+    const { orgSlug, projectSlug } = useParams<{
+        orgSlug: string;
+        projectSlug: string;
+    }>();
     const navigate = useNavigate();
-    const { data, isLoading, isError } = useProjectMembers(orgSlug, projectSlug);
+    const { data, isLoading, isError } = useProjectMembers(
+        orgSlug,
+        projectSlug,
+    );
 
     const [activeFilter, setActiveFilter] = useState<FilterType>("ALL");
     const [searchQuery, setSearchQuery] = useState("");
 
     const allMembers = useMemo<UIMember[]>(() => {
         if (!data) return [];
-        const admins = data.admin.members.map((m) => ({ ...m, type: "ADMIN" as const }));
-        const engineers = data.engineers.members.map((m) => ({ ...m, type: "ENGINEER" as const }));
-        const clients = data.clients.members.map((m) => ({ ...m, type: "CLIENT" as const }));
-        
+        const admins = data.admin.members.map((m) => ({
+            ...m,
+            type: "ADMIN" as const,
+        }));
+        const engineers = data.engineers.members.map((m) => ({
+            ...m,
+            type: "ENGINEER" as const,
+        }));
+        const clients = data.clients.members.map((m) => ({
+            ...m,
+            type: "CLIENT" as const,
+        }));
+
         return [...admins, ...engineers, ...clients];
     }, [data]);
 
@@ -47,7 +64,8 @@ export const ProjectMembersMain = () => {
 
     const filteredMembers = useMemo(() => {
         return allMembers.filter((m) => {
-            const matchesFilter = activeFilter === "ALL" || m.type === activeFilter;
+            const matchesFilter =
+                activeFilter === "ALL" || m.type === activeFilter;
             const q = searchQuery.toLowerCase();
             const matchesSearch =
                 !q ||
@@ -58,7 +76,7 @@ export const ProjectMembersMain = () => {
         });
     }, [allMembers, activeFilter, searchQuery]);
 
-    if (isLoading) {
+    if (isLoading || membershipLoading) {
         return (
             <div className="flex justify-center items-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin text-[#006d30]" />
@@ -67,7 +85,11 @@ export const ProjectMembersMain = () => {
     }
 
     if (isError) {
-        return <div className="text-red-500 py-8 text-center">Failed to load project members.</div>;
+        return (
+            <div className="text-red-500 py-8 text-center">
+                Failed to load project members.
+            </div>
+        );
     }
 
     return (
@@ -81,12 +103,12 @@ export const ProjectMembersMain = () => {
                             </h1>
                         </div>
                         <div className="flex flex-col items-end gap-4">
-                            <Button 
-                                onClick={() => navigate("invite")}
-                            >
-                                <UserPlus className="h-4 w-4" />
-                                Invite New Member
-                            </Button>
+                            {(membership?.role === "ADMIN" || membership?.role === "ENGINEER")&& (
+                                <Button onClick={() => navigate("invite")}>
+                                    <UserPlus className="h-4 w-4" />
+                                    Invite New Member
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </header>
@@ -99,9 +121,12 @@ export const ProjectMembersMain = () => {
                         setSearchQuery={setSearchQuery}
                         counts={counts}
                     />
-                    <MembersList members={filteredMembers} activeFilter={activeFilter} />
+                    <MembersList
+                        members={filteredMembers}
+                        activeFilter={activeFilter}
+                    />
                 </div>
             </div>
         </div>
     );
-}
+};

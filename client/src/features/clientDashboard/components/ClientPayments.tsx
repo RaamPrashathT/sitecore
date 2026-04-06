@@ -1,4 +1,5 @@
 import type { ProcessedPendingPayment } from "../hooks/useClientDashboardItem";
+import { CheckCircle2 } from "lucide-react";
 
 interface ClientPaymentsProps {
     payments: ProcessedPendingPayment[];
@@ -8,73 +9,78 @@ const ClientPayments = ({ payments }: ClientPaymentsProps) => {
     if (payments.length === 0) {
         return (
             <section>
-                <SectionHeader title="Payments Due" count={0} />
-                <div className="mt-4 rounded-xl border border-zinc-200 bg-white px-5 py-8 text-center">
-                    <p className="text-sm text-zinc-400">No pending payments. You're all caught up.</p>
+                <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                    <h2 className="font-serif text-2xl text-slate-900 tracking-tight">Payments Due</h2>
+                </div>
+                <div className="mt-4 rounded bg-white px-5 py-12 flex flex-col items-center text-center border border-slate-200 shadow-sm">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-700/30 mb-3" />
+                    <p className="font-serif text-lg text-slate-900">Ledger is clear</p>
+                    <p className="font-sans text-xs text-slate-500 mt-1">No pending transactions at this time.</p>
                 </div>
             </section>
         );
     }
 
+    const getBadgeStyle = (status: string) => {
+        switch (status) {
+            case "OVERDUE": return "bg-red-50 text-red-700 border-red-200";
+            case "URGENT": return "bg-orange-50 text-orange-700 border-orange-200";
+            case "DUE": return "bg-yellow-50 text-yellow-700 border-yellow-200";
+            default: return "bg-emerald-50 text-emerald-700 border-emerald-200";
+        }
+    };
+
     return (
-        <section>
-            <SectionHeader title="Payments Due" count={payments.length} />
-            <div className="mt-4 flex flex-col gap-3">
+        <section className="space-y-6">
+            <div className="flex items-end justify-between mb-2 border-b border-slate-200 pb-2">
+                <h2 className="font-serif text-2xl text-slate-900 tracking-tight leading-none">Payments Due</h2>
+                <span className="font-mono text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-sm">
+                    {payments.length} PENDING
+                </span>
+            </div>
+
+            <div className="space-y-6">
                 {payments.map((payment) => {
                     const isOverdue = payment.status === "OVERDUE";
-                    const isUrgent = payment.status === "URGENT" || payment.status === "DUE";
 
                     return (
-                        <div
-                            key={payment.id}
-                            className={`
-                                relative overflow-hidden rounded-xl border bg-white px-5 py-4
-                                flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4
-                                transition-shadow hover:shadow-sm
-                                ${isOverdue
-                                    ? "border-red-200"
-                                    : isUrgent
-                                    ? "border-amber-200"
-                                    : "border-zinc-200"
-                                }
-                            `}
-                        >
-
-                            <div className="flex items-start gap-3 min-w-0">
-                                
-
-                                {/* Text */}
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <span className={`
-                                            text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded
-                                            ${isOverdue
-                                                ? "bg-red-100 text-red-600"
-                                                : isUrgent
-                                                ? "bg-amber-100 text-amber-700"
-                                                : "bg-green-50 text-green-700"
-                                            }
-                                        `}>
-                                            {isOverdue ? "Overdue" : payment.status === "UPCOMING" ? "Scheduled" : "Due Soon"}
-                                        </span>
-                                        <p className="text-sm font-semibold text-zinc-800 truncate">
-                                            {payment.phaseName}
-                                        </p>
-                                    </div>
-                                    <p className="text-xs text-zinc-400 mt-0.5">
-                                        {payment.projectName}
-                                        <span className="mx-1.5 text-zinc-300">·</span>
-                                        Due {new Date(payment.paymentDeadline).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                                    </p>
+                        <div key={payment.id} className="group">
+                            <div className="flex justify-between items-end mb-1.5 px-1">
+                                <div>
+                                    <span className="font-sans text-[9px] uppercase tracking-widest text-emerald-800 font-bold mb-0.5 block">
+                                        Project: {payment.projectName}
+                                    </span>
+                                    <h3 className="font-serif text-xl md:text-2xl leading-tight text-slate-900">
+                                        {payment.phaseName}
+                                    </h3>
                                 </div>
+                                <span className={`px-2 py-0.5 text-[9px] font-bold tracking-tighter uppercase rounded-sm border ${getBadgeStyle(payment.status)}`}>
+                                    {payment.status}
+                                </span>
                             </div>
 
-                            {/* Amount */}
-                            <p className={`font-mono text-xl font-bold shrink-0 sm:text-right
-                                ${isOverdue ? "text-red-600" : "text-zinc-900"}
-                            `}>
-                                ₹{payment.budget.toLocaleString()}
-                            </p>
+                            <div className="bg-white p-4 rounded border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ">
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">Deadline</span>
+                                        <span className="font-mono text-sm font-medium text-slate-800">
+                                            {new Date(payment.paymentDeadline).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">Days Left</span>
+                                        <span className={`font-mono text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-slate-800'}`}>
+                                            {payment.daysTillDue} <span className="text-[10px] font-sans text-slate-400">days</span>
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col md:col-span-2 md:items-end">
+                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5">Amount Due</span>
+                                        <span className={`font-mono text-lg md:text-xl font-bold ${isOverdue ? 'text-red-600' : 'text-slate-900'}`}>
+                                            ₹{payment.budget.toLocaleString("en-IN")}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     );
                 })}
@@ -82,18 +88,5 @@ const ClientPayments = ({ payments }: ClientPaymentsProps) => {
         </section>
     );
 };
-
-// ─── Shared section header ────────────────────────────────────────────────────
-
-const SectionHeader = ({ title, count }: { title: string; count: number }) => (
-    <div className="flex items-center gap-3">
-        <h2 className="text-base font-semibold text-zinc-900 tracking-tight">{title}</h2>
-        {count > 0 && (
-            <span className="text-[10px] font-mono font-semibold text-zinc-500 bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded-full">
-                {count}
-            </span>
-        )}
-    </div>
-);
 
 export default ClientPayments;
