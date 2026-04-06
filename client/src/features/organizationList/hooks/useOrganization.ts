@@ -5,6 +5,7 @@ interface OrganizationType {
     id: string;
     name: string;
     slug: string;
+    image: string | null;
     role: "ADMIN" | "ENGINEER" | "CLIENT";
 }
 const getOrganizations = async () => {

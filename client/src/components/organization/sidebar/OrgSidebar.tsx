@@ -5,9 +5,9 @@ import {
     ChartNoAxesGantt,
     SquareTerminal,
     Users,
-    ClipboardClock,
-    ClipboardPlus,
-    Mail,
+    // ClipboardClock,
+    // ClipboardPlus,
+    // Mail,
     ChartArea,
     Presentation,
     Bell,
@@ -53,25 +53,25 @@ const adminData: { sidebarContents: SidebarGroupType[] } = {
                 { title: "Clients", url: "/clients", icon: Users },
             ],
         },
-        {
-            Pending: [
-                {
-                    title: "Payments",
-                    url: "/pending-payments",
-                    icon: ClipboardClock,
-                },
-                {
-                    title: "Requests",
-                    url: "/pending-requisitions",
-                    icon: ClipboardPlus,
-                },
-                {
-                    title: "Invitations",
-                    url: "/pending-invitations",
-                    icon: Mail,
-                },
-            ],
-        },
+        // {
+        //     Pending: [
+        //         {
+        //             title: "Payments",
+        //             url: "/pending-payments",
+        //             icon: ClipboardClock,
+        //         },
+        //         {
+        //             title: "Requests",
+        //             url: "/pending-requisitions",
+        //             icon: ClipboardPlus,
+        //         },
+        //         {
+        //             title: "Invitations",
+        //             url: "/pending-invitations",
+        //             icon: Mail,
+        //         },
+        //     ],
+        // },
     ],
 };
 

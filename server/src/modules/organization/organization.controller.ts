@@ -4,6 +4,7 @@ import { logger } from "../../shared/lib/logger.js";
 import {
     createOrganizationSchema,
     orgSlugSchema,
+    updateOrganizationSchema,
 } from "./organization.schema.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
@@ -222,6 +223,49 @@ const orgController = {
                 success: false,
                 message: "Internal server error",
             });
+        }
+    },
+
+    async getSettings(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            if (!orgId) throw new UnAuthorizedError();
+    
+            const result = await orgService.getSettings(orgId);
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof MissingError) {
+                return response.status(404).json({ success: false, message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
+    
+    async updateSettings(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            if (!orgId) throw new UnAuthorizedError();
+    
+            const validatedData = updateOrganizationSchema.safeParse(request.body);
+            if (!validatedData.success) {
+                throw new ValidationError(validatedData.error.message);
+            }
+    
+            const result = await orgService.updateSettings(orgId, validatedData.data);
+            return response.status(200).json(result);
+        } catch (error) {
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ success: false, message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ success: false, message: "Internal server error" });
         }
     },
 };

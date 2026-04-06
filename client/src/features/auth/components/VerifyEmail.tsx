@@ -42,7 +42,7 @@ const VerifyEmail = () => {
 
     return (
         <div className="flex flex-col items-center gap-6 mb-6">
-            <h1 className="text-2xl font-bold">Verify your Email</h1>
+            <h1 className="text-3xl font-bold font-display">Verify your Email</h1>
             <p>Enter the 6-digit code sent to your email.</p>
 
             <InputOTP

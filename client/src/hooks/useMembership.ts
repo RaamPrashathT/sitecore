@@ -4,6 +4,7 @@ import { useSession } from "@/features/auth/hooks/useSession";
 export interface MembershipType {
     id: string;
     slug: string;
+    profile: string | null;
     role: "ADMIN" | "ENGINEER" | "CLIENT" | "IDLE";
 }
 

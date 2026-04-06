@@ -82,7 +82,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                     <p className="text-sm font-sans text-stone-500 mt-2">Establish a new construction site and financial baseline.</p>
                 </div>
 
-                <div className={`bg-white border border-stone-200 ${GRID.p} ${GRID.radius} shadow-sm`}>
+                <div className={` ${GRID.radius}`}>
                     <form onSubmit={handleSubmit(onSubmit)} className={`flex flex-col ${GRID.gap}`}>
                         
                         {/* Project Name */}

@@ -130,6 +130,7 @@ model SupplierQuote {
     truePrice    Decimal
     standardRate Decimal
     leadTime     Int?
+    email        String?
     inventory    Int     @default(0)
 
     catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
@@ -311,13 +312,13 @@ model InvitationProject {
 }
 
 model Notification {
-    id         String                 @id @default(uuid())
-    type       NotificationType
-    title      String
-    body       String?
-    
+    id    String           @id @default(uuid())
+    type  NotificationType
+    title String
+    body  String?
+
     // NEW: Store the exact relative URL here!
-    actionUrl  String?                
+    actionUrl String?
 
     entityType NotificationEntityType
     entityId   String

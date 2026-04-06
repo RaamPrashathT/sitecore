@@ -52,7 +52,7 @@ const Onboarding = () => {
         className="w-full max-w-sm space-y-6 bg-background p-6 rounded-2xl shadow-sm border"
       >
         <div className="space-y-1 text-center">
-          <h1 className="text-xl font-semibold">Complete your profile</h1>
+          <h1 className="text-xl font-semibold ">Complete your profile</h1>
           <p className="text-sm text-muted-foreground">
             Just a few quick details to get started
           </p>

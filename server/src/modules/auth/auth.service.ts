@@ -149,6 +149,7 @@ const authService = {
                     select: {
                         id: true,
                         slug: true,
+                        image: true,
                         projects: {
                             where: {
                                 assignments: {
@@ -169,11 +170,12 @@ const authService = {
             (acc, item) => {
                 acc[item.organization.slug] = {
                     id: item.organization.id,
+                    profile: item.organization.image,
                     role: item.role,
                 };
                 return acc;
             },
-            {} as Record<string, { id: string; role: string }>,
+            {} as Record<string, { id: string; profile: string | null; role: string }>,
         );
 
         return {
@@ -277,6 +279,7 @@ const authService = {
                     select: {
                         id: true,
                         slug: true,
+                        image: true,
                         projects: {
                             where: {
                                 assignments: {
@@ -300,11 +303,12 @@ const authService = {
             (acc, item) => {
                 acc[item.organization.slug] = {
                     id: item.organization.id,
+                    profile: item.organization.image,
                     role: item.role,
                 };
                 return acc;
             },
-            {} as Record<string, { id: string; role: string }>,
+            {} as Record<string, { id: string; profile: string | null; role: string }>,
         );
         return {
             sessionId,

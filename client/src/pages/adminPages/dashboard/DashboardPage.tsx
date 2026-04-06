@@ -17,7 +17,7 @@ const DashboardPage = () => {
 
     if (membership.role === "ADMIN") {
         return (
-            <div className="h-full w-full max-w-[1600px] mx-auto py-4 sm:pl-4">
+            <div className="h-full w-full max-w-[1600px] mx-auto py-4 sm:pl-4 no-scrollbar">
                 {/* The 12-column grid that handles the 70/30 split */}
                 <div className="grid grid-cols-12 gap-8 h-full items-start">
                     {/* Left Side (70%) - Materials to Fulfill */}

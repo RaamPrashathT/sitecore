@@ -16,7 +16,9 @@ import { useOnboard } from "../hooks/useOnboard";
 import { useSession } from "../hooks/useSession";
 import { Switch } from "@/components/ui/switch";
 import { useRef, useState, useEffect } from "react";
-import { uploadToCloudinary } from "@/lib/cloudinary"; 
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { Camera, X } from "lucide-react"; // Added for a more professional UI
+
 export function OnboardingForm({
     className,
     ...props
@@ -72,13 +74,12 @@ export function OnboardingForm({
         }
 
         if (previewUrl) URL.revokeObjectURL(previewUrl);
-
-        setPreviewUrl(URL.createObjectURL(file)); 
-        setAvatarFile(file);                  
+        setPreviewUrl(URL.createObjectURL(file));
+        setAvatarFile(file);
     }
 
     function handleRemove(e: React.MouseEvent) {
-        e.stopPropagation(); 
+        e.stopPropagation();
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         setPreviewUrl(null);
         setAvatarFile(null);
@@ -101,8 +102,7 @@ export function OnboardingForm({
         } catch (error: unknown) {
             if (axios.isAxiosError(error) && error.response?.data) {
                 setError("root", {
-                    message:
-                        error.response.data.message || "Failed to save profile.",
+                    message: error.response.data.message || "Failed to save profile.",
                 });
             } else {
                 setError("root", { message: "An unexpected error occurred." });
@@ -119,27 +119,27 @@ export function OnboardingForm({
 
     return (
         <form
-            className={cn("flex flex-col gap-5 w-full max-w-sm", className)}
+            className={cn("flex flex-col gap-8 w-full max-w-md", className)}
             {...props}
             onSubmit={handleSubmit(onSubmit)}
         >
-            <div className="flex flex-col gap-0.5">
-                <h1 className="text-xl font-semibold tracking-tight">
+            <div className="space-y-2">
+                <h1 className="text-3xl md:text-4xl font-display text-slate-900 tracking-tight font-semibold">
                     Complete your profile
                 </h1>
-                <p className="text-sm text-muted-foreground">
-                    Finish setting up your account.
+                <p className="text-sm font-sans text-slate-500">
+                    Finish setting up your account credentials and security.
                 </p>
             </div>
 
-            <FieldGroup className="flex flex-col gap-4">
-
-                <Field className="flex flex-col gap-1.5">
-                    <FieldLabel className="text-sm font-medium">
-                        Profile photo
+            <FieldGroup className="space-y-">
+                {/* Profile Photo Section */}
+                <Field className="space-y-3">
+                    <FieldLabel className="font-sans text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Profile Image
                     </FieldLabel>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-5">
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -148,156 +148,143 @@ export function OnboardingForm({
                             onChange={handleFileChange}
                         />
 
-                        <div className="relative shrink-0 cursor-pointer group" onClick={openPicker}>
-                            <div className="h-14 w-14 rounded-full overflow-hidden border border-border bg-muted flex items-center justify-center">
+                        <div
+                            className="relative shrink-0 group cursor-pointer"
+                            onClick={openPicker}
+                        >
+                            <div className="h-20 w-20 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center transition-colors group-hover:border-green-700/50 group-hover:bg-green-50/30">
                                 {previewUrl ? (
                                     <img
                                         src={previewUrl}
-                                        alt="Avatar preview"
+                                        alt="Avatar"
                                         className="h-full w-full object-cover"
                                     />
                                 ) : (
-                                    <span className="text-sm font-medium text-muted-foreground select-none">
-                                        {initials}
-                                    </span>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <Camera className="w-5 h-5 text-slate-400 group-hover:text-green-700" />
+                                    </div>
                                 )}
-                            </div>
-
-                            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <svg
-                                    className="w-4 h-4 text-white"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"
-                                    />
-                                </svg>
                             </div>
 
                             {previewUrl && (
                                 <button
                                     type="button"
                                     onClick={handleRemove}
-                                    className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 rounded-full bg-destructive border-2 border-background flex items-center justify-center"
-                                    aria-label="Remove photo"
+                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 transition-colors"
                                 >
-                                    <svg
-                                        className="w-2.5 h-2.5 text-destructive-foreground"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth={3}
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
+                                    <X className="w-3 h-3 text-slate-600" />
                                 </button>
                             )}
                         </div>
 
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-sm text-foreground">
-                                {previewUrl ? "Click to change" : "Upload a photo"}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
+                        <div className="space-y-1">
+                            <p className="font-sans text-sm font-semibold text-slate-900">
+                                {previewUrl ? "Image ready" : "Upload photo"}
+                            </p>
+                            <p className="font-sans text-xs text-slate-500 leading-relaxed">
                                 JPG, PNG or WEBP · max 2 MB
-                            </span>
+                            </p>
                             {avatarError && (
-                                <span className="text-xs text-destructive">
+                                <p className="font-mono text-[10px] font-bold text-destructive uppercase tracking-tighter">
                                     {avatarError}
-                                </span>
+                                </p>
                             )}
                         </div>
                     </div>
                 </Field>
 
-                <Field className="flex flex-col gap-1.5">
-                    <div className="flex gap-0.5 text-sm font-medium">
-                        Username
-                        <p className="text-destructive">*</p>
-                    </div>
-                    <Input
-                        {...register("username")}
-                        id="username"
-                        autoComplete="username"
-                    />
-                    {errors.username && (
-                        <FieldError className="text-xs">
-                            {errors.username.message}
-                        </FieldError>
-                    )}
-                </Field>
-
-                <Field className="flex flex-col gap-1.5">
-                    <FieldLabel htmlFor="phone" className="text-sm font-medium">
-                        Phone number
-                        <p className="ml-1 text-xs font-normal text-muted-foreground">
-                            (optional)
-                        </p>
-                    </FieldLabel>
-                    <Input
-                        {...register("phone")}
-                        id="phone"
-                        type="tel"
-                        placeholder="98765 43210"
-                    />
-                    {errors.phone && (
-                        <FieldError className="text-xs">
-                            {errors.phone.message}
-                        </FieldError>
-                    )}
-                </Field>
-
-                <Field className="flex flex-row items-center justify-between rounded-md border border-border px-3 py-2.5">
-                    <div className="flex flex-col gap-0.5">
-                        <FieldLabel
-                            htmlFor="isTwoFactorEnabled"
-                            className="text-sm font-medium cursor-pointer"
-                        >
-                            Two-factor authentication
+                <div className="grid grid-cols-1 gap-5">
+                    {/* Username */}
+                    <Field className="">
+                        <FieldLabel className="font-sans text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1">
+                            Username <span className="text-destructive">*</span>
                         </FieldLabel>
-                        <p className="text-xs text-muted-foreground">
-                            Add an extra layer of security.
-                        </p>
-                    </div>
-                    <Controller
-                        name="isTwoFactorEnabled"
-                        control={control}
-                        render={({ field }) => (
-                            <Switch
-                                id="isTwoFactorEnabled"
-                                name={field.name}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                            />
+                        <Input
+                            {...register("username")}
+                            className="font-sans focus:ring-green-700/20 focus:border-green-700"
+                            placeholder="Enter username"
+                        />
+                        {errors.username && (
+                            <FieldError className="font-mono text-[10px] font-bold uppercase tracking-tighter">
+                                {errors.username.message}
+                            </FieldError>
                         )}
-                    />
-                </Field>
+                    </Field>
+
+                    {/* Phone */}
+                    <Field className="">
+                        <FieldLabel className="font-sans text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                            Phone Number
+                        </FieldLabel>
+                        <Input
+                            {...register("phone")}
+                            type="tel"
+                            placeholder="+91 00000 00000"
+                            className="font-mono text-sm tracking-tight focus:ring-green-700/20 focus:border-green-700"
+                        />
+                        {errors.phone && (
+                            <FieldError className="font-mono text-[10px] font-bold uppercase tracking-tighter">
+                                {errors.phone.message}
+                            </FieldError>
+                        )}
+                    </Field>
+                </div>
+
+                {/* Security Section */}
+                <div className="space-y-3">
+                    <p className="font-sans text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                        Security Settings
+                    </p>
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-slate-300">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <FieldLabel
+                                    htmlFor="isTwoFactorEnabled"
+                                    className="font-sans text-sm font-semibold text-slate-900 cursor-pointer"
+                                >
+                                    Two-factor authentication
+                                </FieldLabel>
+                                <p className="font-sans text-xs text-slate-500">
+                                    Verify your identity via mobile app.
+                                </p>
+                            </div>
+                            <Controller
+                                name="isTwoFactorEnabled"
+                                control={control}
+                                render={({ field }) => (
+                                    <Switch
+                                        id="isTwoFactorEnabled"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        className="data-[state=checked]:bg-green-700"
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
+                </div>
 
                 {errors.root && (
-                    <FieldError className="text-center text-xs text-destructive">
-                        {errors.root.message}
-                    </FieldError>
+                    <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/10">
+                        <p className="text-center font-mono text-[10px] font-bold uppercase text-destructive">
+                            {errors.root.message}
+                        </p>
+                    </div>
                 )}
 
-                <Button type="submit" disabled={isSubmitting} className="w-full mt-1">
+                <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                >
                     {isSubmitting ? (
                         <span className="flex items-center gap-2">
-                            <Spinner /> Saving...
+                            <Spinner className="w-4 h-4 border-white/30 border-t-white" /> 
+                            Updating Profile...
                         </span>
                     ) : (
-                        "Continue"
+                        "Complete Setup"
                     )}
                 </Button>
-
             </FieldGroup>
         </form>
     );

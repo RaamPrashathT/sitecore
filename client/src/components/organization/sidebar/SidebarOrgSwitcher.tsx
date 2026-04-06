@@ -17,6 +17,8 @@ import { useMembership } from "@/hooks/useMembership";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 import { useSession } from "@/features/auth/hooks/useSession";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/Avatar";
 
 const OrgSwitcher = () => {
     const { isMobile } = useSidebar();
@@ -52,9 +54,7 @@ const OrgSwitcher = () => {
                             size="lg"
                             className="flex items-center gap-2.5 w-full py-7.5 rounded-none border border-transparent bg-transparent cursor-pointer transition-[background,border-color] duration-150 ease-in-out hover:bg-green-50 hover:border-[#e8eaf0]"
                         >
-                            <div className="w-[34px] h-[34px] rounded-[6px] bg-green-700 text-white text-[13px] font-semibold tracking-[0.02em] flex items-center justify-center shrink-0 font-[DM_Sans,Geist,system-ui,sans-serif]">
-                                {displayName[0].toUpperCase()}
-                            </div>
+                            <UserAvatar name={membership.slug} image={membership.profile} />
                             <div className="flex-1 flex flex-col items-start min-w-0">
                                 <span className="text-[13.5px] font-semibold text-gray-700 leading-[1.3] truncate max-w-[200px] ">
                                     {displayName}
@@ -90,9 +90,8 @@ const OrgSwitcher = () => {
                                 onClick={() => navigate(`/${org.slug}`)}
                                 className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] cursor-pointer text-[13px] text-gray-700 font-[450] transition-colors duration-120 hover:bg-green-50"
                             >
-                                <div className="w-[26px] h-[26px] rounded-[6px] bg-green-100 text-green-700 text-[11px] font-bold flex items-center justify-center shrink-0">
-                                    {org.name[0].toUpperCase()}
-                                </div>
+
+                                <UserAvatar name={org.name} image={org.image} />
                                 <span className="flex-1">{org.name}</span>
                                 {org.slug === membership.slug && (
                                     <span className="text-[10px] font-semibold text-green-700 bg-green-100 rounded-full px-[7px] py-0.5 tracking-[0.02em]">

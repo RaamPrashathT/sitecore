@@ -24,15 +24,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { CatalogueInputSchema, CatalogueItemType } from "../hooks/useGetCatalogues"; 
 
+// FIXED: Removed z.coerce and replaced with standard z.number()
 const formSchema = z.object({
     name: z.string().min(1, "Item Name is required"),
     supplier: z.string().min(1, "Supplier is required"),
+    email: z.string().email("Invalid email address"),
     category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
     unit: z.string().min(1, "Unit is required"),
-    truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
-    standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
-    leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
-    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
+    truePrice: z.number().min(0.01, "Price must be > 0"),
+    standardRate: z.number().min(0.01, "Rate must be > 0"),
+    leadTime: z.number().min(0, "Cannot be negative"),
+    inventory: z.number().min(0, "Cannot be negative"),
 });
 
 type createCatalogueFormSchema = z.infer<typeof formSchema>;
@@ -56,7 +58,13 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
         defaultValues: {
             name: "",
             supplier: "",
+            email: "",
             unit: "",
+            // Provide sensible defaults to prevent NaN errors
+            truePrice: 0,
+            standardRate: 0,
+            leadTime: 0,
+            inventory: 0,
         },
     });
 
@@ -92,6 +100,7 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
                     {
                         id: `temp-quote-${Date.now()}`,
                         supplier: newCatalogueData.supplier,
+                        email: newCatalogueData.email,
                         truePrice: newCatalogueData.truePrice,
                         standardRate: newCatalogueData.standardRate,
                         leadTime: newCatalogueData.leadTime,
@@ -127,8 +136,6 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
             }
         },
         onSettled: () => {
-            // 7. Always fetch the real data in the background to replace the temp ID 
-            // with the actual Database ID
             queryClient.invalidateQueries({ queryKey: ["catalogue", orgId] });
         },
     });
@@ -158,12 +165,18 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
                         <Input {...register("supplier")} id="supplier" className="font-sans text-sm" />
                         {errors.supplier && <FieldError>{errors.supplier.message}</FieldError>}
                     </Field>
+                    
+                    <Field>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Supplier Email</FieldLabel>
+                        <Input {...register("email")} id="email" type="email" placeholder="contact@supplier.com" className="font-sans text-sm" />
+                        {errors.email && <FieldError>{errors.email.message}</FieldError>}
+                    </Field>
+
                     <Field>
                         <FieldLabel className="font-sans text-sm text-muted-foreground">Category</FieldLabel>
                         <Controller
                             name="category"
                             control={control}
-                            rules={{ required: "Category is required" }}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <SelectTrigger className="font-sans text-sm">
@@ -184,29 +197,35 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
                         />
                         {errors.category && <FieldError>{errors.category.message}</FieldError>}
                     </Field>
+
                     <Field>
                         <FieldLabel className="font-sans text-sm text-muted-foreground">Unit</FieldLabel>
                         <Input {...register("unit")} placeholder="KG/Hour/Litre" className="font-sans text-sm" />
                         {errors.unit && <FieldError>{errors.unit.message}</FieldError>}
                     </Field>
+
+                    {/* FIXED: Added type="number" and { valueAsNumber: true } to all numeric fields */}
                     <Field>
                         <FieldLabel className="font-sans text-sm text-muted-foreground">True Price</FieldLabel>
-                        <Input {...register("truePrice")} placeholder="0" className="font-mono text-sm tabular-nums"/>
+                        <Input type="number" step="any" {...register("truePrice", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.truePrice && <FieldError>{errors.truePrice.message}</FieldError>}
                     </Field>
+
                     <Field>
                         <FieldLabel className="font-sans text-sm text-muted-foreground">Standard Rate</FieldLabel>
-                        <Input {...register("standardRate")} placeholder="0" className="font-mono text-sm tabular-nums"/>
+                        <Input type="number" step="any" {...register("standardRate", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.standardRate && <FieldError>{errors.standardRate.message}</FieldError>}
                     </Field>
-                    <Field >
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Lead Time</FieldLabel>
-                        <Input {...register("leadTime")} placeholder="0" className="font-mono text-sm tabular-nums"/>
+
+                    <Field>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">Lead Time (Days)</FieldLabel>
+                        <Input type="number" step="1" {...register("leadTime", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.leadTime && <FieldError>{errors.leadTime.message}</FieldError>}
                     </Field>
+
                     <Field>
                         <FieldLabel className="font-sans text-sm text-muted-foreground">Inventory</FieldLabel>
-                        <Input {...register("inventory")} placeholder="0" className="font-mono text-sm tabular-nums"/>
+                        <Input type="number" step="1" {...register("inventory", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
                         {errors.inventory && <FieldError>{errors.inventory.message}</FieldError>}
                     </Field>
                 </FieldGroup>

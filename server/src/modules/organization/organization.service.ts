@@ -199,6 +199,45 @@ const orgService = {
 
         return notifications
     },
+
+    async getSettings(organizationId: string) {
+        const org = await prisma.organization.findUnique({
+            where: { id: organizationId },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                image: true,
+                createdAt: true,
+            },
+        });
+    
+        if (!org) throw new MissingError("Organization not found");
+        return org;
+    },
+    
+    async updateSettings(
+        organizationId: string,
+        data: { name?: string; image?: string },
+    ) {
+        const updateData: { name?: string; image?: string } = {};
+    
+        if (data.name !== undefined) updateData.name = data.name;
+        if (data.image !== undefined) updateData.image = data.image;
+    
+        const updated = await prisma.organization.update({
+            where: { id: organizationId },
+            data: updateData,
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                image: true,
+            },
+        });
+    
+        return updated;
+    },
 };
 
 export default orgService;

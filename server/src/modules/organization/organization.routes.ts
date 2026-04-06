@@ -7,16 +7,38 @@ import { projectAuthorize } from "../../shared/middleware/projectAuthorize.middl
 
 const orgRouter = Router();
 
-orgRouter.post("/", authorize, orgController.create)
+orgRouter.post("/", authorize, orgController.create);
 
-orgRouter.post("/signup", authorize, orgController.signin)
+orgRouter.post("/signup", authorize, orgController.signin);
 
-orgRouter.get("/", authorize, orgController.getOrg)
+orgRouter.get("/", authorize, orgController.getOrg);
 
-orgRouter.get("/all", authorize, orgController.getAllOrg)
+orgRouter.get("/all", authorize, orgController.getAllOrg);
 
 orgRouter.post("/identity", authorize, orgController.identity);
 
-orgRouter.get("/notifications", authorize, orgAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), orgController.getNotifications)
+orgRouter.get(
+    "/notifications",
+    authorize,
+    orgAuthorize,
+    requiredRole(["ADMIN", "ENGINEER", "CLIENT"]),
+    orgController.getNotifications,
+);
 
-export default orgRouter
+orgRouter.get(
+    "/settings",
+    authorize,
+    orgAuthorize,
+    requiredRole(["ADMIN"]),
+    orgController.getSettings,
+);
+
+orgRouter.patch(
+    "/settings",
+    authorize,
+    orgAuthorize,
+    requiredRole(["ADMIN"]),
+    orgController.updateSettings,
+);
+
+export default orgRouter;

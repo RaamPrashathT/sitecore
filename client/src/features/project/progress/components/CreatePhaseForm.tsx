@@ -62,7 +62,7 @@ export default function CreatePhaseForm() {
                     <p className="text-sm font-sans text-stone-500 mt-2">Add a new milestone to the project pipeline.</p>
                 </div>
 
-                <div className={`bg-white border border-stone-200 ${GRID.p} ${GRID.radius} shadow-sm`}>
+                <div className={`${GRID.radius}`}>
                     <form onSubmit={handleSubmit(onSubmit)} className={`flex flex-col ${GRID.gap}`}>
                         
                         <div className={`flex flex-col ${GRID.gapSm}`}>

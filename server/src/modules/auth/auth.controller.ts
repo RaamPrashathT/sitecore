@@ -655,6 +655,7 @@ const authController = {
                         select: {
                             id: true,
                             slug: true,
+                            image: true,
                         },
                     },
                 },
@@ -664,11 +665,12 @@ const authController = {
                 (acc, item) => {
                     acc[item.organization.slug] = {
                         id: item.organization.id,
+                        profile: item.organization.image,
                         role: item.role,
                     };
                     return acc;
                 },
-                {} as Record<string, { id: string; role: string }>,
+                {} as Record<string, { id: string; profile: string | null;role: string }>,
             );
 
             await redis.set(

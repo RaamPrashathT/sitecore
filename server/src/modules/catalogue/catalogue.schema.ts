@@ -15,6 +15,7 @@ export const getCatalogueByIdSchema = z.object({
 export const formSchema = z.object({
     name: z.string().min(1, "Item Name is required"),
     supplier: z.string().min(1, "Supplier is required"),
+    email: z.string().email("Invalid email address"), // <-- NEW
     category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
     unit: z.string().min(1, "Unit is required"),
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
@@ -26,6 +27,7 @@ export const formSchema = z.object({
 export const editFormSchema = z.object({
     name: z.string().min(1, "Item Name is required"),
     supplier: z.string().min(1, "Supplier is required"),
+    email: z.string().email("Invalid email address"), // <-- NEW
     category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
     unit: z.string().min(1, "Unit is required"),
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
@@ -40,7 +42,6 @@ export const deleteFormSchema = z.object({
     catalogueId: z.string().min(1, "Catalogue Id is required"),
     quoteId: z.string().min(1, "Quote Id is required")
 })
-
 
 export type createCatalogueFormSchema = z.infer<typeof formSchema>;
 export type editCatalogueFormSchema = z.infer<typeof editFormSchema>;

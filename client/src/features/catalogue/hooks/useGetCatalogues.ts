@@ -8,6 +8,7 @@ export interface SupplierQuotesType {
     standardRate: number;
     leadTime: number | null;
     catalogueId: string;
+    email: string;
 }
 
 export type CatalogueItemType = {
