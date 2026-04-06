@@ -1,5 +1,4 @@
-import Provision from "@/features/auth/components/provision";
-import React from "react";
+import Provision from "@/features/auth/components/Provision";
 
 const ProvisionPage = () => {
     return (

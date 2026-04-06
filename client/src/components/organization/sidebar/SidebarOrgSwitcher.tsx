@@ -17,7 +17,6 @@ import { useMembership } from "@/hooks/useMembership";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useOrganizations } from "@/features/organizationList/hooks/useOrganization";
 import { useSession } from "@/features/auth/hooks/useSession";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { UserAvatar } from "@/components/Avatar";
 
 const OrgSwitcher = () => {

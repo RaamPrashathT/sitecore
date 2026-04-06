@@ -9,7 +9,7 @@ import { useUpdatePhase } from "../hooks/useUpdatePhase";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const updatePhaseSchema = z.object({

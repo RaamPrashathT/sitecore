@@ -5,8 +5,7 @@ import {
     Layers, 
     FileText, 
     Layout, 
-    UserPlus, 
-    Bell 
+    UserPlus
 } from "lucide-react";
 import type { NotificationSchema } from "../hooks/useGetNotifications";
 

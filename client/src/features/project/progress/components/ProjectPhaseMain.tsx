@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { format } from "date-fns";
-import { Filter, Plus, AlertCircle, Settings } from "lucide-react";
+import { Plus, AlertCircle, Settings } from "lucide-react";
 import { usePhaseDetails } from "../hooks/usePhaseDetails";
 import { Button } from "@/components/ui/button";
 import SiteLogCard from "./SiteLogCard";
@@ -30,7 +30,7 @@ const ProjectPhaseMain = () => {
         isError,
     } = usePhaseDetails(orgSlug, projectSlug, phaseSlug);
 
-    if (isLoading) {
+    if (isLoading || isMembershipLoading) {
         return <ProjectPhaseSkeleton />;
     }
 

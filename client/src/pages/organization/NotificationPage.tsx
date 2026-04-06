@@ -4,7 +4,6 @@ import { NotificationsList } from "@/features/notifications/components/Notificat
 export default function NotificationPage() {
     const { data: notifications, isLoading, error } = useGetNotifications();
 
-    const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
 
     return (
         <div className="flex-1 flex flex-col bg-gray-50/30 min-h-full">

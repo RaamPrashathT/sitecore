@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowLeft } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { usePhaseAllRequisitions, RequisitionItemDetail } from "../../hooks/usePhaseAllRequisitions";
+import { usePhaseAllRequisitions, type RequisitionItemDetail } from "../../hooks/usePhaseAllRequisitions";
 
 const columnHelper = createColumnHelper<RequisitionItemDetail>();
 
@@ -101,7 +101,7 @@ const RequisitionDetailsMain = () => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
-                <Spinner size="lg" className="text-emerald-700" />
+                <Spinner className="text-emerald-700" />
             </div>
         );
     }

@@ -36,7 +36,7 @@ export const useProjectDetails = (orgSlug?: string, projectSlug?: string) => {
     });
 };
 
-export const useDeleteProject = (orgSlug?: string, projectSlug?: string) => {
+export const useDeleteProject = (orgSlug?: string) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async () => {

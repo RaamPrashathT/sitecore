@@ -27,7 +27,6 @@ export const NotificationsList = ({
             <div className="py-12 border border-dashed border-gray-200 rounded-xl">
                 <Empty
                     title="Error loading notifications"
-                    description="We couldn't fetch your updates. Please refresh the page."
                 />
             </div>
         );
@@ -38,7 +37,6 @@ export const NotificationsList = ({
             <div className="py-12 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
                 <Empty
                     title="No notifications"
-                    description="You're all caught up for now."
                 />
             </div>
         );

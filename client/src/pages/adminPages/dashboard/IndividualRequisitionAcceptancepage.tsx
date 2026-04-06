@@ -1,3 +1,4 @@
+import React from "react"; // <-- Make sure React is imported for useMemo
 import { useParams, useNavigate } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 import { useGetRequisitionBySlug } from "@/features/adminDashboard/hooks/useGetRequisitionBySlug";
@@ -7,6 +8,9 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 // Importing your existing Table components!
 import { PendingRequisitionItemColumns } from "@/features/pending/requisitions/components/PendingRequisitionItemColumns";
 import PendingRequisitionItemTable from "@/features/pending/requisitions/components/PendingRequisitionItemTable";
+
+// Import the type so we can cast it
+import type { PendingRequisitionItemType } from "@/features/pending/requisitions/hooks/usePendingRequisition"; 
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,9 +26,18 @@ const IndividualRequisitionAcceptancePage = () => {
     const { data: requisition, isLoading, error } = useGetRequisitionBySlug(membership?.id, reqSlug);
     const { mutate: updateRequisition, isPending: isUpdating } = useUpdateRequisitions(membership?.id);
 
-    // Initialize your existing TanStack table
+    // FIX: Map the data to satisfy the missing 'supplierId' and memoize it for table performance
+    const tableData = React.useMemo(() => {
+        if (!requisition?.items) return [];
+        return requisition.items.map((item) => ({
+            ...item,
+            // Provide a fallback for supplierId to satisfy TypeScript
+            supplierId: (item as any).supplierId || (item as any).assignedSupplier?.id || "", 
+        })) as unknown as PendingRequisitionItemType[];
+    }, [requisition?.items]);
+
     const table = useReactTable({
-        data: requisition?.items ?? [],
+        data: tableData,
         columns: PendingRequisitionItemColumns,
         getCoreRowModel: getCoreRowModel(),
     });
@@ -158,4 +171,4 @@ const IndividualRequisitionAcceptancePage = () => {
     );
 };
 
-export default IndividualRequisitionAcceptancePage;
+export default IndividualRequisitionAcceptancePage; 

@@ -92,8 +92,6 @@ export const RequisitionColumns = [
         cell: ({ row }) => (
             <div className="flex flex-col divide-y divide-slate-100 w-full">
                 {row.original.supplierQuotes.map((quote) => {
-                    // Check if the item is in the cart to conditionally highlight the total
-                    const hasQuantity = false; // The component inside will handle actual value rendering
                     return (
                         <div key={quote.id} className={`flex items-center justify-end ${ROW_HEIGHT} px-4 font-mono font-bold text-slate-800`}>
                             <TotalItemCount

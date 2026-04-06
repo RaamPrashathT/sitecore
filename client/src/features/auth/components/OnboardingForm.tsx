@@ -110,13 +110,6 @@ export function OnboardingForm({
         }
     };
 
-    const initials = (user?.username ?? "?")
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-
     return (
         <form
             className={cn("flex flex-col gap-8 w-full max-w-md", className)}

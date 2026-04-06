@@ -35,7 +35,7 @@ const CartSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         return (
             <Sidebar collapsible="none" className="fixed right-0 top-16 z-20 hidden border-l lg:flex w-80 h-[calc(100vh-4rem)] p-4 bg-slate-50">
                 <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-500">
-                    <Spinner size="md" />
+                    <Spinner/>
                     <span className="text-sm font-medium tracking-wide uppercase">Loading...</span>
                 </div>
             </Sidebar>

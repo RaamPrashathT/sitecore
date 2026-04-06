@@ -21,7 +21,7 @@ import { Loader2, ArrowLeft, ImagePlus, X, AlertCircle, CalendarIcon } from "luc
 const siteLogSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
-    workDate: z.date({ required_error: "Work date is required" }),
+    workDate: z.date("Work date is required"),
 });
 
 type FormValues = z.infer<typeof siteLogSchema>;
@@ -95,6 +95,7 @@ export default function AddSiteLogForm() {
             });
 
         } catch (error) {
+            console.error("Error uploading images:", error);
             setUploadError("Failed to upload images. Please try again.");
             setIsUploading(false);
         }

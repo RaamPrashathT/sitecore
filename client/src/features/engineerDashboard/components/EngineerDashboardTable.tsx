@@ -6,11 +6,11 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { EngineerDashboardPhase } from "../hooks/useEngineerDashboardItem";
+import type { EngineerDashboardResponse } from "../hooks/useEngineerDashboardItem";
 import EngineerDashboardItemMain from "./EngineerDashboardItemMain";
 
 interface EngineerDashboardDataTableProps {
-    table: ReactTableType<EngineerDashboardPhase>;
+    table: ReactTableType<EngineerDashboardResponse>;
 }
 
 const EngineerDashboardDataTable = ({ table }: EngineerDashboardDataTableProps) => {
@@ -61,7 +61,7 @@ const EngineerDashboardDataTable = ({ table }: EngineerDashboardDataTableProps) 
                         </AccordionTrigger>
 
                         <AccordionContent className="px-4 py-3 ">
-                            <EngineerDashboardItemMain dashboardItems={row.original.items} />
+                            <EngineerDashboardItemMain dashboardItems={row.original.actionablePhases} />
                         </AccordionContent>
                     </AccordionItem>
                 ))}
