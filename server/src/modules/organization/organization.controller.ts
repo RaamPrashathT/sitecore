@@ -17,6 +17,7 @@ import {
     NotificationEntityType,
     NotificationType,
 } from "../../../generated/prisma/index.js";
+import { prisma } from "../../shared/lib/prisma.js";
 
 const orgController = {
     async create(request: Request, response: Response) {

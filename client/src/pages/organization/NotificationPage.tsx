@@ -4,31 +4,36 @@ import { NotificationsList } from "@/features/notifications/components/Notificat
 export default function NotificationPage() {
     const { data: notifications, isLoading, error } = useGetNotifications();
 
-    return (
-        <div className="flex-1 flex flex-col bg-white">
-            <div className="border-b border-slate-200 px-6 py-6">
-                <h1 
-                    className="text-3xl font-bold text-slate-900" 
-                    style={{ fontFamily: "DM Serif Display" }}
-                >
-                    Notifications
-                </h1>
-                <p 
-                    className="text-sm text-slate-600 mt-2" 
-                    style={{ fontFamily: "IBM Plex Sans" }}
-                >
-                    Stay updated with your organization activities
-                </p>
-            </div>
+    const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
 
-            <div className="flex-1 overflow-auto p-6">
-                <div className="max-w-3xl">
+    return (
+        <div className="flex-1 flex flex-col bg-gray-50/30 min-h-full">
+            <div className="w-full max-w-3xl mx-auto px-4 py-6 md:px-6 md:py-10">
+                
+                {/* Header Section */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h1 className="text-2xl md:text-3xl font-display text-gray-900 tracking-tight">
+                            Notifications
+                        </h1>
+                        {unreadCount > 0 && (
+                            <span className="font-mono text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">
+                                {unreadCount} Unread
+                            </span>
+                        )}
+                    </div>
+
+                </div>
+
+                {/* Feed */}
+                <div className="pb-12">
                     <NotificationsList
                         notifications={notifications}
                         isLoading={isLoading}
                         error={error as Error | null}
                     />
                 </div>
+
             </div>
         </div>
     );

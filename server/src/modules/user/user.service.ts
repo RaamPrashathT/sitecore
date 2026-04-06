@@ -3,6 +3,7 @@ import { MissingError } from "../../shared/error/missing.error";
 import { prisma } from "../../shared/lib/prisma";
 import { User } from "../../shared/models/user";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error";
+import { notify } from "../../shared/lib/notify";
 
 export const userService = {
     async getInvitationDetails(token: string) {

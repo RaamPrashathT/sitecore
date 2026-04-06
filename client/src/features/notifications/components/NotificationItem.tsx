@@ -1,73 +1,87 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { 
+    ClipboardList, 
+    Layers, 
+    FileText, 
+    Layout, 
+    UserPlus, 
+    Bell 
+} from "lucide-react";
 import type { NotificationSchema } from "../hooks/useGetNotifications";
-import { useMembership } from "@/hooks/useMembership";
 
 interface NotificationItemProps {
     notification: NotificationSchema;
 }
 
-const getRedirectLink = (notificationType: string, _entityId: string, projectId: string | null, orgSlug: string | undefined): string => {
-    const redirectMap: Record<string, string> = {
-        REQUISITION_SUBMITTED: `/${orgSlug}/${projectId}/requisitions`,
-        REQUISITION_APPROVED: `/${orgSlug}/${projectId}/requisitions`,
-        REQUISITION_REJECTED: `/${orgSlug}/${projectId}/requisitions`,
-        PHASE_STATUS_CHANGED: `/${orgSlug}/${projectId}/phases`,
-        PHASE_PAYMENT_DUE: `/${orgSlug}/${projectId}/phases`,
-        SITE_LOG_CREATED: `/${orgSlug}/${projectId}/logs`,
-        PROJECT_STATUS_CHANGED: `/${orgSlug}/${projectId}`,
-        PROJECT_INVITATION_ACCEPTED: `/${orgSlug}/${projectId}`,
-        PROJECT_INVITATION_REJECTED: `/${orgSlug}/${projectId}`,
-        ORGANIZATION_INVITATION_REQUEST: `/organization/members`,
-    };
-    
-    return redirectMap[notificationType] || "/";
-};
-
 export const NotificationItem = ({ notification }: NotificationItemProps) => {
     const navigate = useNavigate();
-    const {data: membership, isLoading} = useMembership();
-    const { notification: notif } = notification;
-    if(isLoading) {
-        return <div>Loading...</div>;
-    }
-    const redirectLink = getRedirectLink(notif.type, notif.entityId, notif.projectId, membership?.slug);
+    const notif = notification.notification;
+
+    const handleClick = () => {
+        if (notif.actionUrl) {
+            navigate(notif.actionUrl);
+        }
+    };
+
+    // Map types to specific Lucide icons
+    const getIcon = (type: string) => {
+        const iconProps = { size: 20, strokeWidth: 2 };
+        switch (type.toUpperCase()) {
+            case 'REQUISITION':
+                return <ClipboardList {...iconProps} />;
+            case 'PHASE':
+                return <Layers {...iconProps} />;
+            case 'SITE_LOG':
+                return <FileText {...iconProps} />;
+            case 'PROJECT':
+                return <Layout {...iconProps} />;
+            case 'INVITATION':
+                return <UserPlus {...iconProps} />;
+        }
+    };
+
     return (
-        <Card 
-            className="p-4 border-l-4 border-l-green-700 hover:bg-slate-50 transition-all duration-200 cursor-pointer group"
-            onClick={() => navigate(redirectLink)}
+        <div
+            onClick={handleClick}
+            className={`
+                group p-4 md:p-5 rounded-xl border transition-all cursor-pointer flex gap-4 items-start
+                ${notification.isRead 
+                    ? "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm" 
+                    : "bg-green-50/30 border-green-200 hover:border-green-300 hover:shadow-sm"
+                }
+            `}
         >
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0 w-full">
-                    <div className="flex items-center gap-2 mb-2">
-                        <h3 
-                            className="font-semibold text-sm text-slate-900 truncate" 
-                            style={{ fontFamily: "IBM Plex Sans" }}
-                        >
-                            {notif.title}
-                        </h3>
-                        {!notification.isRead && (
-                            <Badge className="bg-green-700 hover:bg-green-800 text-white text-xs font-medium flex-shrink-0">
-                                New
-                            </Badge>
-                        )}
-                    </div>
-                    <p 
-                        className="text-sm text-slate-600 mb-3 leading-relaxed" 
-                        style={{ fontFamily: "IBM Plex Sans" }}
-                    >
+            {/* Themed Icon Container */}
+            <div className={`
+                shrink-0 w-11 h-11 rounded-lg flex items-center justify-center
+                ${notification.isRead 
+                    ? "bg-gray-100 text-gray-500" 
+                    : "bg-green-100 text-green-700"
+                }
+            `}>
+                {getIcon(notif.entityType)}
+            </div>
+
+            <div className="flex-grow min-w-0">
+                {/* Header Row */}
+                <div className="flex justify-between items-start  gap-2">
+                    <h3 className="font-sans text-[15px] font-semibold text-gray-900 truncate">
+                        {notif.title}
+                    </h3>
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-gray-400 whitespace-nowrap shrink-0 mt-1">
+                        {formatDistanceToNow(new Date(notif.createdAt))} ago
+                    </span>
+                </div>
+
+                {/* Body Content */}
+                {notif.body && (
+                    <p className="font-sans text-sm text-gray-600  line-clamp-2 leading-relaxed">
                         {notif.body}
                     </p>
-                    <p 
-                        className="text-xs text-slate-500 font-medium" 
-                        style={{ fontFamily: "IBM Plex Mono" }}
-                    >
-                        {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true })}
-                    </p>
-                </div>
+                )}
+
             </div>
-        </Card>
+        </div>
     );
 };

@@ -188,30 +188,16 @@ const orgService = {
                     userId,
                     organizationId,
                 },
-                ...(role !== "ADMIN" && {
-                    OR: [
-                        { assignmentId: { not: null } },
-                        { notification: { projectId: null } },
-                    ],
-                }),
             },
             include: {
                 notification: true,
-                assignment: {
-                    include: {
-                        project: true,
-                    },
-                },
             },
             orderBy: {
                 notification: { createdAt: "desc" },
             },
         });
 
-        return notifications.map((item) => ({
-            ...item,
-            projectSlug: item.assignment?.project?.slug ?? null,
-        }));
+        return notifications
     },
 };
 

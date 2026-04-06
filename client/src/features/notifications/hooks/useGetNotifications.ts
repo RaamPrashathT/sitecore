@@ -10,7 +10,8 @@ export interface NotificationSchema {
         id: string;
         type: string;
         title: string;
-        body: string;
+        body: string | null;
+        actionUrl: string | null;
         entityType: string;
         entityId: string;
         projectId: string | null;
@@ -20,9 +21,7 @@ export interface NotificationSchema {
 }
 
 const getNotifications = async () => {
-    const response = await api.get<NotificationSchema[]>(
-        "/org/notifications"
-    );
+    const response = await api.get<NotificationSchema[]>("/org/notifications");
     return response.data;
 };
 

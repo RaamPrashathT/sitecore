@@ -1,8 +1,7 @@
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -18,15 +17,14 @@ import { useSession } from "@/features/auth/hooks/useSession";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getSeededColor } from "@/lib/color-hash";
-import { useNavigate } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 
 const SidebarUser = () => {
     const { isMobile } = useSidebar();
     const { user } = useSession();
     const { mutate: logout } = useLogout();
-    const navigate = useNavigate();
-    const { data: membership, isLoading} = useMembership();
+    const { isLoading } = useMembership();
+    
     if (!user) return null;
 
     const initials = user.username
@@ -37,7 +35,9 @@ const SidebarUser = () => {
         .slice(0, 2);
 
     const bgColor = "bg-[" + getSeededColor(user?.username) + "]";
-    if(isLoading) return <div>Loading...</div>
+    
+    if(isLoading) return <div>Loading...</div>;
+
     return (
         <SidebarMenu className="m-0">
             <SidebarMenuItem>
@@ -62,7 +62,6 @@ const SidebarUser = () => {
                                     {user.email}
                                 </span>
                             </div>
-                            <ChevronsUpDown className="w-3.5 h-3.5 text-[#b5bcc9] shrink-0" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
 
@@ -89,21 +88,6 @@ const SidebarUser = () => {
                                 </span>
                             </div>
                         </DropdownMenuLabel>
-
-                        <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
-
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[13px] text-[#1a2440] font-[450] cursor-pointer transition-colors duration-120 hover:bg-[#f0f3f9]">
-                                <BadgeCheck className="w-3.5 h-3.5 shrink-0 opacity-70" />
-                                Account
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[13px] text-[#1a2440] font-[450] cursor-pointer transition-colors duration-120 hover:bg-[#f0f3f9]"
-                                onClick={() => navigate(`/${membership?.slug}/notifications`)}
-                            >
-                                <Bell className="w-3.5 h-3.5 shrink-0 opacity-70" />
-                                Notifications
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
 
                         <DropdownMenuSeparator className="bg-[#e8eaf0] my-1 h-px" />
 

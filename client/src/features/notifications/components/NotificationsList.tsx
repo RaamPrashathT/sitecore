@@ -17,31 +17,35 @@ export const NotificationsList = ({
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-16">
-                <Spinner />
+                <Spinner className="text-green-700" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <Empty
-                title="Error loading notifications"
-                description="Something went wrong. Please try again."
-            />
+            <div className="py-12 border border-dashed border-gray-200 rounded-xl">
+                <Empty
+                    title="Error loading notifications"
+                    description="We couldn't fetch your updates. Please refresh the page."
+                />
+            </div>
         );
     }
 
     if (!notifications || notifications.length === 0) {
         return (
-            <Empty
-                title="No notifications"
-                description="You're all caught up!"
-            />
+            <div className="py-12 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                <Empty
+                    title="No notifications"
+                    description="You're all caught up for now."
+                />
+            </div>
         );
     }
 
     return (
-        <div className="space-y-3">
+        <div className="flex flex-col space-y-3">
             {notifications.map((notification) => (
                 <NotificationItem
                     key={notification.id}
