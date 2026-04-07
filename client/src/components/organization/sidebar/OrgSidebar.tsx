@@ -7,7 +7,7 @@ import {
     ChartArea,
     Bell,
     Settings,
-    FolderDot // Icon for individual projects
+    FolderDot 
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -42,11 +42,10 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     
     const { data: membership, isLoading: membershipLoading } = useMembership();
     
-    // Fetch projects (Automatically scoped by backend: Admin gets all, others get assigned)
     const { data: projectsData, isLoading: projectsLoading } = useProjectList(
         membership?.id,
         0,
-        50, // Fetch up to 50 projects to list in the sidebar
+        50, 
         ""
     );
 
@@ -67,15 +66,12 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             </div>
         );
     }
-
-    // Map individual projects for the sidebar
     const projectItems: SidebarItem[] = (projectsData?.data || []).map((project) => ({
         title: project.name,
         url: `/${project.slug}`, 
         icon: FolderDot,
     }));
 
-    // Build the Sidebar dynamically based on role
     let dynamicContents: SidebarGroupType[] = [];
 
     if (membership.role === "ADMIN") {
@@ -83,12 +79,9 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             {
                 Overview: [
                     { title: "Dashboard", url: "/", icon: ChartArea },
-                    // Generic "Projects" link removed!
                 ],
             }
         ];
-
-        // Insert the individual projects subheading
         if (projectItems.length > 0) {
             dynamicContents.push({
                 Projects: projectItems
@@ -110,7 +103,6 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             }
         );
     } else {
-        // ENGINEER & CLIENT VIEW
         dynamicContents = [
             {
                 Overview: [
@@ -137,7 +129,6 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             </SidebarHeader>
             <SidebarContent className="bg-white py-2 flex flex-col h-full">
                 
-                {/* Main Dynamic Role Content */}
                 <SidebarContents
                     groups={dynamicContents.map((group) => {
                         const [label, items] = Object.entries(group)[0];
@@ -146,14 +137,11 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                             label,
                             items: items.map((item) => ({
                                 ...item,
-                                // Automatically prepends orgSlug so individual projects become /orgSlug/projectSlug
                                 url: `/${orgSlug}${item.url}`,
                             })),
                         };
                     })}
                 />
-
-                {/* Static Bottom Pinned Items */}
                 <SidebarGroup className="mt-auto px-2.5 py-0 mb-2">
                     {membership.role === "ADMIN" ? (
                         <SidebarMenu className="flex flex-col gap-0.5">

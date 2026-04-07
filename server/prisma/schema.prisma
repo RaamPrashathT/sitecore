@@ -29,6 +29,37 @@ enum CatalogueCategory {
     OVERHEAD
 }
 
+enum MeasurementUnit {
+  NOS
+  BAG
+  ROLL
+  BUNDLE
+  SET
+  PAIR
+  
+  KG
+  MT
+  QUINTAL
+
+  CUM
+  CFT
+  LITRE
+
+  SQM
+  SQFT
+
+  RMT
+  RFT
+
+  DAY
+  HOUR
+  MONTH
+
+  TRIP    
+
+  LS 
+}
+
 enum ProjectStatus {
     DRAFT
     ACTIVE

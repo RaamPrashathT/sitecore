@@ -86,7 +86,7 @@ const PendingApprovalsSidebar = () => {
                             {summary?.pendingPayments.map((payment) => (
                                 <Link
                                     key={payment.id}
-                                    to={`payments/${payment.id}`} // <-- CHANGED TO .id
+                                    to={`payments/${payment.id}`}
                                     className="flex items-center p-3 hover:bg-muted/50 transition-colors group"
                                 >
                                     <div className="flex-1 min-w-0">

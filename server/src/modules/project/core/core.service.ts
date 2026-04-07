@@ -1,9 +1,9 @@
 import { prisma } from "../../../shared/lib/prisma.js";
 import { slugify } from "../../../shared/utils/slugify.js";
-import { User } from "../../../shared/models/user.js"; // Adjust path to Mongo User model
+import { User } from "../../../shared/models/user.js";
 import { Types } from "mongoose";
 import crypto from "node:crypto";
-import { sendInviteEmail } from "../../../shared/lib/emails/sendClientInvitation.js"; // Adjust path if needed
+import { sendInviteEmail } from "../../../shared/lib/emails/sendClientInvitation.js"; 
 import { ValidationError } from "../../../shared/error/validation.error.js";
 
 const coreService = {
@@ -56,7 +56,6 @@ const coreService = {
             organizationId: organizationId,
         };
 
-        // Filter to only assigned projects if not ADMIN
         if (role !== "ADMIN") {
             whereClause.assignments = {
                 some: {
@@ -86,7 +85,7 @@ const coreService = {
             prisma.project.findMany({
                 where: whereClause,
                 include: {
-                    phases: true, // Just include them so we can count them
+                    phases: true,
                     _count: {
                         select: { assignments: true },
                     },
@@ -126,7 +125,6 @@ const coreService = {
                         name: true,
                         status: true,
                         budget: true,
-                        // NEW: Fetch all ordered items to calculate actual consumed budget
                         requisitions: {
                             select: {
                                 items: {
@@ -149,7 +147,6 @@ const coreService = {
 
         if (!project) throw new Error("Project not found");
 
-        // Fetch recent site logs across all phases of this project
         const recentLogs = await prisma.siteLog.findMany({
             where: { phase: { projectId: projectId } },
             orderBy: { workDate: "desc" },
@@ -157,7 +154,6 @@ const coreService = {
             include: { author: { select: { userId: true } } },
         });
 
-        // Fetch authors for the logs
         const authorUserIds = [
             ...new Set(recentLogs.map((log) => log.author.userId)),
         ];
@@ -170,12 +166,11 @@ const coreService = {
             return {
                 id: log.id,
                 title: log.title,
-                workDate: log.workDate as any, // Will serialize to ISO string
+                workDate: log.workDate as any,
                 authorName: author ? author.username : "Unknown",
             };
         });
 
-        // NEW: Calculate Consumed Budget from ORDERED items
         let consumedBudget = 0;
         project.phases.forEach((phase) => {
             phase.requisitions.forEach((req) => {
@@ -200,7 +195,6 @@ const coreService = {
                 consumed: consumedBudget,
                 remaining: Number(project.estimatedBudget) - consumedBudget,
             },
-            // Strip out the requisitions payload to perfectly match the frontend hook interface
             phases: project.phases.map((phase) => ({
                 id: phase.id,
                 name: phase.name,
@@ -225,7 +219,6 @@ const coreService = {
     },
 
     async getMembers(projectId: string, organizationId: string) {
-        // Find all admins for the organization + all direct assignments for the project
         const [adminMembers, projectAssignments] = await Promise.all([
             prisma.membership.findMany({
                 where: { organizationId, role: "ADMIN" },

@@ -18,7 +18,6 @@ projectRouter.get("/details", authorize, orgAuthorize, projectAuthorize, coreCon
 projectRouter.put("/", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.updateProject);
 projectRouter.post("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.assignMember);
 projectRouter.delete("/members", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.removeMember);
-// projectRouter.delete("/", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), coreController.deleteProject);
 
 projectRouter.get("/timeline", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), phaseController.getProjectTimeline);
 projectRouter.post("/phase", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), phaseController.createPhase);

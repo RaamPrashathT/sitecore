@@ -131,9 +131,7 @@ const dashboardService = {
         deductInventoryQty: number;
         organizationId: string;
     }) {
-        // Use a transaction to ensure both operations succeed or fail together
         return await prisma.$transaction(async (tx) => {
-            // 1. Verify the item belongs to the org and is currently UNORDERED
             const item = await tx.requisitionItem.findFirst({
                 where: {
                     id: requisitionItemId,
@@ -154,7 +152,6 @@ const dashboardService = {
                 );
             }
 
-            // 2. Mark the requisition item as ORDERED
             const updatedItem = await tx.requisitionItem.update({
                 where: { id: requisitionItemId },
                 data: { status: "ORDERED" },
@@ -216,8 +213,6 @@ const dashboardService = {
             for (const phase of project.phases) {
                 if (phase.status === "ACTIVE") {
                     activePhase = phase;
-
-                    // A. Alert: Active Phase but NO Requisition drafted yet
                     if (phase.requisitions.length === 0) {
                         actionablePhases.push({
                             phaseId: phase.id,
@@ -229,7 +224,6 @@ const dashboardService = {
                     }
                 }
 
-                // B. Requisitions Tracker
                 for (const req of phase.requisitions) {
                     recentRequisitions.push({
                         id: req.id,
@@ -272,8 +266,6 @@ const dashboardService = {
                 });
             }
         }
-
-        // Sort globally by newest first
         recentRequisitions.sort(
             (a, b) =>
                 new Date(b.createdAt).getTime() -
@@ -288,8 +280,8 @@ const dashboardService = {
         return {
             activeProjects,
             actionablePhases,
-            recentRequisitions: recentRequisitions.slice(0, 8), // Top 8 recent reqs
-            recentLogs: allLogs.slice(0, 10), // Top 10 recent logs across sites
+            recentRequisitions: recentRequisitions.slice(0, 8),
+            recentLogs: allLogs.slice(0, 10),
         };
     },
 
@@ -343,7 +335,6 @@ const dashboardService = {
                     });
                 }
 
-                // B. Check phase statuses
                 if (phase.status === "ACTIVE") {
                     activePhase = { id: phase.id, name: phase.name };
                 }
@@ -351,13 +342,12 @@ const dashboardService = {
                     completedPhases++;
                 }
 
-                // C. Collect ALL site logs for THIS specific phase
                 for (const log of phase.siteLogs) {
                     allLogs.push({
                         id: log.id,
                         title: log.title,
-                        phaseSlug: phase.slug,       // <-- CHANGED: Pull directly from the 'phase' object
-                        projectSlug: project.slug,   // <-- CHANGED: Pull directly from the 'project' object
+                        phaseSlug: phase.slug,
+                        projectSlug: project.slug,
                         createdAt: log.createdAt,
                         phaseName: phase.name 
                     });
@@ -385,7 +375,6 @@ const dashboardService = {
                     phaseName: log.phaseName
                 }));
 
-            // 4. Calculate a rough completion percentage based on completed phases
             const completionPercentage = project.phases.length > 0
                 ? Math.round((completedPhases / project.phases.length) * 100) 
                 : 0;
@@ -411,7 +400,6 @@ const dashboardService = {
 
     async getPendingApprovalsSummary(organizationId: string) {
         const [pendingPayments, pendingRequisitions] = await Promise.all([
-            // 1. Fetch Phases waiting on Client Payment
             prisma.phase.findMany({
                 where: {
                     status: "PAYMENT_PENDING",
@@ -428,10 +416,9 @@ const dashboardService = {
                     },
                 },
                 orderBy: { paymentDeadline: "asc" },
-                take: 5, // Just grab the top 5 for the sidebar
+                take: 5,
             }),
 
-            // 2. Fetch Requisitions waiting on Admin Approval
             prisma.requisition.findMany({
                 where: {
                     status: "PENDING_APPROVAL",
@@ -525,7 +512,6 @@ const dashboardService = {
             throw new Error("Requisition not found");
         }
 
-        // Flatten the data for a clean frontend response
         return {
             id: requisition.id,
             title: requisition.title,
@@ -586,7 +572,6 @@ const dashboardService = {
         };
     },
     async approvePendingPayment(organizationId: string, phaseId: string) {
-        // 1. Verify it belongs to the org and grab all the slugs we need for the URL
         const phase = await prisma.phase.findFirst({
             where: { id: phaseId, project: { organizationId } },
             include: {
@@ -605,7 +590,6 @@ const dashboardService = {
 
         if (!phase) throw new Error("Phase not found");
 
-        // 2. Mark it as paid and active
         const updatedPhase = await prisma.phase.update({
             where: { id: phaseId },
             data: {

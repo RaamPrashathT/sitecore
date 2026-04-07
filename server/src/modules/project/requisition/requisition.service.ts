@@ -260,7 +260,6 @@ const requisitionService = {
             }>;
         },
     ) {
-        // 1. Update the query to include the organization so we can get its slug
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId: projectId },
             include: { project: { include: { organization: true } } },
@@ -321,7 +320,6 @@ const requisitionService = {
             include: { items: true },
         });
 
-        // 2. SEND NOTIFICATION (Alerts Admin to approve)
         await notify({
             type: "REQUISITION_SUBMITTED",
             title: "Material Request Pending",
@@ -330,7 +328,7 @@ const requisitionService = {
             entityId: requisition.id,
             projectId: projectId,
             orgId: phase.project.organizationId,
-            actionUrl: `/${phase.project.organization.slug}/requisitions/${requisition.slug}`, // Routes Admin to Acceptance Page
+            actionUrl: `/${phase.project.organization.slug}/requisitions/${requisition.slug}`,
         });
 
         return {
@@ -344,7 +342,6 @@ const requisitionService = {
     },
 
     async approveRequisition(requisitionId: string) {
-        // 1. Get the requisition WITH the phase and project slugs
         const requisition = await prisma.requisition.findFirst({
             where: { id: requisitionId },
             include: {
@@ -369,7 +366,6 @@ const requisitionService = {
             data: { status: "APPROVED" },
         });
 
-        // 2. SEND NOTIFICATION (Alerts Engineer it was approved)
         await notify({
             type: "REQUISITION_APPROVED",
             title: "Requisition Approved",
@@ -383,7 +379,6 @@ const requisitionService = {
     },
 
     async rejectRequisition(requisitionId: string) {
-        // 1. Get the requisition WITH the phase and project slugs
         const requisition = await prisma.requisition.findFirst({
             where: { id: requisitionId },
             include: {
@@ -408,7 +403,6 @@ const requisitionService = {
             data: { status: "REJECTED" },
         });
 
-        // 2. SEND NOTIFICATION (Alerts Engineer it was rejected)
         await notify({
             type: "REQUISITION_REJECTED",
             title: "Requisition Rejected",
@@ -428,7 +422,6 @@ const requisitionService = {
         pageSize: number,
         searchQuery: string,
     ) {
-        // 1. Fetch the Phase to calculate financial allocation
         const phase = await prisma.phase.findUnique({
             where: {
                 slug_projectId: { slug: phaseSlug, projectId: projectId },
@@ -436,7 +429,6 @@ const requisitionService = {
             include: {
                 project: { select: { organizationId: true } },
                 requisitions: {
-                    // Count all budgets that are active, pending, or drafted
                     where: { status: { not: "REJECTED" } },
                     select: { budget: true },
                 },
@@ -447,14 +439,12 @@ const requisitionService = {
             throw new ValidationError("Phase not found");
         }
 
-        // Calculate Remaining Budget
         const usedBudget = phase.requisitions.reduce(
             (sum, req) => sum + Number(req.budget),
             0,
         );
         const remainingBudget = Number(phase.budget) - usedBudget;
 
-        // 2. Fetch the Catalogue with nested Supplier Quotes
         const skip = pageIndex * pageSize;
         const whereClause: any = {
             organizationId: phase.project.organizationId,

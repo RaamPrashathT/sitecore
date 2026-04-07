@@ -77,7 +77,7 @@ const authService = {
                 token: verifyToken,
                 otpHash,
                 email: newUser.email,
-                expiresAt: new Date(Date.now() + 1000 * 60 * 10), // 10 min expiry
+                expiresAt: new Date(Date.now() + 1000 * 60 * 10),
             },
             { upsert: true, new: true },
         );

@@ -96,7 +96,7 @@ const catalogueService = {
                     supplierQuotes: {
                         create: {
                             supplier: data.supplier,
-                            email: data.email, // <-- NEW
+                            email: data.email, 
                             truePrice: data.truePrice,
                             standardRate: data.standardRate,
                             leadTime: data.leadTime,
@@ -109,7 +109,7 @@ const catalogueService = {
         return prisma.supplierQuote.create({
             data: {
                 supplier: data.supplier,
-                email: data.email, // <-- NEW
+                email: data.email, 
                 truePrice: data.truePrice,
                 standardRate: data.standardRate,
                 leadTime: data.leadTime,
@@ -141,7 +141,7 @@ const catalogueService = {
                 data: {
                     truePrice: data.truePrice,
                     supplier: data.supplier,
-                    email: data.email, // <-- NEW
+                    email: data.email, 
                     standardRate: data.standardRate,
                     leadTime: data.leadTime,
                     inventory: data.inventory,
@@ -193,7 +193,7 @@ const catalogueService = {
                             create: {
                                 truePrice: data.truePrice,
                                 supplier: data.supplier,
-                                email: data.email, // <-- NEW
+                                email: data.email, 
                                 standardRate: data.standardRate,
                                 leadTime: data.leadTime,
                                 inventory: data.inventory,

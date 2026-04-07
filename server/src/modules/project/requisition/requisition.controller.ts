@@ -181,7 +181,6 @@ const requisitionController = {
                 .json({ message: "Internal server error" });
         }
     },
-    // Add this inside your requisitionController object:
     async getRequisitionCatalogue(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;

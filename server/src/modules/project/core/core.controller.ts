@@ -40,8 +40,8 @@ const coreController = {
     async getProjects(request: Request, response: Response) {
         try {
             const organizationId = request.tenant!.orgId;
-            const role = request.tenant!.role; // <-- Extract role
-            const userId = request.session!.userId; // <-- Extract userId
+            const role = request.tenant!.role;
+            const userId = request.session!.userId;
 
             const index = Number.parseInt(request.query.index as string) || 0;
             const size = Number.parseInt(request.query.size as string) || 10;
@@ -63,8 +63,8 @@ const coreController = {
                 validatedData.data.pageIndex,
                 validatedData.data.pageSize,
                 validatedData.data.searchQuery,
-                userId, // <-- Pass down
-                role, // <-- Pass down
+                userId,
+                role,
             );
             return response.status(200).json(result);
         } catch (error) {

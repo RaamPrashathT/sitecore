@@ -89,7 +89,6 @@ export const userService = {
     },
 
     async acceptInvitation(token: string, userId: string, userEmail: string) {
-        // 1. Fetch invitation with nested project slugs
         const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
@@ -117,7 +116,6 @@ export const userService = {
             );
         }
 
-        // 2. Fetch Organization slug separately
         const organization = await prisma.organization.findUnique({
             where: { id: invitation.organizationId },
             select: { slug: true },
@@ -162,7 +160,6 @@ export const userService = {
             }
         });
 
-        // 3. Setup slugs and notify!
         const orgSlug = organization?.slug || "";
         const projectSlug = invitation.projects[0]?.project.slug || "";
 
@@ -187,7 +184,6 @@ export const userService = {
     },
 
     async declineInvitation(token: string, userId: string, userEmail: string) {
-        // 1. Fetch invitation with nested project slugs
         const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
@@ -214,7 +210,6 @@ export const userService = {
             );
         }
 
-        // 2. Fetch Organization slug separately
         const organization = await prisma.organization.findUnique({
             where: { id: invitation.organizationId },
             select: { slug: true },
@@ -227,7 +222,6 @@ export const userService = {
             },
         });
 
-        // 3. Setup slugs and notify!
         const orgSlug = organization?.slug || "";
         const projectSlug = invitation.projects[0]?.project.slug || "";
 

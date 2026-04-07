@@ -14,7 +14,6 @@ const sitelogService = {
             images: string[];
         },
     ) {
-        // 1. Updated query to include the organization so we can get its slug for the URL
         const phase = await prisma.phase.findUnique({
             where: {
                 slug_projectId: {
@@ -66,7 +65,6 @@ const sitelogService = {
             },
         });
 
-        // 2. SEND NOTIFICATION
         await notify({
             type: "SITE_LOG_CREATED",
             title: "New Site Log Added",
@@ -90,7 +88,6 @@ const sitelogService = {
             imageId?: string | null;
         },
     ) {
-        // 1. Fetch the SiteLog with all nested relations to get our slugs
         const siteLog = await prisma.siteLog.findUnique({
             where: { id: sitelogId },
             include: {
@@ -126,9 +123,8 @@ const sitelogService = {
             },
         });
 
-        // 2. SEND NOTIFICATION
         await notify({
-            type: "SITE_LOG_CREATED", // Reusing this enum since it's related to the site log
+            type: "SITE_LOG_CREATED",
             title: "New Comment on Site Log",
             body: `Someone commented on the site log: "${siteLog.title}".`,
             entityType: "SITE_LOG",

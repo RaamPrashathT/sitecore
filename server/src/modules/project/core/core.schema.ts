@@ -21,7 +21,7 @@ export const updateProjectSchema = z.object({
 });
 
 export const assignMemberSchema = z.object({
-    userId: z.string().length(24), // Assuming MongoDB ObjectId 24-char hex
+    userId: z.string().length(24),
     role: z.enum(["ENGINEER", "CLIENT"]),
 });
 

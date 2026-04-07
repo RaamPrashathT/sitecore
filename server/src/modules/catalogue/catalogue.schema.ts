@@ -15,7 +15,7 @@ export const getCatalogueByIdSchema = z.object({
 export const formSchema = z.object({
     name: z.string().min(1, "Item Name is required"),
     supplier: z.string().min(1, "Supplier is required"),
-    email: z.string().email("Invalid email address"), // <-- NEW
+    email: z.string().email("Invalid email address"),
     category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
     unit: z.string().min(1, "Unit is required"),
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
@@ -27,7 +27,7 @@ export const formSchema = z.object({
 export const editFormSchema = z.object({
     name: z.string().min(1, "Item Name is required"),
     supplier: z.string().min(1, "Supplier is required"),
-    email: z.string().email("Invalid email address"), // <-- NEW
+    email: z.string().email("Invalid email address"), 
     category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
     unit: z.string().min(1, "Unit is required"),
     truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),

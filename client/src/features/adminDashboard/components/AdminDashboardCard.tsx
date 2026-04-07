@@ -22,10 +22,8 @@ const AdminDashboardCard = ({ row }: DashboardItemCardProps) => {
     const usableInventory = Math.max(0, rawInventory);
     const requestedQty = Number(item.quantity) || 0;
 
-    // Default to "0"
     const [warehouseQty, setWarehouseQty] = useState<string>("0");
     
-    // Evaluate input for error states
     const rawInput = Number(warehouseQty) || 0;
     const isExceedingStock = rawInput > usableInventory;
     const isExceedingRequested = rawInput > requestedQty;
@@ -42,7 +40,6 @@ const AdminDashboardCard = ({ row }: DashboardItemCardProps) => {
     const hasPartialStock = usableInventory > 0 && usableInventory < requestedQty;
     const hasNoStock = usableInventory <= 0;
 
-    // Handlers
     const handleOrderExternally = () => mutate({ requisitionItemId: item.id, deductInventoryQty: 0 });
     const handleUseFullStock = () => mutate({ requisitionItemId: item.id, deductInventoryQty: requestedQty });
     const handleSplitOrder = () => mutate({ requisitionItemId: item.id, deductInventoryQty: parsedWarehouse });

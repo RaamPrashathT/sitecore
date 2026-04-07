@@ -186,7 +186,6 @@ const clientService = {
     },
 
     async acceptInvitation(token: string, userId: string, userEmail: string) {
-        // 1. Removed 'organization' from include because the relation isn't in the schema
         const invitation = await prisma.invitation.findFirst({
             where: {
                 token,
@@ -214,7 +213,6 @@ const clientService = {
             );
         }
 
-        // 2. Fetch the Organization slug separately using the organizationId
         const organization = await prisma.organization.findUnique({
             where: { id: invitation.organizationId },
             select: { slug: true }

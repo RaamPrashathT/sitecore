@@ -23,7 +23,6 @@ interface AdminDashboardPaginationProps {
     table: ReactTableType<DashboardItemType>;
 }
 
-// ... keep getPaginationNumbers function exactly as is ...
 const getPaginationNumbers = (pageIndex: number, pageCount: number) => {
     const currentPage = pageIndex + 1; 
     const totalPages = pageCount;

@@ -30,7 +30,7 @@ const AdminDashboardMain = () => {
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         onGlobalFilterChange: setGlobalFilter,
-        manualFiltering: true, // Backend handles filtering
+        manualFiltering: true, 
         onRowSelectionChange: setRowSelection,
         getRowId: (row) => row.id,
         state: {

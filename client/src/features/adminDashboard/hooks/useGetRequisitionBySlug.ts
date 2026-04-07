@@ -41,7 +41,6 @@ export const useGetRequisitionBySlug = (
     return useQuery({
         queryKey: ["requisitionDetail", organizationId, reqSlug],
         queryFn: () => getRequisitionBySlug(organizationId!, reqSlug!),
-        // Only run the query if we have both the org ID and the slug from the URL
         enabled: !!organizationId && !!reqSlug, 
     });
 };

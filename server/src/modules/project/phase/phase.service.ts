@@ -237,7 +237,6 @@ const phaseService = {
             commentCountMap.set(p.id, total);
         });
 
-        // Resolve MongoDB Users for the site log authors
         const authorUserIds = new Set<string>();
         project.phases.forEach((phase) => {
             phase.siteLogs.forEach((log) =>
@@ -393,7 +392,6 @@ const phaseService = {
                 },
             },
             include: {
-                // Fetch Requisitions and their nested Items to calculate spend
                 requisitions: {
                     include: {
                         items: {
@@ -425,7 +423,6 @@ const phaseService = {
             throw new ValidationError("Phase not found");
         }
 
-        // 1. Calculate Financials based on ORDERED items
         let spent = 0;
         phase.requisitions.forEach((req) => {
             req.items.forEach((item) => {
@@ -438,7 +435,6 @@ const phaseService = {
         const budget = Number(phase.budget);
         const remaining = budget - spent;
 
-        // 2. Resolve MongoDB Users (Unchanged)
         const authorUserIds = new Set<string>();
         phase.siteLogs.forEach((log) => {
             authorUserIds.add(log.author.userId);
@@ -451,7 +447,6 @@ const phaseService = {
         }).lean();
         const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
-        // 3. Format Output (Unchanged)
         const mappedSiteLogs = phase.siteLogs.map((log) => {
             const logAuthor = userMap.get(log.author.userId);
             return {
@@ -503,7 +498,7 @@ const phaseService = {
 
     async updatePhase(
         projectId: string,
-        phaseSlug: string, // 👇 Changed to phaseSlug
+        phaseSlug: string,
         data: {
             name?: string | undefined;
             description?: string | undefined;
@@ -612,7 +607,7 @@ const phaseService = {
     async approvePayment(projectId: string, phaseId: string) {
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
-            include: { project: { include: { organization: true } } }, // <-- Need slugs for actionUrl
+            include: { project: { include: { organization: true } } },
         });
 
         if (!phase) throw new ValidationError("Phase not found");
@@ -631,7 +626,6 @@ const phaseService = {
             },
         });
 
-        // SEND NOTIFICATION
         await notify({
             type: "PHASE_STATUS_CHANGED",
             title: "Phase is now Active",
@@ -647,7 +641,7 @@ const phaseService = {
     async completePhase(projectId: string, phaseId: string) {
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
-            include: { project: { include: { organization: true } } }, // <-- Need slugs for actionUrl
+            include: { project: { include: { organization: true } } },
         });
 
         if (!phase) throw new ValidationError("Phase not found");
@@ -680,7 +674,6 @@ const phaseService = {
             data: { status: "COMPLETED" },
         });
 
-        // SEND NOTIFICATION
         await notify({
             type: "PHASE_STATUS_CHANGED",
             title: "Phase Completed",
