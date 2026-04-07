@@ -6,6 +6,7 @@ const logDir = "D:/logs/sitecore";
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
 }
+
 const levels = {
     error: 0,
     warn: 1,
@@ -25,6 +26,7 @@ const colors = {
 winston.addColors(colors);
 
 const structuredFormat = winston.format.combine(
+    winston.format.errors({ stack: true }), 
     winston.format.timestamp(),
     winston.format.printf((info) => {
         const log = {
@@ -33,25 +35,21 @@ const structuredFormat = winston.format.combine(
 
             service: info.service || "sitecore-service",
             instance: info.instance || "local",
-            environment:
-                info.environment || process.env.NODE_ENV || "development",
+            environment: info.environment || process.env.NODE_ENV || "development",
 
             message: info.message,
+            
+            ...(info.stack ? { stack: info.stack } : {}),
+            ...(info.code ? { prismaCode: info.code } : {}),
+            ...(info.meta ? { prismaMeta: info.meta } : {}),
 
             ...(info.traceId ? { traceId: info.traceId } : {}),
             ...(info.spanId ? { spanId: info.spanId } : {}),
             ...(info.userId ? { userId: info.userId } : {}),
             ...(info.endpoint ? { endpoint: info.endpoint } : {}),
             ...(info.method ? { method: info.method } : {}),
-
-            ...(info.statusCode !== undefined
-                ? { statusCode: info.statusCode }
-                : {}),
-
-            ...(info.responseTime !== undefined
-                ? { responseTime: info.responseTime }
-                : {}),
-
+            ...(info.statusCode !== undefined ? { statusCode: info.statusCode } : {}),
+            ...(info.responseTime !== undefined ? { responseTime: info.responseTime } : {}),
             ...(info.errorCode ? { errorCode: info.errorCode } : {}),
             ...(info.errorDetails ? { errorDetails: info.errorDetails } : {}),
             ...(info.tags ? { tags: info.tags } : {}),
@@ -62,11 +60,14 @@ const structuredFormat = winston.format.combine(
 );
 
 const consoleFormat = winston.format.combine(
+    winston.format.errors({ stack: true }), 
     winston.format.timestamp({ format: "HH:mm:ss" }),
     winston.format.colorize({ all: true }),
-    winston.format.printf(
-        (info) => `[${info.timestamp}] ${info.level}: ${info.message}`,
-    ),
+    winston.format.printf((info) => {
+        const msg = info.stack || info.message;
+        const codeStr = info.code ? ` [Code: ${info.code}]` : "";
+        return `[${info.timestamp}] ${info.level}:${codeStr} ${msg}`;
+    }),
 );
 
 export const logger = winston.createLogger({

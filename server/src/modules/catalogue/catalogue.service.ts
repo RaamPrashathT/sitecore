@@ -1,12 +1,8 @@
-import { MissingError } from "../../shared/error/missing.error.js";
 import { prisma } from "../../shared/lib/prisma.js";
-import type {
-    createCatalogueFormSchema,
-    deleteCatalogueFormSchema,
-    editCatalogueFormSchema,
-} from "./catalogue.schema.js";
+import type { CreateCataloguePayload } from "./catalogue.schema.js";
+import { User } from "../../shared/models/user.js";
 
-const catalogueService = {
+export const catalogueService = {
     async getCatalogue(
         orgId: string,
         pageIndex: number,
@@ -14,9 +10,7 @@ const catalogueService = {
         searchQuery: string,
     ) {
         const skip = pageIndex * pageSize;
-        const whereClause: any = {
-            organizationId: orgId,
-        };
+        const whereClause: any = { organizationId: orgId };
 
         if (searchQuery) {
             whereClause.OR = [
@@ -25,8 +19,10 @@ const catalogueService = {
                     supplierQuotes: {
                         some: {
                             supplier: {
-                                contains: searchQuery,
-                                mode: "insensitive",
+                                name: {
+                                    contains: searchQuery,
+                                    mode: "insensitive",
+                                },
                             },
                         },
                     },
@@ -34,203 +30,140 @@ const catalogueService = {
             ];
         }
 
-        const [data, count] = await Promise.all([
+        const [rawItems, totalCount] = await prisma.$transaction([
             prisma.catalogue.findMany({
                 where: whereClause,
                 include: {
-                    supplierQuotes: true,
-                },
-                take: pageSize,
-                skip: skip,
-                orderBy: {
-                    name: "asc",
-                },
-            }),
-            prisma.catalogue.count({
-                where: whereClause,
-            }),
-        ]);
-
-        return { data, count };
-    },
-
-    async getCatalogueById(catalogueId: string, quoteId: string, organizationId: string) {
-        const catalogue = await prisma.catalogue.findUnique({
-            where: {
-                id: catalogueId,
-                organizationId,
-                supplierQuotes: {
-                    some: {
-                        id: quoteId,
-                    },
-                }
-            },
-            include: {
-                supplierQuotes: {
-                    where: {
-                        id: quoteId,
-                    }
-                },
-            },
-        });
-        return catalogue;
-    },
-
-    async createCatalogue(data: createCatalogueFormSchema, orgId: string) {
-        const catalogue = await prisma.catalogue.findUnique({
-            where: {
-                name_organizationId: {
-                    name: data.name,
-                    organizationId: orgId,
-                },
-            },
-        });
-
-        if (!catalogue) {
-            return prisma.catalogue.create({
-                data: {
-                    name: data.name,
-                    category: data.category,
-                    unit: data.unit,
-                    organizationId: orgId,
                     supplierQuotes: {
-                        create: {
-                            supplier: data.supplier,
-                            email: data.email, 
-                            truePrice: data.truePrice,
-                            standardRate: data.standardRate,
-                            leadTime: data.leadTime,
-                            inventory: data.inventory,
+                        include: {
+                            supplier: { select: { id: true, name: true } },
                         },
                     },
-                },
-            });
-        }
-        return prisma.supplierQuote.create({
-            data: {
-                supplier: data.supplier,
-                email: data.email, 
-                truePrice: data.truePrice,
-                standardRate: data.standardRate,
-                leadTime: data.leadTime,
-                inventory: data.inventory,
-                catalogueId: catalogue.id,
-            },
-        });
-    },
-
-    async editCatalogue(data: editCatalogueFormSchema, orgId: string) {
-        const existingCatalogue = await prisma.catalogue.findFirst({
-            where: {
-                id: data.catalogueId,
-            },
-            include: {
-                supplierQuotes: true,
-            },
-        });
-
-        if (!existingCatalogue) {
-            throw new MissingError("Catalogue not found");
-        }
-
-        if (data.name === existingCatalogue.name) {
-            await prisma.supplierQuote.update({
-                where: {
-                    id: data.quoteId,
-                },
-                data: {
-                    truePrice: data.truePrice,
-                    supplier: data.supplier,
-                    email: data.email, 
-                    standardRate: data.standardRate,
-                    leadTime: data.leadTime,
-                    inventory: data.inventory,
-                },
-            });
-        } else {
-            if (existingCatalogue.supplierQuotes.length >= 2) {
-                await prisma.supplierQuote.delete({
-                    where: {
-                        id: data.quoteId,
-                    },
-                });
-            } else {
-                await prisma.catalogue.delete({
-                    where: {
-                        id: data.catalogueId,
-                    },
-                });
-            }
-
-            const catalogue = await prisma.catalogue.findUnique({
-                where: {
-                    name_organizationId: {
-                        name: data.name,
-                        organizationId: orgId,
-                    },
-                },
-            });
-            if (catalogue) {
-                await prisma.supplierQuote.create({
-                    data: {
-                        truePrice: data.truePrice,
-                        supplier: data.supplier,
-                        email: data.email,
-                        standardRate: data.standardRate,
-                        leadTime: data.leadTime,
-                        catalogueId: catalogue.id,
-                        inventory: data.inventory,
-                    },
-                });
-            } else {
-                await prisma.catalogue.create({
-                    data: {
-                        name: data.name,
-                        category: data.category,
-                        unit: data.unit,
-                        organizationId: orgId,
-                        supplierQuotes: {
-                            create: {
-                                truePrice: data.truePrice,
-                                supplier: data.supplier,
-                                email: data.email, 
-                                standardRate: data.standardRate,
-                                leadTime: data.leadTime,
-                                inventory: data.inventory,
+                    inventoryItems: {
+                        where: { quantityOnHand: { gt: 0 } },
+                        include: {
+                            location: {
+                                select: { id: true, name: true, type: true },
                             },
                         },
                     },
-                });
-            }
-        }
+                },
+                take: pageSize,
+                skip: skip,
+                orderBy: { createdAt: "desc" },
+            }),
+            prisma.catalogue.count({ where: whereClause }),
+        ]);
+
+        const userIdsToFetch = Array.from(
+            new Set(rawItems.map((item) => item.createdBy)),
+        );
+        const fetchedMongoUsers = await User.find({
+            _id: { $in: userIdsToFetch },
+        })
+            .select("_id username profileImage")
+            .lean();
+
+        const userMap = fetchedMongoUsers.reduce((acc: any, user: any) => {
+            acc[user._id.toString()] = {
+                username: user.username,
+                profileImage: user.profileImage,
+            };
+            return acc;
+        }, {});
+
+        const stitchedData = rawItems.map((item) => ({
+            ...item,
+            creator: userMap[item.createdBy] || {
+                username: "Unknown User",
+                profileImage: null,
+            },
+        }));
+
+        return {
+            data: stitchedData,
+            meta: {
+                total: totalCount,
+                pageIndex,
+                pageSize,
+                totalPages: Math.ceil(totalCount / pageSize),
+            },
+        };
     },
 
-    async deleteCatalogue(data: deleteCatalogueFormSchema, orgId: string) {
-        const existingCatalogue = await prisma.catalogue.findFirst({
-            where: {
-                id: data.catalogueId,
-            },
-            include: {
-                supplierQuotes: true,
-            },
+    async createCatalogue(
+        orgId: string,
+        userId: string,
+        payload: CreateCataloguePayload,
+    ) {
+        return await prisma.$transaction(async (tx) => {
+            let resolvedSupplierId = payload.supplier.id;
+            if (!resolvedSupplierId && payload.supplier.name) {
+                const newSupplier = await tx.supplier.create({
+                    data: {
+                        organizationId: orgId,
+                        name: payload.supplier.name,
+                    },
+                });
+                resolvedSupplierId = newSupplier.id;
+            }
+
+            if (!resolvedSupplierId)
+                throw new Error("Supplier resolution failed");
+
+            let resolvedLocationId = payload.inventory?.locationId;
+            if (
+                payload.inventory &&
+                !resolvedLocationId &&
+                payload.inventory.locationName
+            ) {
+                const newLocation = await tx.inventoryLocation.create({
+                    data: {
+                        organizationId: orgId,
+                        name: payload.inventory.locationName,
+                        type: payload.inventory.locationType as string,
+                    },
+                });
+                resolvedLocationId = newLocation.id;
+            }
+
+            return await tx.catalogue.create({
+                data: {
+                    organizationId: orgId,
+                    createdBy: userId,
+                    name: payload.name,
+                    category: payload.category,
+                    unit: payload.unit,
+                    defaultLeadTime: payload.defaultLeadTime || 0,
+
+                    supplierQuotes: {
+                        create: {
+                            supplierId: resolvedSupplierId,
+                            truePrice: payload.supplier.truePrice,
+                            standardRate: payload.supplier.standardRate,
+                            leadTimeDays: payload.supplier.leadTimeDays ?? null,
+                        },
+                    },
+
+                    ...(payload.inventory && resolvedLocationId
+                        ? {
+                              inventoryItems: {
+                                  create: {
+                                      locationId: resolvedLocationId,
+                                      quantityOnHand:
+                                          payload.inventory.quantityOnHand,
+                                      averageUnitCost:
+                                          payload.inventory.averageUnitCost,
+                                  },
+                              },
+                          }
+                        : {}),
+                },
+                include: {
+                    supplierQuotes: { include: { supplier: true } },
+                    inventoryItems: { include: { location: true } },
+                },
+            });
         });
-        if (!existingCatalogue) {
-            throw new MissingError("Catalogue not found");
-        }
-        if (existingCatalogue.supplierQuotes.length >= 2) {
-            await prisma.supplierQuote.delete({
-                where: {
-                    id: data.quoteId,
-                },
-            });
-        } else {
-            await prisma.catalogue.delete({
-                where: {
-                    id: data.catalogueId,
-                },
-            });
-        }
     },
 };
-
-export default catalogueService;

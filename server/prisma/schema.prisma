@@ -30,34 +30,34 @@ enum CatalogueCategory {
 }
 
 enum MeasurementUnit {
-  NOS
-  BAG
-  ROLL
-  BUNDLE
-  SET
-  PAIR
-  
-  KG
-  MT
-  QUINTAL
+    NOS
+    BAG
+    ROLL
+    BUNDLE
+    SET
+    PAIR
 
-  CUM
-  CFT
-  LITRE
+    KG
+    MT
+    QUINTAL
 
-  SQM
-  SQFT
+    CUM
+    CFT
+    LITRE
 
-  RMT
-  RFT
+    SQM
+    SQFT
 
-  DAY
-  HOUR
-  MONTH
+    RMT
+    RFT
 
-  TRIP    
+    DAY
+    HOUR
+    MONTH
 
-  LS 
+    TRIP
+
+    LS
 }
 
 enum ProjectStatus {
@@ -85,6 +85,7 @@ enum RequisitionItemStatus {
     ORDERED
     UNORDERED
 }
+
 
 enum NotificationType {
     REQUISITION_SUBMITTED
@@ -117,10 +118,12 @@ model Organization {
     updatedAt DateTime @updatedAt
     image     String?
 
-    notifications Notification[]
-    catalogue     Catalogue[]
-    members       Membership[]
-    projects      Project[]
+    notifications      Notification[]
+    catalogue          Catalogue[]
+    members            Membership[]
+    projects           Project[]
+    suppliers          Supplier[]
+    inventoryLocations InventoryLocation[]
 }
 
 model Membership {
@@ -141,34 +144,89 @@ model Membership {
 
 model Catalogue {
     id              String            @id @default(uuid())
-    name            String
+    name            String 
     category        CatalogueCategory
-    unit            String
+    unit            MeasurementUnit
     defaultLeadTime Int               @default(0)
 
-    supplierQuotes SupplierQuote[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    createdBy String 
 
-    organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId   String
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    supplierQuotes SupplierQuote[]
+    inventoryItems InventoryItem[]
+
     requisitionItems RequisitionItem[]
 
     @@unique([name, organizationId])
 }
 
+model Supplier {
+    id          String  @id @default(uuid())
+    name        String 
+    contactName String?
+    email       String?
+    phone       String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    quotes SupplierQuote[]
+
+    @@unique([name, organizationId])
+}
+
 model SupplierQuote {
-    id           String  @id @default(uuid())
-    supplier     String
+    id           String    @id @default(uuid())
     truePrice    Decimal
     standardRate Decimal
-    leadTime     Int?
-    email        String?
-    inventory    Int     @default(0)
+    leadTimeDays Int?
+    validUntil   DateTime?
 
-    catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
-    catalogueId  String
-    assignedItem RequisitionItem[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    @@unique([catalogueId, supplier])
+    supplierId String
+    supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+    catalogueId String
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+
+    requisitionItems RequisitionItem[]
+
+    @@unique([supplierId, catalogueId])
+}
+model InventoryLocation {
+    id   String @id @default(uuid())
+    name String 
+    type String 
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    items InventoryItem[]
+
+    @@unique([name, organizationId])
+}
+
+model InventoryItem {
+    id              String  @id @default(uuid())
+    quantityOnHand  Decimal @default(0)
+    averageUnitCost Decimal @default(0) // Used for moving average valuation
+
+    locationId String
+    location   InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+    catalogueId String
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+
+    @@unique([locationId, catalogueId])
 }
 
 model Project {

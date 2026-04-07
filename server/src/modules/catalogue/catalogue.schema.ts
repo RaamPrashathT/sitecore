@@ -1,48 +1,60 @@
-import z from "zod";
+import { z } from "zod";
 
-export const getCatalogueSchema = z.object({
-    organizationId: z.string().length(36),
-    pageIndex: z.number().min(0),
-    pageSize: z.number().min(1),
-    searchQuery: z.string().max(500)
+const CatalogueCategoryEnum = z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]);
+const MeasurementUnitEnum = z.enum(["NOS", "BAG", "ROLL", "BUNDLE", "SET", "PAIR", "KG", "MT", "QUINTAL", "CUM", "CFT", "LITRE", "SQM", "SQFT", "RMT", "RFT", "DAY", "HOUR", "MONTH", "TRIP", "LS"]);
+
+export const createCatalogueSchema = z.object({
+    name: z.string().min(1, "Item name is required"),
+    category: CatalogueCategoryEnum,
+    unit: MeasurementUnitEnum,
+    defaultLeadTime: z.number().int().nonnegative().optional(),
+
+    supplier: z.object({
+        id: z.string().uuid().optional(),
+        name: z.string().min(1).optional(),
+        truePrice: z.number().positive("True price must be greater than 0"),
+        standardRate: z.number().positive("Standard rate must be greater than 0"),
+        leadTimeDays: z.number().int().nonnegative().optional(),
+    }).refine((data) => data.id || data.name, {
+        message: "Either a Supplier ID or a New Supplier Name must be provided",
+        path: ["name"],
+    }),
+
+    inventory: z.object({
+        locationId: z.string().uuid().optional(),
+        locationName: z.string().min(1).optional(),
+        locationType: z.string().optional(),
+        quantityOnHand: z.number().nonnegative(),
+        averageUnitCost: z.number().nonnegative(),
+    }).optional().refine((data) => {
+        if (!data) return true;
+        if (data.locationId) return true;
+        return !!(data.locationName && data.locationType);
+    }, {
+        message: "New locations require both a Name and a Type (SITE/WAREHOUSE)",
+        path: ["locationName"],
+    }),
 });
 
-export const getCatalogueByIdSchema = z.object({
-    catalogueId: z.string().length(36),
-    quoteId: z.string().length(36)
-})
+export interface CreateCataloguePayload {
+    name: string;
+    category: z.infer<typeof CatalogueCategoryEnum>;
+    unit: z.infer<typeof MeasurementUnitEnum>;
+    defaultLeadTime?: number | undefined;
 
-export const formSchema = z.object({
-    name: z.string().min(1, "Item Name is required"),
-    supplier: z.string().min(1, "Supplier is required"),
-    email: z.string().email("Invalid email address"),
-    category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
-    unit: z.string().min(1, "Unit is required"),
-    truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
-    standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
-    leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
-    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
-});
+    supplier: {
+        id?: string | undefined;
+        name?: string | undefined;
+        truePrice: number;
+        standardRate: number;
+        leadTimeDays?: number | undefined;
+    };
 
-export const editFormSchema = z.object({
-    name: z.string().min(1, "Item Name is required"),
-    supplier: z.string().min(1, "Supplier is required"),
-    email: z.string().email("Invalid email address"), 
-    category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
-    unit: z.string().min(1, "Unit is required"),
-    truePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
-    standardRate: z.coerce.number().min(0.01, "Rate must be greater than 0"),
-    leadTime: z.coerce.number().min(0, "Lead time cannot be negative"),
-    catalogueId: z.string().min(1, "Catalogue Id is required"),
-    quoteId: z.string().min(1, "Quote Id is required"),
-    inventory: z.coerce.number().min(0, "Inventory cannot be negative"),
-});
-
-export const deleteFormSchema = z.object({
-    catalogueId: z.string().min(1, "Catalogue Id is required"),
-    quoteId: z.string().min(1, "Quote Id is required")
-})
-
-export type createCatalogueFormSchema = z.infer<typeof formSchema>;
-export type editCatalogueFormSchema = z.infer<typeof editFormSchema>;
-export type deleteCatalogueFormSchema = z.infer<typeof deleteFormSchema>;
+    inventory?: {
+        locationId?: string | undefined;
+        locationName?: string | undefined;
+        locationType?: string | undefined;
+        quantityOnHand: number;
+        averageUnitCost: number;
+    } | undefined;
+}
