@@ -7,6 +7,7 @@ import {
     createCatalogueSchema,
     type CreateCataloguePayload,
 } from "./catalogue.schema.js";
+import { Prisma } from "../../shared/lib/prisma.js";
 
 const catalogueController = {
     async getCatalogue(request: Request, response: Response) {
@@ -65,11 +66,39 @@ const catalogueController = {
         } catch (error) {
             logger.error(error);
 
+            if (error instanceof UnAuthorizedError) {
+                return response
+                    .status(401)
+                    .json({ success: false, message: error.message });
+            }
             if (error instanceof ValidationError) {
                 return response
                     .status(400)
                     .json({ success: false, message: error.message });
             }
+
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2002") {
+                    const target =
+                        (error.meta?.target as string[])?.join(", ") || "field";
+                    return response.status(400).json({
+                        success: false,
+                        message: `Duplicate entry error. A record with this ${target} already exists.`,
+                    });
+                }
+                if (error.code === "P2003") {
+                    return response.status(400).json({
+                        success: false,
+                        message:
+                            "Invalid reference. The supplier or location ID provided does not exist.",
+                    });
+                }
+                return response.status(400).json({
+                    success: false,
+                    message: "Database operation failed due to invalid data.",
+                });
+            }
+
             return response
                 .status(500)
                 .json({ success: false, message: "Internal server error" });
