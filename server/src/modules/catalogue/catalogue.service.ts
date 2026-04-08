@@ -4,6 +4,7 @@ import type {
     UpdateCataloguePayload,
 } from "./catalogue.schema.js";
 import { User } from "../../shared/models/user.js";
+import { ValidationError } from "../../shared/error/validation.error.js";
 
 export const catalogueService = {
     async getCatalogue(
@@ -283,6 +284,39 @@ export const catalogueService = {
                     },
                 },
             });
+        });
+    },
+
+    async deleteCatalogue(orgId: string, catalogueId: string) {
+        const catalogue = await prisma.catalogue.findFirstOrThrow({
+            where: {
+                id: catalogueId,
+                organizationId: orgId,
+            },
+            select: {
+                id: true,
+                _count: {
+                    select: {
+                        inventoryItems: true,
+                        requisitionItems: true,
+                    },
+                },
+            },
+        });
+
+        if (
+            catalogue._count.inventoryItems > 0 ||
+            catalogue._count.requisitionItems > 0
+        ) {
+            throw new ValidationError(
+                "Cannot delete this item because it is currently tied to historical project requisitions or warehouse inventory.",
+            );
+        }
+
+        await prisma.catalogue.delete({
+            where: {
+                id: catalogue.id,
+            },
         });
     },
 };

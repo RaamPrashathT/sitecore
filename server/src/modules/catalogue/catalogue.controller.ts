@@ -6,6 +6,7 @@ import { catalogueService } from "./catalogue.service.js";
 import {
     createCatalogueSchema,
     type CreateCataloguePayload,
+    deleteCatalogueSchema,
     updateCatalogueSchema,
     type UpdateCataloguePayload,
 } from "./catalogue.schema.js";
@@ -172,6 +173,58 @@ const catalogueController = {
                         success: false,
                         message:
                             "Catalogue item or its related active record was not found.",
+                    });
+                }
+            }
+
+            return response
+                .status(500)
+                .json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async deleteCatalogue(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+
+            const validatedParams = deleteCatalogueSchema.safeParse(
+                request.params,
+            );
+            if (!validatedParams.success) {
+                const firstError =
+                    validatedParams.error.issues[0]?.message ||
+                    "Invalid catalogue ID";
+                throw new ValidationError(firstError);
+            }
+
+            await catalogueService.deleteCatalogue(
+                orgId as string,
+                validatedParams.data.id,
+            );
+
+            return response.status(200).json({
+                success: true,
+                message: "Catalogue item deleted successfully",
+            });
+        } catch (error) {
+            logger.error(error);
+
+            if (error instanceof UnAuthorizedError) {
+                return response
+                    .status(401)
+                    .json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response
+                    .status(400)
+                    .json({ success: false, message: error.message });
+            }
+
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2025") {
+                    return response.status(404).json({
+                        success: false,
+                        message: "Catalogue item not found.",
                     });
                 }
             }

@@ -12,4 +12,6 @@ catalogueRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), catalo
 
 catalogueRouter.put("/:id", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.updateCatalogue);
 
+catalogueRouter.delete("/:id", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.deleteCatalogue);
+
 export default catalogueRouter;

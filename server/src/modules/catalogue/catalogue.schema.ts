@@ -82,6 +82,10 @@ export const updateCatalogueSchema = z
         message: "At least one field must be provided for update",
     });
 
+export const deleteCatalogueSchema = z.object({
+    id: z.string().uuid("Invalid catalogue ID"),
+});
+
 export interface CreateCataloguePayload {
     name: string;
     category: z.infer<typeof CatalogueCategoryEnum>;
