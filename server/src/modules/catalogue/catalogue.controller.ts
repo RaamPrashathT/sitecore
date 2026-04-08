@@ -6,8 +6,15 @@ import { catalogueService } from "./catalogue.service.js";
 import {
     createCatalogueSchema,
     type CreateCataloguePayload,
+    updateCatalogueSchema,
+    type UpdateCataloguePayload,
 } from "./catalogue.schema.js";
 import { Prisma } from "../../shared/lib/prisma.js";
+import { z } from "zod";
+
+const catalogueIdParamsSchema = z.object({
+    id: z.string().uuid("Invalid catalogue ID"),
+});
 
 const catalogueController = {
     async getCatalogue(request: Request, response: Response) {
@@ -97,6 +104,76 @@ const catalogueController = {
                     success: false,
                     message: "Database operation failed due to invalid data.",
                 });
+            }
+
+            return response
+                .status(500)
+                .json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async updateCatalogue(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+
+            const validatedParams = catalogueIdParamsSchema.safeParse(
+                request.params,
+            );
+            if (!validatedParams.success) {
+                const firstError =
+                    validatedParams.error.issues[0]?.message ||
+                    "Invalid catalogue ID";
+                throw new ValidationError(firstError);
+            }
+
+            const validatedBody = updateCatalogueSchema.safeParse(request.body);
+            if (!validatedBody.success) {
+                const firstError =
+                    validatedBody.error.issues[0]?.message || "Invalid entries";
+                throw new ValidationError(firstError);
+            }
+
+            const result = await catalogueService.updateCatalogue(
+                orgId as string,
+                validatedParams.data.id,
+                validatedBody.data as UpdateCataloguePayload,
+            );
+
+            return response.status(200).json({
+                success: true,
+                message: "Catalogue item updated successfully",
+                data: result,
+            });
+        } catch (error) {
+            logger.error(error);
+
+            if (error instanceof UnAuthorizedError) {
+                return response
+                    .status(401)
+                    .json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response
+                    .status(400)
+                    .json({ success: false, message: error.message });
+            }
+
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2002") {
+                    const target =
+                        (error.meta?.target as string[])?.join(", ") || "field";
+                    return response.status(400).json({
+                        success: false,
+                        message: `Duplicate entry error. A record with this ${target} already exists.`,
+                    });
+                }
+                if (error.code === "P2025") {
+                    return response.status(404).json({
+                        success: false,
+                        message:
+                            "Catalogue item or its related active record was not found.",
+                    });
+                }
             }
 
             return response

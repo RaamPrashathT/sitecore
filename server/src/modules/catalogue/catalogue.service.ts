@@ -1,5 +1,8 @@
 import { prisma } from "../../shared/lib/prisma.js";
-import type { CreateCataloguePayload } from "./catalogue.schema.js";
+import type {
+    CreateCataloguePayload,
+    UpdateCataloguePayload,
+} from "./catalogue.schema.js";
 import { User } from "../../shared/models/user.js";
 
 export const catalogueService = {
@@ -162,6 +165,122 @@ export const catalogueService = {
                 include: {
                     supplierQuotes: { include: { supplier: true } },
                     inventoryItems: { include: { location: true } },
+                },
+            });
+        });
+    },
+
+    async updateCatalogue(
+        orgId: string,
+        catalogueId: string,
+        payload: UpdateCataloguePayload,
+    ) {
+        return await prisma.$transaction(async (tx) => {
+            const existingCatalogue = await tx.catalogue.findFirstOrThrow({
+                where: {
+                    id: catalogueId,
+                    organizationId: orgId,
+                },
+                include: {
+                    inventoryItems: true,
+                },
+            });
+
+            const catalogueData = {
+                ...(payload.name !== undefined ? { name: payload.name } : {}),
+                ...(payload.category !== undefined
+                    ? { category: payload.category }
+                    : {}),
+                ...(payload.unit !== undefined ? { unit: payload.unit } : {}),
+                ...(payload.defaultLeadTime !== undefined
+                    ? { defaultLeadTime: payload.defaultLeadTime }
+                    : {}),
+            };
+
+            if (Object.keys(catalogueData).length > 0) {
+                await tx.catalogue.update({
+                    where: { id: existingCatalogue.id },
+                    data: catalogueData,
+                });
+            }
+
+            if (payload.inventory) {
+                const inventoryItem =
+                    await tx.inventoryItem.findFirstOrThrow({
+                        where: {
+                            catalogueId: existingCatalogue.id,
+                        },
+                        orderBy: {
+                            id: "asc",
+                        },
+                    });
+
+                const inventoryData = {
+                    ...(payload.inventory.quantityOnHand !== undefined
+                        ? { quantityOnHand: payload.inventory.quantityOnHand }
+                        : {}),
+                    ...(payload.inventory.averageUnitCost !== undefined
+                        ? {
+                              averageUnitCost:
+                                  payload.inventory.averageUnitCost,
+                          }
+                        : {}),
+                };
+
+                if (Object.keys(inventoryData).length > 0) {
+                    await tx.inventoryItem.update({
+                        where: { id: inventoryItem.id },
+                        data: inventoryData,
+                    });
+                }
+            }
+
+            if (
+                payload.supplier?.truePrice !== undefined ||
+                payload.supplier?.standardRate !== undefined ||
+                payload.supplier?.leadTimeDays !== undefined
+            ) {
+                const activeQuote = await tx.supplierQuote.findFirstOrThrow({
+                    where: {
+                        catalogueId: existingCatalogue.id,
+                        validUntil: null,
+                    },
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                });
+
+                await tx.supplierQuote.update({
+                    where: { id: activeQuote.id },
+                    data: { validUntil: new Date() },
+                });
+
+                await tx.supplierQuote.create({
+                    data: {
+                        catalogueId: existingCatalogue.id,
+                        supplierId: activeQuote.supplierId,
+                        truePrice:
+                            payload.supplier?.truePrice ?? activeQuote.truePrice,
+                        standardRate:
+                            payload.supplier?.standardRate ??
+                            activeQuote.standardRate,
+                        leadTimeDays:
+                            payload.supplier?.leadTimeDays ??
+                            activeQuote.leadTimeDays,
+                    },
+                });
+            }
+
+            return await tx.catalogue.findUniqueOrThrow({
+                where: { id: existingCatalogue.id },
+                include: {
+                    supplierQuotes: {
+                        include: { supplier: true },
+                        orderBy: { createdAt: "desc" },
+                    },
+                    inventoryItems: {
+                        include: { location: true },
+                    },
                 },
             });
         });

@@ -200,7 +200,7 @@ model SupplierQuote {
 
     requisitionItems RequisitionItem[]
 
-    @@unique([supplierId, catalogueId])
+    // @@unique([supplierId, catalogueId])
 }
 model InventoryLocation {
     id   String @id @default(uuid())
@@ -218,7 +218,7 @@ model InventoryLocation {
 model InventoryItem {
     id              String  @id @default(uuid())
     quantityOnHand  Decimal @default(0)
-    averageUnitCost Decimal @default(0) // Used for moving average valuation
+    averageUnitCost Decimal @default(0) 
 
     locationId String
     location   InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)

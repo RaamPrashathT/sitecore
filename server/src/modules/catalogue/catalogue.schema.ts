@@ -36,6 +36,52 @@ export const createCatalogueSchema = z.object({
     }),
 });
 
+export const updateCatalogueSchema = z
+    .object({
+        name: z.string().min(1, "Item name is required").optional(),
+        category: CatalogueCategoryEnum.optional(),
+        unit: MeasurementUnitEnum.optional(),
+        defaultLeadTime: z.number().int().nonnegative().optional(),
+
+        supplier: z
+            .object({
+                truePrice: z
+                    .number()
+                    .positive("True price must be greater than 0")
+                    .optional(),
+                standardRate: z
+                    .number()
+                    .positive("Standard rate must be greater than 0")
+                    .optional(),
+                leadTimeDays: z.number().int().nonnegative().optional(),
+            })
+            .optional()
+            .refine((data) => {
+                if (!data) return true;
+                return Object.values(data).some((value) => value !== undefined);
+            }, {
+                message: "At least one supplier field must be provided",
+            }),
+
+        inventory: z
+            .object({
+                quantityOnHand: z.number().nonnegative().optional(),
+                averageUnitCost: z.number().nonnegative().optional(),
+            })
+            .optional()
+            .refine((data) => {
+                if (!data) return true;
+                return Object.values(data).some((value) => value !== undefined);
+            }, {
+                message: "At least one inventory field must be provided",
+            }),
+    })
+    .refine((data) => {
+        return Object.values(data).some((value) => value !== undefined);
+    }, {
+        message: "At least one field must be provided for update",
+    });
+
 export interface CreateCataloguePayload {
     name: string;
     category: z.infer<typeof CatalogueCategoryEnum>;
@@ -57,4 +103,24 @@ export interface CreateCataloguePayload {
         quantityOnHand: number;
         averageUnitCost: number;
     } | undefined;
+}
+
+export interface UpdateCataloguePayload {
+    name?: string | undefined;
+    category?: z.infer<typeof CatalogueCategoryEnum> | undefined;
+    unit?: z.infer<typeof MeasurementUnitEnum> | undefined;
+    defaultLeadTime?: number | undefined;
+    supplier?:
+        | {
+              truePrice?: number | undefined;
+              standardRate?: number | undefined;
+              leadTimeDays?: number | undefined;
+          }
+        | undefined;
+    inventory?:
+        | {
+              quantityOnHand?: number | undefined;
+              averageUnitCost?: number | undefined;
+          }
+        | undefined;
 }

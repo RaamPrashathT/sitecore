@@ -10,4 +10,6 @@ catalogueRouter.get("/", authorize, orgAuthorize, catalogueController.getCatalog
 
 catalogueRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.createCatalogue);
 
+catalogueRouter.put("/:id", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.updateCatalogue);
+
 export default catalogueRouter;
