@@ -39,6 +39,7 @@ export const catalogueService = {
                 where: whereClause,
                 include: {
                     supplierQuotes: {
+                        where: { validUntil: null },
                         include: {
                             supplier: { select: { id: true, name: true } },
                         },
@@ -91,6 +92,53 @@ export const catalogueService = {
                 pageIndex,
                 pageSize,
                 totalPages: Math.ceil(totalCount / pageSize),
+            },
+        };
+    },
+
+    async getCatalogueById(orgId: string, catalogueId: string) {
+        const rawItem = await prisma.catalogue.findFirstOrThrow({
+            where: {
+                id: catalogueId,
+                organizationId: orgId,
+            },
+            include: {
+                supplierQuotes: {
+                    include: {
+                        supplier: { select: { id: true, name: true } },
+                    },
+                    orderBy: { createdAt: "desc" },
+                },
+                inventoryItems: {
+                    include: {
+                        location: {
+                            select: { id: true, name: true, type: true },
+                        },
+                    },
+                },
+            },
+        });
+
+        const userIdsToFetch = Array.from(new Set([rawItem.createdBy]));
+        const fetchedMongoUsers = await User.find({
+            _id: { $in: userIdsToFetch },
+        })
+            .select("_id username profileImage")
+            .lean();
+
+        const userMap = fetchedMongoUsers.reduce((acc: any, user: any) => {
+            acc[user._id.toString()] = {
+                username: user.username,
+                profileImage: user.profileImage,
+            };
+            return acc;
+        }, {});
+
+        return {
+            ...rawItem,
+            creator: userMap[rawItem.createdBy] || {
+                username: "Unknown User",
+                profileImage: null,
             },
         };
     },
