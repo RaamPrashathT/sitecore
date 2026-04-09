@@ -406,7 +406,6 @@ model Notification {
     title String
     body  String?
 
-    // NEW: Store the exact relative URL here!
     actionUrl String?
 
     entityType NotificationEntityType

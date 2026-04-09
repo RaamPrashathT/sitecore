@@ -1,0 +1,1354 @@
+{
+  "info": {
+    "_postman_id": "e0f305d3-7b5d-4e7f-be06-43990e377fa9",
+    "name": "New Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "37818196"
+  },
+  "item": [
+    {
+      "name": "Catalogue",
+      "item": [
+        {
+          "name": "Create Catalogue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-tenant-slug",
+                "value": "construction-company"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Portland Cement (25kg Bag)\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"BAG\",\n  \"defaultLeadTime\": 3,\n  \"supplier\": {\n    \"name\": \"UltraTech Distributors Ltd\",\n    \"truePrice\": 410.50,\n    \"standardRate\": 450.00,\n    \"leadTimeDays\": 2\n  },\n  \"inventory\": {\n    \"locationName\": \"Main Warehouse - Zone A\",\n    \"locationType\": \"WAREHOUSE\",\n    \"quantityOnHand\": 100,\n    \"averageUnitCost\": 410.50\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/catalogue",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "catalogue"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success - New Supplier & Location",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Portland Cement (25kg Bag)\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"BAG\",\n  \"defaultLeadTime\": 3,\n  \"supplier\": {\n    \"name\": \"UltraTech Distributors Ltd\",\n    \"truePrice\": 410.50,\n    \"standardRate\": 450.00,\n    \"leadTimeDays\": 2\n  },\n  \"inventory\": {\n    \"locationName\": \"Main Warehouse - Zone A\",\n    \"locationType\": \"WAREHOUSE\",\n    \"quantityOnHand\": 100,\n    \"averageUnitCost\": 410.50\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "0a56e83e-b8ae-4b33-bedb-660222f371f2"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1362"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"552-pBVoPvdVvb4c5/CF8reZ7DqDXyg\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 07 Apr 2026 18:58:57 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Catalogue item created successfully\",\n    \"data\": {\n        \"id\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n        \"name\": \"Portland Cement (25kg Bag)\",\n        \"category\": \"MATERIALS\",\n        \"unit\": \"BAG\",\n        \"defaultLeadTime\": 3,\n        \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n        \"updatedAt\": \"2026-04-07T18:58:57.040Z\",\n        \"createdBy\": \"69d313fd932955178d1942fa\",\n        \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n        \"supplierQuotes\": [\n            {\n                \"id\": \"e6c3fbfa-097a-40a4-981c-160d0e4ab421\",\n                \"truePrice\": \"410.5\",\n                \"standardRate\": \"450\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": null,\n                \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n                \"updatedAt\": \"2026-04-07T18:58:57.040Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ],\n        \"inventoryItems\": [\n            {\n                \"id\": \"eec2f50f-d05b-4637-a48c-75603aeb28ff\",\n                \"quantityOnHand\": \"100\",\n                \"averageUnitCost\": \"410.5\",\n                \"locationId\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"location\": {\n                    \"id\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                    \"name\": \"Main Warehouse - Zone A\",\n                    \"type\": \"WAREHOUSE\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ]\n    }\n}"
+            },
+            {
+              "name": "Success - Existing Supplier & No Location",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"TMT Bar 12mm\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"MT\",\n  \"supplier\": {\n    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n    \"truePrice\": 65000.00,\n    \"standardRate\": 72000.00,\n    \"leadTimeDays\": 5\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "fa8d3a58-568e-4477-bf60-471069e8411c"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "985"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"3d9-uUCw801LGwhi3lyJPbA+1rCh+Do\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 07 Apr 2026 19:07:53 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Catalogue item created successfully\",\n    \"data\": {\n        \"id\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n        \"name\": \"TMT Bar 12mm\",\n        \"category\": \"MATERIALS\",\n        \"unit\": \"MT\",\n        \"defaultLeadTime\": 0,\n        \"createdAt\": \"2026-04-07T19:07:52.603Z\",\n        \"updatedAt\": \"2026-04-07T19:07:52.603Z\",\n        \"createdBy\": \"69d313fd932955178d1942fa\",\n        \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n        \"supplierQuotes\": [\n            {\n                \"id\": \"fd7e6def-c0b4-42cd-8c36-0e134a0c01db\",\n                \"truePrice\": \"65000\",\n                \"standardRate\": \"72000\",\n                \"leadTimeDays\": 5,\n                \"validUntil\": null,\n                \"createdAt\": \"2026-04-07T19:07:52.603Z\",\n                \"updatedAt\": \"2026-04-07T19:07:52.603Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ],\n        \"inventoryItems\": []\n    }\n}"
+            },
+            {
+              "name": "Error - Duplicate Errors",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Portland Cement (25kg Bag)\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"BAG\",\n  \"defaultLeadTime\": 3,\n  \"supplier\": {\n    \"name\": \"UltraTech Distributors Ltd\",\n    \"truePrice\": 410.50,\n    \"standardRate\": 450.00,\n    \"leadTimeDays\": 2\n  },\n  \"inventory\": {\n    \"locationName\": \"Main Warehouse - Zone A\",\n    \"locationType\": \"WAREHOUSE\",\n    \"quantityOnHand\": 100,\n    \"averageUnitCost\": 410.50\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "20388feb-6188-422c-8c86-497c78f55773"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "93"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"5d-9Nt8gkmAYToGn+jDpve5S9oxdrc\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 07 Apr 2026 19:33:55 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Duplicate entry error. A record with this field already exists.\"\n}"
+            },
+            {
+              "name": "Error - Missing Supplier Identity",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"PVC Pipe 2-inch\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"RMT\",\n  \"supplier\": {\n    \"truePrice\": 150,\n    \"standardRate\": 180\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "c6eb0cdd-026a-43f9-b5ea-a7227f577292"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "90"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"5a-uPm6usmt9k1z7eOXkUEKHrUvKiM\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 07 Apr 2026 19:34:44 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Either a Supplier ID or a New Supplier Name must be provided\"\n}"
+            },
+            {
+              "name": "Error - Invalid Enum",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"White Paint\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"GALLONS\", \n  \"supplier\": {\n    \"name\": \"Sherwin Williams\",\n    \"truePrice\": 4000,\n    \"standardRate\": 4500\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "0fb85516-525a-4c85-86d3-1e26edd8fd66"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "242"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"f2-MfZeuyfW08zASA3cThZd0pByx1k\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 07 Apr 2026 19:35:38 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Invalid option: expected one of \\\"NOS\\\"|\\\"BAG\\\"|\\\"ROLL\\\"|\\\"BUNDLE\\\"|\\\"SET\\\"|\\\"PAIR\\\"|\\\"KG\\\"|\\\"MT\\\"|\\\"QUINTAL\\\"|\\\"CUM\\\"|\\\"CFT\\\"|\\\"LITRE\\\"|\\\"SQM\\\"|\\\"SQFT\\\"|\\\"RMT\\\"|\\\"RFT\\\"|\\\"DAY\\\"|\\\"HOUR\\\"|\\\"MONTH\\\"|\\\"TRIP\\\"|\\\"LS\\\"\"\n}"
+            },
+            {
+              "name": "Error - Ghost Foreign Key",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Safety Helmets\",\n  \"category\": \"EQUIPMENT\",\n  \"unit\": \"NOS\",\n  \"supplier\": {\n    \"id\": \"11111111-2222-3333-4444-555555555555\",\n    \"truePrice\": 150,\n    \"standardRate\": 200\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "29ba6839-f961-4b3f-8854-add0f7e21307"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "42"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"2a-Osb6fA5jsvof6d23SdzWj+g8GI4\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 07 Apr 2026 19:37:17 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Invalid UUID\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Catalogue",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-tenant-slug",
+                "value": "construction-company"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"supplier\": {\n      \"truePrice\": 70000,\n      \"standardRate\": 75000\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/catalogue/9a163411-a524-4c2d-adc6-ba3818a636f5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "catalogue",
+                "9a163411-a524-4c2d-adc6-ba3818a636f5"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success: Update Master Details Only",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"TMT Bar 12mm (Premium Grade)\",\n    \"defaultLeadTime\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/b6d3b108-92f0-4817-8ea1-7f7df2a8bce2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "b6d3b108-92f0-4817-8ea1-7f7df2a8bce2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "064f93e6-a026-4d39-8cfd-a48b1c519987"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1001"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"3e9-Djf0e5L3QwTxjf/oVD9Q+XcCsao\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 08 Apr 2026 06:11:21 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Catalogue item updated successfully\",\n    \"data\": {\n        \"id\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n        \"name\": \"TMT Bar 12mm (Premium Grade)\",\n        \"category\": \"MATERIALS\",\n        \"unit\": \"MT\",\n        \"defaultLeadTime\": 2,\n        \"createdAt\": \"2026-04-07T19:07:52.603Z\",\n        \"updatedAt\": \"2026-04-08T06:11:21.496Z\",\n        \"createdBy\": \"69d313fd932955178d1942fa\",\n        \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n        \"supplierQuotes\": [\n            {\n                \"id\": \"fd7e6def-c0b4-42cd-8c36-0e134a0c01db\",\n                \"truePrice\": \"65000\",\n                \"standardRate\": \"72000\",\n                \"leadTimeDays\": 5,\n                \"validUntil\": null,\n                \"createdAt\": \"2026-04-07T19:07:52.603Z\",\n                \"updatedAt\": \"2026-04-07T19:07:52.603Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ],\n        \"inventoryItems\": []\n    }\n}"
+            },
+            {
+              "name": "Success: The Pricing Versioning Trigger",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"supplier\": {\n      \"truePrice\": 66000,\n      \"standardRate\": 73000\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/b6d3b108-92f0-4817-8ea1-7f7df2a8bce2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "b6d3b108-92f0-4817-8ea1-7f7df2a8bce2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "f86e09bb-5194-4521-8c78-01715a04de5b"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "2203"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"89b-HTD2v9se371al+4nOwhLsvzQlEQ\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 08 Apr 2026 06:11:59 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Catalogue item updated successfully\",\n    \"data\": {\n        \"id\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n        \"name\": \"TMT Bar 12mm (Premium Grade)\",\n        \"category\": \"MATERIALS\",\n        \"unit\": \"MT\",\n        \"defaultLeadTime\": 2,\n        \"createdAt\": \"2026-04-07T19:07:52.603Z\",\n        \"updatedAt\": \"2026-04-08T06:11:21.496Z\",\n        \"createdBy\": \"69d313fd932955178d1942fa\",\n        \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n        \"supplierQuotes\": [\n            {\n                \"id\": \"9302e9c8-ce62-4a23-9a9a-786cad6e2e02\",\n                \"truePrice\": \"66000\",\n                \"standardRate\": \"73000\",\n                \"leadTimeDays\": 5,\n                \"validUntil\": null,\n                \"createdAt\": \"2026-04-08T06:11:59.449Z\",\n                \"updatedAt\": \"2026-04-08T06:11:59.449Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            },\n            {\n                \"id\": \"6519e179-fcb6-422f-9d5a-3d6b987d6ea5\",\n                \"truePrice\": \"66000\",\n                \"standardRate\": \"73000\",\n                \"leadTimeDays\": 5,\n                \"validUntil\": \"2026-04-08T06:11:59.377Z\",\n                \"createdAt\": \"2026-04-08T06:11:53.950Z\",\n                \"updatedAt\": \"2026-04-08T06:11:59.377Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            },\n            {\n                \"id\": \"fd7e6def-c0b4-42cd-8c36-0e134a0c01db\",\n                \"truePrice\": \"65000\",\n                \"standardRate\": \"72000\",\n                \"leadTimeDays\": 5,\n                \"validUntil\": \"2026-04-08T06:11:53.747Z\",\n                \"createdAt\": \"2026-04-07T19:07:52.603Z\",\n                \"updatedAt\": \"2026-04-08T06:11:53.749Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"b6d3b108-92f0-4817-8ea1-7f7df2a8bce2\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ],\n        \"inventoryItems\": []\n    }\n}"
+            },
+            {
+              "name": "Success: Manual Inventory Adjustment",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"inventory\": {\n      \"quantityOnHand\": 85\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/9a163411-a524-4c2d-adc6-ba3818a636f5",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "9a163411-a524-4c2d-adc6-ba3818a636f5"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "4a8ba5d0-e7ba-492a-ab5d-c36a7a4610e8"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "2563"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"a03-qQQztcii4u/rhpfSBJaLd96CSNE\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 08 Apr 2026 06:12:25 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Catalogue item updated successfully\",\n    \"data\": {\n        \"id\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n        \"name\": \"Portland Cement (25kg Bag)\",\n        \"category\": \"MATERIALS\",\n        \"unit\": \"BAG\",\n        \"defaultLeadTime\": 3,\n        \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n        \"updatedAt\": \"2026-04-07T18:58:57.040Z\",\n        \"createdBy\": \"69d313fd932955178d1942fa\",\n        \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n        \"supplierQuotes\": [\n            {\n                \"id\": \"2003a9eb-7de6-4fc2-9ca5-f43627102290\",\n                \"truePrice\": \"70000\",\n                \"standardRate\": \"75000\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": null,\n                \"createdAt\": \"2026-04-08T05:35:01.295Z\",\n                \"updatedAt\": \"2026-04-08T05:35:01.295Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            },\n            {\n                \"id\": \"e8993249-418e-49f0-bee7-5837b7f569b3\",\n                \"truePrice\": \"68000\",\n                \"standardRate\": \"75000\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": \"2026-04-08T05:35:01.211Z\",\n                \"createdAt\": \"2026-04-08T05:34:14.135Z\",\n                \"updatedAt\": \"2026-04-08T05:35:01.211Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            },\n            {\n                \"id\": \"e6c3fbfa-097a-40a4-981c-160d0e4ab421\",\n                \"truePrice\": \"410.5\",\n                \"standardRate\": \"450\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": \"2026-04-08T05:34:14.081Z\",\n                \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n                \"updatedAt\": \"2026-04-08T05:34:14.082Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\",\n                    \"contactName\": null,\n                    \"email\": null,\n                    \"phone\": null,\n                    \"createdAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"updatedAt\": \"2026-04-07T18:58:56.853Z\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ],\n        \"inventoryItems\": [\n            {\n                \"id\": \"eec2f50f-d05b-4637-a48c-75603aeb28ff\",\n                \"quantityOnHand\": \"85\",\n                \"averageUnitCost\": \"410.5\",\n                \"locationId\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"location\": {\n                    \"id\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                    \"name\": \"Main Warehouse - Zone A\",\n                    \"type\": \"WAREHOUSE\",\n                    \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\"\n                }\n            }\n        ]\n    }\n}"
+            },
+            {
+              "name": "Failure: Zod Validation Catch",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"supplier\": {\n      \"truePrice\": -500\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/b6d3b108-92f0-4817-8ea1-7f7df2a8bce2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "b6d3b108-92f0-4817-8ea1-7f7df2a8bce2"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "2bb3fe05-0a93-4799-bbf7-bbd4d475b5db"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "63"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"3f-vKX77IeUzE5T5ovxG48KaJXmnRE\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 08 Apr 2026 06:13:16 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"True price must be greater than 0\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "construction-company",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/catalogue?index=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "catalogue"
+              ],
+              "query": [
+                {
+                  "key": "index",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Individual Catalogue",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:5000/catalogue?index=0&size=10",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue"
+                  ],
+                  "query": [
+                    {
+                      "key": "index",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "eaae484f-c7ed-4074-9b69-6c614c4812cc"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1289"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"509-a5U6y4K0yBW3rKcWqbJDmFR+LF8\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 09 Apr 2026 10:07:00 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n            \"name\": \"Portland Cement (25kg Bag)\",\n            \"category\": \"MATERIALS\",\n            \"unit\": \"BAG\",\n            \"defaultLeadTime\": 3,\n            \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n            \"updatedAt\": \"2026-04-07T18:58:57.040Z\",\n            \"createdBy\": \"69d313fd932955178d1942fa\",\n            \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n            \"supplierQuotes\": [\n                {\n                    \"id\": \"2003a9eb-7de6-4fc2-9ca5-f43627102290\",\n                    \"truePrice\": \"70000\",\n                    \"standardRate\": \"75000\",\n                    \"leadTimeDays\": 2,\n                    \"validUntil\": null,\n                    \"createdAt\": \"2026-04-08T05:35:01.295Z\",\n                    \"updatedAt\": \"2026-04-08T05:35:01.295Z\",\n                    \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                    \"supplier\": {\n                        \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                        \"name\": \"UltraTech Distributors Ltd\"\n                    }\n                }\n            ],\n            \"inventoryItems\": [\n                {\n                    \"id\": \"eec2f50f-d05b-4637-a48c-75603aeb28ff\",\n                    \"quantityOnHand\": \"85\",\n                    \"averageUnitCost\": \"410.5\",\n                    \"locationId\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                    \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                    \"location\": {\n                        \"id\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                        \"name\": \"Main Warehouse - Zone A\",\n                        \"type\": \"WAREHOUSE\"\n                    }\n                }\n            ],\n            \"creator\": {\n                \"username\": \"Raam Prashath T\",\n                \"profileImage\": \"https://res.cloudinary.com/datgb606y/image/upload/v1775440944/wxw281n7tnwtncfcpjao.jpg\"\n            }\n        }\n    ],\n    \"meta\": {\n        \"total\": 1,\n        \"pageIndex\": 0,\n        \"pageSize\": 10,\n        \"totalPages\": 1\n    }\n}"
+            },
+            {
+              "name": "Get Catalogues",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/9a163411-a524-4c2d-adc6-ba3818a636f5",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "9a163411-a524-4c2d-adc6-ba3818a636f5"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "9e9717f4-e843-4b8c-a7fd-cd7905ee1245"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "2067"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"813-wcfj+dT4braSzwiRgFWbX+vAIR4\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Thu, 09 Apr 2026 10:14:32 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"id\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n        \"name\": \"Portland Cement (25kg Bag)\",\n        \"category\": \"MATERIALS\",\n        \"unit\": \"BAG\",\n        \"defaultLeadTime\": 3,\n        \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n        \"updatedAt\": \"2026-04-07T18:58:57.040Z\",\n        \"createdBy\": \"69d313fd932955178d1942fa\",\n        \"organizationId\": \"c50e1747-36c7-44a3-845d-1138249e23a9\",\n        \"supplierQuotes\": [\n            {\n                \"id\": \"2003a9eb-7de6-4fc2-9ca5-f43627102290\",\n                \"truePrice\": \"70000\",\n                \"standardRate\": \"75000\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": null,\n                \"createdAt\": \"2026-04-08T05:35:01.295Z\",\n                \"updatedAt\": \"2026-04-08T05:35:01.295Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\"\n                }\n            },\n            {\n                \"id\": \"e8993249-418e-49f0-bee7-5837b7f569b3\",\n                \"truePrice\": \"68000\",\n                \"standardRate\": \"75000\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": \"2026-04-08T05:35:01.211Z\",\n                \"createdAt\": \"2026-04-08T05:34:14.135Z\",\n                \"updatedAt\": \"2026-04-08T05:35:01.211Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\"\n                }\n            },\n            {\n                \"id\": \"e6c3fbfa-097a-40a4-981c-160d0e4ab421\",\n                \"truePrice\": \"410.5\",\n                \"standardRate\": \"450\",\n                \"leadTimeDays\": 2,\n                \"validUntil\": \"2026-04-08T05:34:14.081Z\",\n                \"createdAt\": \"2026-04-07T18:58:57.040Z\",\n                \"updatedAt\": \"2026-04-08T05:34:14.082Z\",\n                \"supplierId\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"supplier\": {\n                    \"id\": \"777a3670-d241-42bb-a2a3-4d004ea2ca74\",\n                    \"name\": \"UltraTech Distributors Ltd\"\n                }\n            }\n        ],\n        \"inventoryItems\": [\n            {\n                \"id\": \"eec2f50f-d05b-4637-a48c-75603aeb28ff\",\n                \"quantityOnHand\": \"85\",\n                \"averageUnitCost\": \"410.5\",\n                \"locationId\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                \"catalogueId\": \"9a163411-a524-4c2d-adc6-ba3818a636f5\",\n                \"location\": {\n                    \"id\": \"0fad9043-b815-4d86-80ed-ed0d6d932a19\",\n                    \"name\": \"Main Warehouse - Zone A\",\n                    \"type\": \"WAREHOUSE\"\n                }\n            }\n        ],\n        \"creator\": {\n            \"username\": \"Raam Prashath T\",\n            \"profileImage\": \"https://res.cloudinary.com/datgb606y/image/upload/v1775440944/wxw281n7tnwtncfcpjao.jpg\"\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Catalogue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-tenant-slug",
+                "value": "construction-company"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/catalogue/9a163411-a524-4c2d-adc6-ba3818a636f5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "catalogue",
+                "9a163411-a524-4c2d-adc6-ba3818a636f5"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Failure: The \"Safe Hard-Delete\" Block (400 Bad Request)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/9a163411-a524-4c2d-adc6-ba3818a636f5",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "9a163411-a524-4c2d-adc6-ba3818a636f5"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "c51c72fb-59a2-4ef1-b314-e557f21f5ec1"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "141"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"8d-l4oJMKs0np//69LFhWGSNKkq6lE\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 08 Apr 2026 06:14:01 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Cannot delete this item because it is currently tied to historical project requisitions or warehouse inventory.\"\n}"
+            },
+            {
+              "name": "Success: The Safe Delete (200 OK)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "x-tenant-slug",
+                    "value": "construction-company"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:5000/catalogue/b6d3b108-92f0-4817-8ea1-7f7df2a8bce2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "catalogue",
+                    "b6d3b108-92f0-4817-8ea1-7f7df2a8bce2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "x-trace-id",
+                  "value": "8cc75470-4c12-4d78-81d9-aa5a31021293"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "64"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"40-2opkvcesSZcuJGfzP8RsGjpyzIw\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 08 Apr 2026 06:14:35 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Catalogue item deleted successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

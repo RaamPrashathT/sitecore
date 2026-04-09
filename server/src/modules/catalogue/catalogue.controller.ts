@@ -34,6 +34,7 @@ const catalogueController = {
 
             return response.status(200).json({ success: true, ...result });
         } catch (error) {
+            console.log(error)
             logger.error(error);
             if (error instanceof UnAuthorizedError) {
                 return response
