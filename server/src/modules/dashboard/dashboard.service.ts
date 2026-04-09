@@ -1,5 +1,7 @@
 import { notify } from "../../shared/lib/notify.js";
 import { prisma } from "../../shared/lib/prisma.js";
+import { sendSupplierOrderNotification } from "../../shared/lib/emails/sendSupplierOrderNotification.js";
+import { sendPartialOrderNotification } from "../../shared/lib/emails/sendPartialOrderNotification.js";
 import type { SetDashboardItemsType } from "./dashboard.schema.js";
 
 const dashboardService = {
@@ -132,7 +134,7 @@ const dashboardService = {
         organizationId: string;
     }) {
         // Use a transaction to ensure both operations succeed or fail together
-        return await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             // 1. Verify the item belongs to the org and is currently UNORDERED
             const item = await tx.requisitionItem.findFirst({
                 where: {
@@ -145,7 +147,23 @@ const dashboardService = {
                         },
                     },
                 },
-                include: { assignedSupplier: true },
+                include: {
+                    assignedSupplier: true,
+                    catalogue: true,
+                    requisition: {
+                        include: {
+                            phase: {
+                                include: {
+                                    project: {
+                                        include: {
+                                            organization: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             });
 
             if (!item) {
@@ -160,19 +178,121 @@ const dashboardService = {
                 data: { status: "ORDERED" },
             });
 
-            if (deductInventoryQty > 0 && item.assignedSupplierId) {
+            const totalQuantity = Number(item.quantity);
+            const fromInventory = deductInventoryQty;
+            const fromSupplier = totalQuantity - fromInventory;
+
+            // Handle inventory deduction
+            if (fromInventory > 0 && item.assignedSupplierId) {
                 await tx.supplierQuote.update({
                     where: { id: item.assignedSupplierId },
                     data: {
                         inventory: {
-                            decrement: deductInventoryQty,
+                            decrement: fromInventory,
                         },
                     },
                 });
             }
 
-            return updatedItem;
+            return { item, updatedItem, fromSupplier, fromInventory, totalQuantity };
         });
+
+        // 3. Send notifications after transaction completes
+        const { item, updatedItem, fromSupplier, fromInventory, totalQuantity } = result;
+
+        if (fromSupplier === 0) {
+            // SCENARIO 1: Fully from inventory
+            // Notify engineers assigned to the project
+            await notifyEngineersForInventoryUse(
+                item,
+                fromInventory,
+                organizationId,
+            );
+        } else if (fromInventory === 0) {
+            // SCENARIO 2: Fully from supplier
+            // Send email to supplier
+            if (
+                item.assignedSupplier?.email &&
+                item.assignedSupplier?.supplier
+            ) {
+                const supplierEmail = item.assignedSupplier.email;
+                const supplierName = item.assignedSupplier.supplier;
+                const projectLocation = item.requisition.phase.project.address;
+                const organizationName =
+                    item.requisition.phase.project.organization.name;
+
+                const orderItems = [
+                    {
+                        itemName: item.catalogue.name,
+                        quantity: totalQuantity,
+                        unit: item.catalogue.unit,
+                        truePrice: Number(item.assignedSupplier.truePrice),
+                    },
+                ];
+
+                setImmediate(() => {
+                    sendSupplierOrderNotification(
+                        supplierEmail,
+                        supplierName,
+                        orderItems,
+                        projectLocation,
+                        organizationName,
+                    ).catch((err) => {
+                        console.error(
+                            "Failed to send supplier order email:",
+                            err,
+                        );
+                    });
+                });
+            }
+        } else {
+            // SCENARIO 3: Partial order and partial inventory
+            // Send partial order email to supplier AND notify engineers
+            if (
+                item.assignedSupplier?.email &&
+                item.assignedSupplier?.supplier
+            ) {
+                const supplierEmail = item.assignedSupplier.email;
+                const supplierName = item.assignedSupplier.supplier;
+                const projectLocation = item.requisition.phase.project.address;
+                const organizationName =
+                    item.requisition.phase.project.organization.name;
+
+                const partialOrderItems = [
+                    {
+                        itemName: item.catalogue.name,
+                        supplierQuantity: fromSupplier,
+                        inventoryQuantity: fromInventory,
+                        unit: item.catalogue.unit,
+                        truePrice: Number(item.assignedSupplier.truePrice),
+                    },
+                ];
+
+                setImmediate(() => {
+                    sendPartialOrderNotification(
+                        supplierEmail,
+                        supplierName,
+                        partialOrderItems,
+                        projectLocation,
+                        organizationName,
+                    ).catch((err) => {
+                        console.error(
+                            "Failed to send partial order email:",
+                            err,
+                        );
+                    });
+                });
+            }
+
+            // Notify engineers about inventory portion
+            await notifyEngineersForInventoryUse(
+                item,
+                fromInventory,
+                organizationId,
+            );
+        }
+
+        return updatedItem;
     },
 
     async getEngineerDashboardItems(
@@ -628,5 +748,33 @@ const dashboardService = {
         return updatedPhase;
     },
 };
+
+// Helper function to notify engineers about inventory usage
+async function notifyEngineersForInventoryUse(
+    item: any,
+    quantityFromInventory: number,
+    organizationId: string,
+) {
+    try {
+        const projectName = item.requisition.phase.project.name;
+        const phaseName = item.requisition.phase.name;
+        const itemName = item.catalogue.name;
+        const unit = item.catalogue.unit;
+
+        // Notify all engineers and admins assigned to the project
+        await notify({
+            type: "REQUISITION_APPROVED",
+            title: "Inventory Item for Collection",
+            body: `Please collect ${quantityFromInventory} ${unit} of ${itemName} from inventory for ${projectName} (${phaseName}).`,
+            entityType: "REQUISITION",
+            entityId: item.requisitionId,
+            projectId: item.requisition.phase.projectId,
+            orgId: organizationId,
+            actionUrl: `/${item.requisition.phase.project.organization.slug}/${item.requisition.phase.project.slug}`,
+        });
+    } catch (err) {
+        console.error("Failed to notify engineers for inventory use:", err);
+    }
+}
 
 export default dashboardService;

@@ -5,7 +5,7 @@ export async function sendInviteEmail(email: string, token: string) {
     try {
         const fromAddress =
             process.env.NODE_ENV === "production"
-                ? "rajaram<no resply@gmail.com>"
+                ? "onboarding<no-reply@gmail.com>"
                 : "onboarding@resend.dev";
 
         const { data, error } = await resend.emails.send({
@@ -29,7 +29,7 @@ export async function sendInviteEmail(email: string, token: string) {
                             style="
                                 display: inline-block;
                                 padding: 12px 20px;
-                                background-color: #7e22ce;
+                                background-color: #15803d;
                                 color: #ffffff;
                                 text-decoration: none;
                                 font-weight: 600;
