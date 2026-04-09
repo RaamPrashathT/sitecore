@@ -9,12 +9,17 @@ import {
     deleteCatalogueSchema,
     updateCatalogueSchema,
     type UpdateCataloguePayload,
+    createQuoteSchema,
+    updateQuoteSchema,
+    catalogueAndQuoteParamsSchema,
+    type CreateQuotePayload,
+    type UpdateQuotePayload,
 } from "./catalogue.schema.js";
 import { Prisma } from "../../shared/lib/prisma.js";
 import { z } from "zod";
 
 const catalogueIdParamsSchema = z.object({
-    id: z.string().uuid("Invalid catalogue ID"),
+    id: z.uuid("Invalid catalogue ID"),
 });
 
 const catalogueController = {
@@ -25,77 +30,45 @@ const catalogueController = {
             const size = Number.parseInt(request.query.size as string) || 10;
             const searchQuery = (request.query.search as string) || "";
 
-            const result = await catalogueService.getCatalogue(
-                organizationId as string,
-                index,
-                size,
-                searchQuery,
-            );
+            const result = await catalogueService.getCatalogue(organizationId as string, index, size, searchQuery);
 
             return response.status(200).json({ success: true, ...result });
         } catch (error) {
-            console.log(error)
             logger.error(error);
             if (error instanceof UnAuthorizedError) {
-                return response
-                    .status(401)
-                    .json({ success: false, message: error.message });
+                return response.status(401).json({ success: false, message: error.message });
             }
-            return response
-                .status(500)
-                .json({ success: false, message: "Internal server error" });
+            return response.status(500).json({ success: false, message: "Internal server error" });
         }
     },
 
     async getCatalogueById(request: Request, response: Response) {
         try {
             const orgId = request.tenant?.orgId;
-
-            const validatedParams = catalogueIdParamsSchema.safeParse(
-                request.params,
-            );
+            const validatedParams = catalogueIdParamsSchema.safeParse(request.params);
+            
             if (!validatedParams.success) {
-                const firstError =
-                    validatedParams.error.issues[0]?.message ||
-                    "Invalid catalogue ID";
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid catalogue ID";
                 throw new ValidationError(firstError);
             }
 
-            const result = await catalogueService.getCatalogueById(
-                orgId as string,
-                validatedParams.data.id,
-            );
+            const result = await catalogueService.getCatalogueById(orgId as string, validatedParams.data.id);
 
-            return response.status(200).json({
-                success: true,
-                data: result,
-            });
+            return response.status(200).json({ success: true, data: result });
         } catch (error) {
             logger.error(error);
-
             if (error instanceof UnAuthorizedError) {
-                return response
-                    .status(401)
-                    .json({ success: false, message: error.message });
+                return response.status(401).json({ success: false, message: error.message });
             }
             if (error instanceof ValidationError) {
-                return response
-                    .status(400)
-                    .json({ success: false, message: error.message });
+                return response.status(400).json({ success: false, message: error.message });
             }
-
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === "P2025") {
-                    return response.status(404).json({
-                        success: false,
-                        message: "Catalogue item not found.",
-                    });
+                    return response.status(404).json({ success: false, message: "Catalogue item not found." });
                 }
             }
-
-            return response
-                .status(500)
-                .json({ success: false, message: "Internal server error" });
+            return response.status(500).json({ success: false, message: "Internal server error" });
         }
     },
 
@@ -103,20 +76,17 @@ const catalogueController = {
         try {
             const orgId = request.tenant?.orgId;
             const userId = request.session?.userId;
-            console.log("User ID from session:", userId);
-
             const validatedData = createCatalogueSchema.safeParse(request.body);
 
             if (!validatedData.success) {
-                const firstError =
-                    validatedData.error.issues[0]?.message || "Invalid Entries";
+                const firstError = validatedData.error.issues[0]?.message || "Invalid Entries";
                 throw new ValidationError(firstError);
             }
 
             const result = await catalogueService.createCatalogue(
                 orgId as string,
                 userId as string,
-                validatedData.data as CreateCataloguePayload,
+                validatedData.data as CreateCataloguePayload
             );
 
             return response.status(201).json({
@@ -126,22 +96,15 @@ const catalogueController = {
             });
         } catch (error) {
             logger.error(error);
-
             if (error instanceof UnAuthorizedError) {
-                return response
-                    .status(401)
-                    .json({ success: false, message: error.message });
+                return response.status(401).json({ success: false, message: error.message });
             }
             if (error instanceof ValidationError) {
-                return response
-                    .status(400)
-                    .json({ success: false, message: error.message });
+                return response.status(400).json({ success: false, message: error.message });
             }
-
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === "P2002") {
-                    const target =
-                        (error.meta?.target as string[])?.join(", ") || "field";
+                    const target = (error.meta?.target as string[])?.join(", ") || "field";
                     return response.status(400).json({
                         success: false,
                         message: `Duplicate entry error. A record with this ${target} already exists.`,
@@ -150,47 +113,35 @@ const catalogueController = {
                 if (error.code === "P2003") {
                     return response.status(400).json({
                         success: false,
-                        message:
-                            "Invalid reference. The supplier or location ID provided does not exist.",
+                        message: "Invalid reference. The supplier or location ID provided does not exist.",
                     });
                 }
-                return response.status(400).json({
-                    success: false,
-                    message: "Database operation failed due to invalid data.",
-                });
+                return response.status(400).json({ success: false, message: "Database operation failed due to invalid data." });
             }
-
-            return response
-                .status(500)
-                .json({ success: false, message: "Internal server error" });
+            return response.status(500).json({ success: false, message: "Internal server error" });
         }
     },
 
     async updateCatalogue(request: Request, response: Response) {
         try {
             const orgId = request.tenant?.orgId;
-
-            const validatedParams = catalogueIdParamsSchema.safeParse(
-                request.params,
-            );
+            const validatedParams = catalogueIdParamsSchema.safeParse(request.params);
+            
             if (!validatedParams.success) {
-                const firstError =
-                    validatedParams.error.issues[0]?.message ||
-                    "Invalid catalogue ID";
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid catalogue ID";
                 throw new ValidationError(firstError);
             }
 
             const validatedBody = updateCatalogueSchema.safeParse(request.body);
             if (!validatedBody.success) {
-                const firstError =
-                    validatedBody.error.issues[0]?.message || "Invalid entries";
+                const firstError = validatedBody.error.issues[0]?.message || "Invalid entries";
                 throw new ValidationError(firstError);
             }
 
             const result = await catalogueService.updateCatalogue(
                 orgId as string,
                 validatedParams.data.id,
-                validatedBody.data as UpdateCataloguePayload,
+                validatedBody.data as UpdateCataloguePayload
             );
 
             return response.status(200).json({
@@ -200,22 +151,15 @@ const catalogueController = {
             });
         } catch (error) {
             logger.error(error);
-
             if (error instanceof UnAuthorizedError) {
-                return response
-                    .status(401)
-                    .json({ success: false, message: error.message });
+                return response.status(401).json({ success: false, message: error.message });
             }
             if (error instanceof ValidationError) {
-                return response
-                    .status(400)
-                    .json({ success: false, message: error.message });
+                return response.status(400).json({ success: false, message: error.message });
             }
-
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === "P2002") {
-                    const target =
-                        (error.meta?.target as string[])?.join(", ") || "field";
+                    const target = (error.meta?.target as string[])?.join(", ") || "field";
                     return response.status(400).json({
                         success: false,
                         message: `Duplicate entry error. A record with this ${target} already exists.`,
@@ -224,36 +168,25 @@ const catalogueController = {
                 if (error.code === "P2025") {
                     return response.status(404).json({
                         success: false,
-                        message:
-                            "Catalogue item or its related active record was not found.",
+                        message: "Catalogue item or its related active record was not found.",
                     });
                 }
             }
-
-            return response
-                .status(500)
-                .json({ success: false, message: "Internal server error" });
+            return response.status(500).json({ success: false, message: "Internal server error" });
         }
     },
 
     async deleteCatalogue(request: Request, response: Response) {
         try {
             const orgId = request.tenant?.orgId;
-
-            const validatedParams = deleteCatalogueSchema.safeParse(
-                request.params,
-            );
+            const validatedParams = deleteCatalogueSchema.safeParse(request.params);
+            
             if (!validatedParams.success) {
-                const firstError =
-                    validatedParams.error.issues[0]?.message ||
-                    "Invalid catalogue ID";
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid catalogue ID";
                 throw new ValidationError(firstError);
             }
 
-            await catalogueService.deleteCatalogue(
-                orgId as string,
-                validatedParams.data.id,
-            );
+            await catalogueService.deleteCatalogue(orgId as string, validatedParams.data.id);
 
             return response.status(200).json({
                 success: true,
@@ -261,30 +194,143 @@ const catalogueController = {
             });
         } catch (error) {
             logger.error(error);
-
             if (error instanceof UnAuthorizedError) {
-                return response
-                    .status(401)
-                    .json({ success: false, message: error.message });
+                return response.status(401).json({ success: false, message: error.message });
             }
             if (error instanceof ValidationError) {
-                return response
-                    .status(400)
-                    .json({ success: false, message: error.message });
+                return response.status(400).json({ success: false, message: error.message });
+            }
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2025") {
+                    return response.status(404).json({ success: false, message: "Catalogue item not found." });
+                }
+            }
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async createQuote(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            const validatedParams = catalogueIdParamsSchema.safeParse(request.params);
+            
+            if (!validatedParams.success) {
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid catalogue ID";
+                throw new ValidationError(firstError);
             }
 
+            const validatedData = createQuoteSchema.safeParse(request.body);
+            if (!validatedData.success) {
+                const firstError = validatedData.error.issues[0]?.message || "Invalid Entries";
+                throw new ValidationError(firstError);
+            }
+
+            const result = await catalogueService.createQuote(
+                orgId as string,
+                validatedParams.data.id,
+                validatedData.data as CreateQuotePayload
+            );
+
+            return response.status(201).json({
+                success: true,
+                message: "Supplier quote created successfully",
+                data: result,
+            });
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ success: false, message: error.message });
+            }
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === "P2025") {
                     return response.status(404).json({
                         success: false,
-                        message: "Catalogue item not found.",
+                        message: "Related catalogue or supplier not found in your organization.",
                     });
                 }
             }
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
 
-            return response
-                .status(500)
-                .json({ success: false, message: "Internal server error" });
+    async updateQuote(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            const validatedParams = catalogueAndQuoteParamsSchema.safeParse(request.params);
+            
+            if (!validatedParams.success) {
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid parameters";
+                throw new ValidationError(firstError);
+            }
+
+            const validatedBody = updateQuoteSchema.safeParse(request.body);
+            if (!validatedBody.success) {
+                const firstError = validatedBody.error.issues[0]?.message || "Invalid entries";
+                throw new ValidationError(firstError);
+            }
+
+            const result = await catalogueService.updateQuote(
+                orgId as string,
+                validatedParams.data.id,
+                validatedParams.data.quoteId,
+                validatedBody.data as UpdateQuotePayload
+            );
+
+            return response.status(200).json({
+                success: true,
+                message: "Supplier quote updated successfully",
+                data: result,
+            });
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ success: false, message: error.message });
+            }
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2025") {
+                    return response.status(404).json({ success: false, message: "Quote not found." });
+                }
+            }
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async deleteQuote(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            const validatedParams = catalogueAndQuoteParamsSchema.safeParse(request.params);
+            
+            if (!validatedParams.success) {
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid parameters";
+                throw new ValidationError(firstError);
+            }
+
+            await catalogueService.deleteQuote(orgId as string, validatedParams.data.id, validatedParams.data.quoteId);
+
+            return response.status(200).json({
+                success: true,
+                message: "Supplier quote deleted successfully",
+            });
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ success: false, message: error.message });
+            }
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2025") {
+                    return response.status(404).json({ success: false, message: "Quote not found." });
+                }
+            }
+            return response.status(500).json({ success: false, message: "Internal server error" });
         }
     },
 };

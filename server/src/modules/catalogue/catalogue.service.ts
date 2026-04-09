@@ -2,6 +2,8 @@ import { prisma } from "../../shared/lib/prisma.js";
 import type {
     CreateCataloguePayload,
     UpdateCataloguePayload,
+    CreateQuotePayload,
+    UpdateQuotePayload,
 } from "./catalogue.schema.js";
 import { User } from "../../shared/models/user.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
@@ -104,9 +106,7 @@ export const catalogueService = {
             },
             include: {
                 supplierQuotes: {
-                    include: {
-                        supplier: { select: { id: true, name: true } },
-                    },
+                    include: { supplier: { select: { id: true, name: true } } },
                     orderBy: { createdAt: "desc" },
                 },
                 inventoryItems: {
@@ -187,7 +187,6 @@ export const catalogueService = {
                     category: payload.category,
                     unit: payload.unit,
                     defaultLeadTime: payload.defaultLeadTime || 0,
-
                     supplierQuotes: {
                         create: {
                             supplierId: resolvedSupplierId,
@@ -196,7 +195,6 @@ export const catalogueService = {
                             leadTimeDays: payload.supplier.leadTimeDays ?? null,
                         },
                     },
-
                     ...(payload.inventory && resolvedLocationId
                         ? {
                               inventoryItems: {
@@ -226,24 +224,19 @@ export const catalogueService = {
     ) {
         return await prisma.$transaction(async (tx) => {
             const existingCatalogue = await tx.catalogue.findFirstOrThrow({
-                where: {
-                    id: catalogueId,
-                    organizationId: orgId,
-                },
-                include: {
-                    inventoryItems: true,
-                },
+                where: { id: catalogueId, organizationId: orgId },
+                include: { inventoryItems: true },
             });
 
             const catalogueData = {
-                ...(payload.name !== undefined ? { name: payload.name } : {}),
-                ...(payload.category !== undefined
-                    ? { category: payload.category }
-                    : {}),
-                ...(payload.unit !== undefined ? { unit: payload.unit } : {}),
-                ...(payload.defaultLeadTime !== undefined
-                    ? { defaultLeadTime: payload.defaultLeadTime }
-                    : {}),
+                ...(payload.name === undefined ? {} : { name: payload.name }),
+                ...(payload.category === undefined
+                    ? {}
+                    : { category: payload.category }),
+                ...(payload.unit === undefined ? {} : { unit: payload.unit }),
+                ...(payload.defaultLeadTime === undefined
+                    ? {}
+                    : { defaultLeadTime: payload.defaultLeadTime }),
             };
 
             if (Object.keys(catalogueData).length > 0) {
@@ -254,26 +247,18 @@ export const catalogueService = {
             }
 
             if (payload.inventory) {
-                const inventoryItem =
-                    await tx.inventoryItem.findFirstOrThrow({
-                        where: {
-                            catalogueId: existingCatalogue.id,
-                        },
-                        orderBy: {
-                            id: "asc",
-                        },
-                    });
+                const inventoryItem = await tx.inventoryItem.findFirstOrThrow({
+                    where: { catalogueId: existingCatalogue.id },
+                    orderBy: { id: "asc" },
+                });
 
                 const inventoryData = {
-                    ...(payload.inventory.quantityOnHand !== undefined
-                        ? { quantityOnHand: payload.inventory.quantityOnHand }
-                        : {}),
-                    ...(payload.inventory.averageUnitCost !== undefined
-                        ? {
-                              averageUnitCost:
-                                  payload.inventory.averageUnitCost,
-                          }
-                        : {}),
+                    ...(payload.inventory.quantityOnHand === undefined
+                        ? {}
+                        : { quantityOnHand: payload.inventory.quantityOnHand }),
+                    ...(payload.inventory.averageUnitCost === undefined
+                        ? {}
+                        : { averageUnitCost: payload.inventory.averageUnitCost }),
                 };
 
                 if (Object.keys(inventoryData).length > 0) {
@@ -294,9 +279,7 @@ export const catalogueService = {
                         catalogueId: existingCatalogue.id,
                         validUntil: null,
                     },
-                    orderBy: {
-                        createdAt: "desc",
-                    },
+                    orderBy: { createdAt: "desc" },
                 });
 
                 await tx.supplierQuote.update({
@@ -309,7 +292,8 @@ export const catalogueService = {
                         catalogueId: existingCatalogue.id,
                         supplierId: activeQuote.supplierId,
                         truePrice:
-                            payload.supplier?.truePrice ?? activeQuote.truePrice,
+                            payload.supplier?.truePrice ??
+                            activeQuote.truePrice,
                         standardRate:
                             payload.supplier?.standardRate ??
                             activeQuote.standardRate,
@@ -327,9 +311,7 @@ export const catalogueService = {
                         include: { supplier: true },
                         orderBy: { createdAt: "desc" },
                     },
-                    inventoryItems: {
-                        include: { location: true },
-                    },
+                    inventoryItems: { include: { location: true } },
                 },
             });
         });
@@ -337,17 +319,11 @@ export const catalogueService = {
 
     async deleteCatalogue(orgId: string, catalogueId: string) {
         const catalogue = await prisma.catalogue.findFirstOrThrow({
-            where: {
-                id: catalogueId,
-                organizationId: orgId,
-            },
+            where: { id: catalogueId, organizationId: orgId },
             select: {
                 id: true,
                 _count: {
-                    select: {
-                        inventoryItems: true,
-                        requisitionItems: true,
-                    },
+                    select: { inventoryItems: true, requisitionItems: true },
                 },
             },
         });
@@ -361,10 +337,95 @@ export const catalogueService = {
             );
         }
 
-        await prisma.catalogue.delete({
-            where: {
-                id: catalogue.id,
+        await prisma.catalogue.delete({ where: { id: catalogue.id } });
+    },
+
+    async createQuote(
+        orgId: string,
+        catalogueId: string,
+        payload: CreateQuotePayload,
+    ) {
+        await prisma.catalogue.findFirstOrThrow({
+            where: { id: catalogueId, organizationId: orgId },
+        });
+
+        await prisma.supplier.findFirstOrThrow({
+            where: { id: payload.supplierId, organizationId: orgId },
+        });
+
+        return await prisma.supplierQuote.create({
+            data: {
+                catalogueId,
+                supplierId: payload.supplierId,
+                truePrice: payload.truePrice,
+                standardRate: payload.standardRate,
+                leadTimeDays: payload.leadTimeDays ?? null,
             },
+            include: {
+                supplier: { select: { id: true, name: true } },
+            },
+        });
+    },
+
+    async updateQuote(
+        orgId: string,
+        catalogueId: string,
+        quoteId: string,
+        payload: UpdateQuotePayload,
+    ) {
+        await prisma.supplierQuote.findFirstOrThrow({
+            where: {
+                id: quoteId,
+                catalogueId: catalogueId,
+                catalogue: { organizationId: orgId },
+            },
+        });
+
+        const updateData = {
+            ...(payload.truePrice === undefined
+                ? {}
+                : { truePrice: payload.truePrice }),
+            ...(payload.standardRate === undefined
+                ? {}
+                : { standardRate: payload.standardRate }),
+            ...(payload.leadTimeDays === undefined
+                ? {}
+                : { leadTimeDays: payload.leadTimeDays }),
+            ...(payload.validUntil === undefined
+                ? {}
+                : { validUntil: payload.validUntil }),
+        };
+
+        return await prisma.supplierQuote.update({
+            where: { id: quoteId },
+            data: updateData,
+            include: {
+                supplier: { select: { id: true, name: true } },
+            },
+        });
+    },
+    
+    async deleteQuote(orgId: string, catalogueId: string, quoteId: string) {
+        const quote = await prisma.supplierQuote.findFirstOrThrow({
+            where: {
+                id: quoteId,
+                catalogueId: catalogueId,
+                catalogue: { organizationId: orgId },
+            },
+            select: {
+                id: true,
+                _count: { select: { requisitionItems: true } },
+            },
+        });
+
+        if (quote._count.requisitionItems > 0) {
+            throw new ValidationError(
+                "Cannot delete this quote because it is currently tied to historical project requisitions.",
+            );
+        }
+
+        await prisma.supplierQuote.delete({
+            where: { id: quote.id },
         });
     },
 };

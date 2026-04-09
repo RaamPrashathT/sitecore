@@ -10,7 +10,7 @@ export const createCatalogueSchema = z.object({
     defaultLeadTime: z.number().int().nonnegative().optional(),
 
     supplier: z.object({
-        id: z.string().uuid().optional(),
+        id: z.uuid().optional(),
         name: z.string().min(1).optional(),
         truePrice: z.number().positive("True price must be greater than 0"),
         standardRate: z.number().positive("Standard rate must be greater than 0"),
@@ -21,7 +21,7 @@ export const createCatalogueSchema = z.object({
     }),
 
     inventory: z.object({
-        locationId: z.string().uuid().optional(),
+        locationId: z.uuid().optional(),
         locationName: z.string().min(1).optional(),
         locationType: z.string().optional(),
         quantityOnHand: z.number().nonnegative(),
@@ -45,14 +45,8 @@ export const updateCatalogueSchema = z
 
         supplier: z
             .object({
-                truePrice: z
-                    .number()
-                    .positive("True price must be greater than 0")
-                    .optional(),
-                standardRate: z
-                    .number()
-                    .positive("Standard rate must be greater than 0")
-                    .optional(),
+                truePrice: z.number().positive("True price must be greater than 0").optional(),
+                standardRate: z.number().positive("Standard rate must be greater than 0").optional(),
                 leadTimeDays: z.number().int().nonnegative().optional(),
             })
             .optional()
@@ -83,7 +77,30 @@ export const updateCatalogueSchema = z
     });
 
 export const deleteCatalogueSchema = z.object({
-    id: z.string().uuid("Invalid catalogue ID"),
+    id: z.uuid("Invalid catalogue ID"),
+});
+
+export const createQuoteSchema = z.object({
+    supplierId: z.uuid("Invalid supplier ID"),
+    truePrice: z.number().positive("True price must be greater than 0"),
+    standardRate: z.number().positive("Standard rate must be greater than 0"),
+    leadTimeDays: z.number().int().nonnegative().optional(),
+});
+
+export const updateQuoteSchema = z
+    .object({
+        truePrice: z.number().positive("True price must be greater than 0").optional(),
+        standardRate: z.number().positive("Standard rate must be greater than 0").optional(),
+        leadTimeDays: z.number().int().nonnegative().optional(),
+        validUntil: z.string().datetime().nullable().optional(),
+    })
+    .refine((data) => Object.values(data).some((value) => value !== undefined), {
+        message: "At least one field must be provided for update",
+    });
+
+export const catalogueAndQuoteParamsSchema = z.object({
+    id: z.uuid("Invalid catalogue ID"),
+    quoteId: z.uuid("Invalid quote ID"),
 });
 
 export interface CreateCataloguePayload {
@@ -128,3 +145,6 @@ export interface UpdateCataloguePayload {
           }
         | undefined;
 }
+
+export type CreateQuotePayload = z.infer<typeof createQuoteSchema>;
+export type UpdateQuotePayload = z.infer<typeof updateQuoteSchema>;
