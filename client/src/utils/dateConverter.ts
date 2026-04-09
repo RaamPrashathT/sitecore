@@ -25,7 +25,7 @@ export const getDeadlineStatus = (deadline: Date | string) => {
     }
 
     return {
-        formattedDate: date.toLocaleDateString('en-US', { 
+        formattedDate: date.toLocaleDateString('en-IN', { 
             month: 'short', 
             day: 'numeric', 
             year: 'numeric' 

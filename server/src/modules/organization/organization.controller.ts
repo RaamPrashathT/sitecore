@@ -255,7 +255,7 @@ const orgController = {
                 throw new ValidationError(validatedData.error.message);
             }
     
-            const result = await orgService.updateSettings(orgId, validatedData.data);
+            const result = await orgService.updateSettings(orgId, cvalidatedData.data);
             return response.status(200).json(result);
         } catch (error) {
             if (error instanceof UnAuthorizedError) {

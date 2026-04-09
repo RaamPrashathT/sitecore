@@ -24,7 +24,10 @@ export const PendingRequisitionItemColumns = [
         header: "Quantity",
         cell: (info) => (
             <div className="flex h-full min-h-12 items-center font-mono text-sm tabular-nums text-foreground">
-                {info.getValue()} <span className="text-muted-foreground ml-1 font-sans">{info.row.original.unit}</span>
+                {info.getValue()}{" "}
+                <span className="text-muted-foreground ml-1 font-sans">
+                    {info.row.original.unit}
+                </span>
             </div>
         ),
     }),
@@ -54,16 +57,36 @@ export const PendingRequisitionItemColumns = [
         header: "Total Cost",
         cell: (info) => (
             <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
-                ₹{info.getValue().toFixed(2)}
+                ₹
+                {info.row.original.truePrice
+                    ? (
+                          info.row.original.truePrice *
+                          info.row.original.quantity
+                      ).toFixed(2)
+                    : "-"}
             </div>
         ),
     }),
     columnHelper.accessor("estimatedUnitCost", {
         header: "Total Profit",
-        cell: (info) => (
-            <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
-                ₹{(info.getValue() - ((info.row.original.truePrice || 0) * info.row.original.quantity)).toFixed(2)}
-            </div>  
-        ),
+        cell: (info) => {
+            const quantity = info.row.original.quantity;
+
+            const standard = info.row.original.standardRate
+                ? info.row.original.standardRate * quantity
+                : 0;
+
+            const trueCost = info.row.original.truePrice
+                ? info.row.original.truePrice * quantity
+                : 0;
+
+            const profit = standard - trueCost;
+
+            return (
+                <div className="flex h-full min-h-12 items-center font-mono text-sm font-semibold tabular-nums text-green-700">
+                    ₹{profit.toFixed(2)}
+                </div>
+            );
+        },
     }),
 ];

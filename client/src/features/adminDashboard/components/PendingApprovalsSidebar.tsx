@@ -5,6 +5,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const formatCurrencyINR = (amount: number) => {
+    if (amount >= 10000000) {
+        return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    } else if (amount >= 100000) {
+        return `₹${(amount / 100000).toFixed(2)} L`;
+    }
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+    }).format(amount);
+};
+
 const PendingApprovalsSidebar = () => {
     const { data: membership } = useMembership();
     const { data: summary, isLoading } = usePendingApprovalsSummary(
@@ -57,7 +70,7 @@ const PendingApprovalsSidebar = () => {
                                                 {req.title}
                                             </p>
                                             <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                                ${req.amount.toLocaleString()}{" "}
+                                                {formatCurrencyINR(req.amount)}{" "}
                                                 <span className="mx-1">•</span>{" "}
                                                 {req.phaseName}
                                             </p>
@@ -94,7 +107,7 @@ const PendingApprovalsSidebar = () => {
                                             {payment.title}
                                         </p>
                                         <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                            ${payment.amount.toLocaleString()}{" "}
+                                            {formatCurrencyINR(payment.amount)}{" "}
                                             <span className="mx-1">•</span>{" "}
                                             {payment.projectName}
                                         </p>

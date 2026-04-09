@@ -8,7 +8,6 @@ const catalogueRouter = Router();
 
 catalogueRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.getCatalogue)
 
-
 catalogueRouter.post("/", authorize, orgAuthorize, catalogueController.createCatalogue)
 
 catalogueRouter.put("/", authorize, orgAuthorize, catalogueController.editCatalogue)

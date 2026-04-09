@@ -1,37 +1,42 @@
-import React from "react"; // <-- Make sure React is imported for useMemo
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 import { useGetRequisitionBySlug } from "@/features/adminDashboard/hooks/useGetRequisitionBySlug";
 import { useUpdateRequisitions } from "@/features/pending/requisitions/hooks/useUpdateRequisition";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-
-// Importing your existing Table components!
 import { PendingRequisitionItemColumns } from "@/features/pending/requisitions/components/PendingRequisitionItemColumns";
 import PendingRequisitionItemTable from "@/features/pending/requisitions/components/PendingRequisitionItemTable";
-
-// Import the type so we can cast it
 import type { PendingRequisitionItemType } from "@/features/pending/requisitions/hooks/usePendingRequisition"; 
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Check, X, Loader2 } from "lucide-react";
 
+const formatCurrencyINR = (amount: number) => {
+    if (amount >= 10000000) {
+        return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    } else if (amount >= 100000) {
+        return `₹${(amount / 100000).toFixed(2)} L`;
+    }
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+    }).format(amount);
+};
+
 const IndividualRequisitionAcceptancePage = () => {
     const { reqSlug } = useParams<{ reqSlug: string }>();
     const navigate = useNavigate();
     
-    // Hooks
     const { data: membership } = useMembership();
     const { data: requisition, isLoading, error } = useGetRequisitionBySlug(membership?.id, reqSlug);
     const { mutate: updateRequisition, isPending: isUpdating } = useUpdateRequisitions(membership?.id);
 
-    // FIX: Map the data to satisfy the missing 'supplierId' and memoize it for table performance
     const tableData = React.useMemo(() => {
         if (!requisition?.items) return [];
         return requisition.items.map((item) => ({
             ...item,
-            // Provide a fallback for supplierId to satisfy TypeScript
             supplierId: (item as any).supplierId || (item as any).assignedSupplier?.id || "", 
         })) as unknown as PendingRequisitionItemType[];
     }, [requisition?.items]);
@@ -42,7 +47,6 @@ const IndividualRequisitionAcceptancePage = () => {
         getCoreRowModel: getCoreRowModel(),
     });
 
-    // Loading State
     if (isLoading) {
         return (
             <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -53,7 +57,6 @@ const IndividualRequisitionAcceptancePage = () => {
         );
     }
 
-    // Error State
     if (error || !requisition) {
         return (
             <div className="max-w-6xl mx-auto p-6 text-center mt-20">
@@ -64,7 +67,6 @@ const IndividualRequisitionAcceptancePage = () => {
         );
     }
 
-    // Inline Handlers so they can redirect you immediately
     const handleApprove = () => {
         updateRequisition(
             { requisitionId: requisition.id, action: "APPROVE" },
@@ -82,7 +84,6 @@ const IndividualRequisitionAcceptancePage = () => {
     return (
         <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6 h-full">
             
-            {/* Top Navigation */}
             <div>
                 <Button 
                     variant="ghost" 
@@ -94,7 +95,6 @@ const IndividualRequisitionAcceptancePage = () => {
                 </Button>
             </div>
 
-            {/* Header Info Card */}
             <Card className="p-6 sm:p-0 shadow-none border-none ">
                 <div className="flex flex-col md:flex-row justify-between gap-6 md:items-start">
                     
@@ -124,13 +124,12 @@ const IndividualRequisitionAcceptancePage = () => {
                             Total Requested Budget
                         </p>
                         <p className="text-3xl font-mono font-black text-foreground">
-                            ${requisition.budget.toLocaleString()}
+                            {formatCurrencyINR(requisition.budget)}
                         </p>
                     </div>
                 </div>
             </Card>
 
-            {/* The Items Table Container */}
             <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold text-foreground tracking-tight">
@@ -141,11 +140,9 @@ const IndividualRequisitionAcceptancePage = () => {
                     </span>
                 </div>
                 
-                {/* Renders your exact existing Table! */}
                 <PendingRequisitionItemTable table={table} />
             </div>
 
-            {/* Action Footer */}
             <div className="flex flex-col-reverse sm:flex-row justify-end items-center gap-3 mt-6 pt-6 border-t border-border/60">
                 <Button
                     variant="destructive"

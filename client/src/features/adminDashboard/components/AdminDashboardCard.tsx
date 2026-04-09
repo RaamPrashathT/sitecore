@@ -87,7 +87,7 @@ const AdminDashboardCard = ({ row }: DashboardItemCardProps) => {
                         <div className="text-left xl:text-right flex-1 xl:flex-none">
                             <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-0.5">Requested</p>
                             <p className="font-mono text-sm font-bold text-foreground leading-none">
-                                {requestedQty.toLocaleString()}
+                                {requestedQty.toLocaleString('en-IN')}
                                 <span className="text-[10px] font-normal text-muted-foreground ml-1">{item.unit}</span>
                             </p>
                         </div>
@@ -95,7 +95,7 @@ const AdminDashboardCard = ({ row }: DashboardItemCardProps) => {
                         <div className="text-center xl:text-right flex-1 xl:flex-none">
                             <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-0.5">In Stock</p>
                             <p className={`font-mono text-sm font-bold leading-none ${stockColor}`}>
-                                {rawInventory.toLocaleString()}
+                                {rawInventory.toLocaleString('en-IN')}
                                 <span className="text-[10px] font-normal text-muted-foreground ml-1">{item.unit}</span>
                             </p>
                         </div>

@@ -9,7 +9,8 @@ import {
     ChartArea,
     Bell,
     Settings,
-    FolderDot // Icon for individual projects
+    FolderDot, // Icon for individual projects
+    Folder // Icon for all projects
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -85,7 +86,7 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             {
                 Overview: [
                     { title: "Dashboard", url: "/", icon: ChartArea },
-                    // Generic "Projects" link removed!
+                    { title: "All Projects", url: "/projects", icon: Folder },
                 ],
             }
         ];
