@@ -4,6 +4,8 @@ import type {
     UpdateCataloguePayload,
     CreateQuotePayload,
     UpdateQuotePayload,
+    AddInventoryPayload,
+    UpdateInventoryPayload,
 } from "./catalogue.schema.js";
 import { User } from "../../shared/models/user.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
@@ -426,6 +428,94 @@ export const catalogueService = {
 
         await prisma.supplierQuote.delete({
             where: { id: quote.id },
+        });
+    },
+
+    async getFormOptions(orgId: string) {
+        const [suppliers, locations] = await prisma.$transaction([
+            prisma.supplier.findMany({
+                where: { organizationId: orgId },
+                select: { id: true, name: true },
+                orderBy: { name: "asc" },
+            }),
+            prisma.inventoryLocation.findMany({
+                where: { organizationId: orgId },
+                select: { id: true, name: true, type: true },
+                orderBy: { name: "asc" },
+            }),
+        ]);
+
+        return { suppliers, locations };
+    },
+
+
+    async addInventory(
+        orgId: string,
+        catalogueId: string,
+        payload: AddInventoryPayload,
+    ) {
+        await prisma.catalogue.findFirstOrThrow({
+            where: { id: catalogueId, organizationId: orgId },
+        });
+
+        let resolvedLocationId = payload.locationId;
+        if (!resolvedLocationId && payload.locationName) {
+            const newLocation = await prisma.inventoryLocation.create({
+                data: {
+                    organizationId: orgId,
+                    name: payload.locationName,
+                    type: payload.locationType as string,
+                },
+            });
+            resolvedLocationId = newLocation.id;
+        }
+
+        if (!resolvedLocationId) {
+            throw new ValidationError("Location resolution failed");
+        }
+
+        return await prisma.inventoryItem.create({
+            data: {
+                catalogueId,
+                locationId: resolvedLocationId,
+                quantityOnHand: payload.quantityOnHand,
+                averageUnitCost: payload.averageUnitCost,
+            },
+            include: {
+                location: { select: { id: true, name: true, type: true } },
+            },
+        });
+    },
+
+    async updateInventory(
+        orgId: string,
+        catalogueId: string,
+        inventoryId: string,
+        payload: UpdateInventoryPayload,
+    ) {
+        await prisma.inventoryItem.findFirstOrThrow({
+            where: {
+                id: inventoryId,
+                catalogueId: catalogueId,
+                catalogue: { organizationId: orgId },
+            },
+        });
+
+        const updateData = {
+            ...(payload.quantityOnHand === undefined
+                ? {}
+                : { quantityOnHand: payload.quantityOnHand }),
+            ...(payload.averageUnitCost === undefined
+                ? {}
+                : { averageUnitCost: payload.averageUnitCost }),
+        };
+
+        return await prisma.inventoryItem.update({
+            where: { id: inventoryId },
+            data: updateData,
+            include: {
+                location: { select: { id: true, name: true, type: true } },
+            },
         });
     },
 };

@@ -32,17 +32,34 @@ export const catalogueColumns = [
   }),
 
   columnHelper.display({
-    id: "currentPrice",
-    header: "Current Price",
-    size: 200,
+    id: "truePrice",
+    header: "True Price",
+    size: 180,
     cell: ({ row }) => {
       const item = row.original;
       const currentQuote = item.supplierQuotes.find((q) => !q.validUntil);
       const price = currentQuote ? Number.parseFloat(currentQuote.truePrice) : 0;
 
       return (
-        <div className="flex h-full min-h-14 w-[200px] items-center px-4 font-mono text-sm tabular-nums text-foreground">
+        <div className="flex h-full min-h-14 w-[180px] items-center px-4 font-mono text-sm tabular-nums text-foreground">
           ₹{price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}/{item.unit}
+        </div>
+      );
+    },
+  }),
+
+  columnHelper.display({
+    id: "standardRate",
+    header: "Standard Rate",
+    size: 180,
+    cell: ({ row }) => {
+      const item = row.original;
+      const currentQuote = item.supplierQuotes.find((q) => !q.validUntil);
+      const rate = currentQuote ? Number.parseFloat(currentQuote.standardRate) : 0;
+
+      return (
+        <div className="flex h-full min-h-14 w-[180px] items-center px-4 font-mono text-sm tabular-nums text-muted-foreground">
+          ₹{rate.toLocaleString("en-IN", { minimumFractionDigits: 2 })}/{item.unit}
         </div>
       );
     },

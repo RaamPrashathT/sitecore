@@ -6,6 +6,7 @@ import type {
   CreateQuoteInput,
   UpdateQuoteInput,
   UpdateInventoryInput,
+  AddInventoryInput,
 } from "../catalogueSchema";
 
 // Type definitions based on API response
@@ -203,6 +204,22 @@ export const useDeleteQuote = (catalogueId: string) => {
   return useMutation({
     mutationFn: async (quoteId: string) => {
       const response = await api.delete(`/catalogue/${catalogueId}/quote/${quoteId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogue", catalogueId] });
+    },
+  });
+};
+
+// Add Inventory
+export const useAddInventory = (catalogueId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: AddInventoryInput) => {
+      const response = await api.post(`/catalogue/${catalogueId}/inventory`, data);
       return response.data;
     },
     onSuccess: () => {

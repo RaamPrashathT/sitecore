@@ -19,13 +19,13 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { createQuoteSchema, type CreateQuoteInput } from "@/features/catalogue/catalogueSchema";
 import { useCreateQuote } from "@/features/catalogue/hooks/useCatalogue";
-import { useGetSuppliers } from "@/features/catalogue/hooks/useSuppliers";
+import { useGetFormOptions } from "@/features/catalogue/hooks/useFormOptions";
 
 const AddQuotePage = () => {
   const navigate = useNavigate();
   const { catalogueId } = useParams();
   
-  const { data: suppliersData } = useGetSuppliers();
+  const { data: formOptions, isLoading: loadingFormOptions } = useGetFormOptions();
   const createQuoteMutation = useCreateQuote(catalogueId || "");
 
   const {
@@ -61,8 +61,8 @@ const AddQuotePage = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-4xl space-y-8 pb-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl space-y-8 pb-8 pr-4">
           <section>
             <h2 className="mb-4 font-sans text-lg font-semibold text-foreground">
               Quote Information
@@ -81,11 +81,15 @@ const AddQuotePage = () => {
                         <SelectValue placeholder="Select supplier" />
                       </SelectTrigger>
                       <SelectContent>
-                        {suppliersData?.data.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
+                        {loadingFormOptions ? (
+                          <SelectItem value="loading" disabled>Loading suppliers...</SelectItem>
+                        ) : (
+                          formOptions?.data.suppliers.map((supplier) => (
+                            <SelectItem key={supplier.id} value={supplier.id}>
+                              {supplier.name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   )}

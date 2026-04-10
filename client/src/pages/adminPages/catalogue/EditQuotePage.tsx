@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,15 +12,28 @@ import {
 } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 import { updateQuoteSchema, type UpdateQuoteInput } from "@/features/catalogue/catalogueSchema";
-import { useGetCatalogueById, useUpdateQuote } from "@/features/catalogue/hooks/useCatalogue";
+import { useGetCatalogueById, useUpdateQuote, useDeleteQuote } from "@/features/catalogue/hooks/useCatalogue";
 
 const EditQuotePage = () => {
   const navigate = useNavigate();
   const { catalogueId, quoteId } = useParams();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const { data, isLoading } = useGetCatalogueById(catalogueId || null);
   const updateQuoteMutation = useUpdateQuote(catalogueId || "", quoteId || "");
+  const deleteQuoteMutation = useDeleteQuote(catalogueId || "");
 
   const {
     register,
@@ -47,6 +60,15 @@ const EditQuotePage = () => {
 
   const onSubmit = (formData: UpdateQuoteInput) => {
     updateQuoteMutation.mutate(formData, {
+      onSuccess: () => {
+        navigate(-1);
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (!quoteId) return;
+    deleteQuoteMutation.mutate(quoteId, {
       onSuccess: () => {
         navigate(-1);
       },
@@ -80,8 +102,8 @@ const EditQuotePage = () => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-4xl space-y-8 pb-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl space-y-8 pb-8 pr-4">
           <section>
             <h2 className="mb-4 font-sans text-lg font-semibold text-foreground">
               Quote Information
@@ -151,26 +173,60 @@ const EditQuotePage = () => {
           </section>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-3 border-t border-border pt-6">
+          <div className="flex items-center justify-between border-t border-border pt-6">
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(-1)}
-              className="font-sans"
+              onClick={() => setShowDeleteDialog(true)}
+              className="border-red-200 font-sans text-red-600 hover:bg-red-50 hover:text-red-700"
             >
-              Cancel
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Quote
             </Button>
-            <Button
-              type="submit"
-              disabled={updateQuoteMutation.isPending}
-              className="bg-green-700 font-sans text-white hover:bg-green-800"
-            >
-              {updateQuoteMutation.isPending && <Spinner className="mr-2" />}
-              {updateQuoteMutation.isPending ? "Saving..." : "Save Changes"}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className="font-sans"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={updateQuoteMutation.isPending}
+                className="bg-green-700 font-sans text-white hover:bg-green-800"
+              >
+                {updateQuoteMutation.isPending && <Spinner className="mr-2" />}
+                {updateQuoteMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
           </div>
         </div>
       </form>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="z-50">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-sans">Delete Quote</AlertDialogTitle>
+            <AlertDialogDescription className="font-display">
+              Are you sure you want to delete this supplier quote? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-sans">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteQuoteMutation.isPending}
+              className="bg-red-600 font-sans hover:bg-red-700"
+            >
+              {deleteQuoteMutation.isPending && <Spinner className="mr-2" />}
+              {deleteQuoteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

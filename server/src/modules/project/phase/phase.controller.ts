@@ -49,7 +49,6 @@ const phaseController = {
     async getPhases(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;
-            console.log(projectId)
             const result = await phaseService.getPhases(projectId);
             return response.status(200).json(result);
         } catch (error) {
@@ -280,9 +279,7 @@ const phaseController = {
 
     async paymentApproval(request: Request, response: Response) {
         try {
-            console.log("hi");
             const phaseId = request.body.id;
-            console.log(phaseId);
             await phaseService.paymentApproval(phaseId);
 
             return response.status(200).json({

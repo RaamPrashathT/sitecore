@@ -103,6 +103,34 @@ export const catalogueAndQuoteParamsSchema = z.object({
     quoteId: z.uuid("Invalid quote ID"),
 });
 
+export const catalogueAndInventoryParamsSchema = z.object({
+    id: z.uuid("Invalid catalogue ID"),
+    inventoryId: z.uuid("Invalid inventory ID"),
+});
+
+export const addInventorySchema = z.object({
+    locationId: z.uuid().optional(),
+    locationName: z.string().min(1).optional(),
+    locationType: z.string().optional(),
+    quantityOnHand: z.number().nonnegative(),
+    averageUnitCost: z.number().nonnegative(),
+}).refine((data) => {
+    if (data.locationId) return true;
+    return !!(data.locationName && data.locationType);
+}, {
+    message: "Either select a location or create a new one with Name and Type",
+    path: ["locationName"],
+});
+
+export const updateInventorySchema = z
+    .object({
+        quantityOnHand: z.number().nonnegative().optional(),
+        averageUnitCost: z.number().nonnegative().optional(),
+    })
+    .refine((data) => Object.values(data).some((value) => value !== undefined), {
+        message: "At least one field must be provided for update",
+    });
+
 export interface CreateCataloguePayload {
     name: string;
     category: z.infer<typeof CatalogueCategoryEnum>;
@@ -148,3 +176,5 @@ export interface UpdateCataloguePayload {
 
 export type CreateQuotePayload = z.infer<typeof createQuoteSchema>;
 export type UpdateQuotePayload = z.infer<typeof updateQuoteSchema>;
+export type AddInventoryPayload = z.infer<typeof addInventorySchema>;
+export type UpdateInventoryPayload = z.infer<typeof updateInventorySchema>;

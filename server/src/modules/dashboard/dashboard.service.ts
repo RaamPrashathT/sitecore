@@ -115,7 +115,6 @@ const dashboardService = {
             inventory: item.assignedSupplier?.inventory ?? 0,
         }));
 
-        console.log(data);
         return {
             data,
             count,

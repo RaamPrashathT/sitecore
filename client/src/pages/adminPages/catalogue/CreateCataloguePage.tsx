@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -20,24 +20,21 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { createCatalogueSchema, type CreateCatalogueInput } from "@/features/catalogue/catalogueSchema";
 import { useCreateCatalogue } from "@/features/catalogue/hooks/useCatalogue";
-import { useGetSuppliers } from "@/features/catalogue/hooks/useSuppliers";
-import { useGetLocations } from "@/features/catalogue/hooks/useLocations";
+import { useGetFormOptions } from "@/features/catalogue/hooks/useFormOptions";
 
 const CreateCataloguePage = () => {
   const navigate = useNavigate();
-  const { orgSlug } = useParams();
   const [showNewSupplier, setShowNewSupplier] = useState(false);
   const [showNewLocation, setShowNewLocation] = useState(false);
 
-  const { data: suppliersData } = useGetSuppliers();
-  const { data: locationsData } = useGetLocations();
+  // Fetch suppliers and locations in one request
+  const { data: formOptions, isLoading: loadingFormOptions } = useGetFormOptions();
   const createMutation = useCreateCatalogue();
 
   const {
     register,
     control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<CreateCatalogueInput>({
     resolver: zodResolver(createCatalogueSchema),
@@ -56,9 +53,6 @@ const CreateCataloguePage = () => {
     },
   });
 
-  const supplierSelection = watch("supplier.id");
-  const locationSelection = watch("inventory.locationId");
-
   const onSubmit = (data: CreateCatalogueInput) => {
     createMutation.mutate(data, {
       onSuccess: () => {
@@ -75,8 +69,8 @@ const CreateCataloguePage = () => {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-4xl space-y-8 pb-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl space-y-8 pb-8 pr-4">
           {/* Base Details Section */}
           <section>
             <h2 className="mb-4 font-sans text-lg font-semibold text-foreground">
@@ -216,11 +210,15 @@ const CreateCataloguePage = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CREATE_NEW">+ Create New Supplier</SelectItem>
-                        {suppliersData?.data.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
+                        {loadingFormOptions ? (
+                          <SelectItem value="loading" disabled>Loading suppliers...</SelectItem>
+                        ) : (
+                          formOptions?.data.suppliers.map((supplier) => (
+                            <SelectItem key={supplier.id} value={supplier.id}>
+                              {supplier.name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   )}
@@ -326,11 +324,15 @@ const CreateCataloguePage = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="CREATE_NEW">+ Create New Location</SelectItem>
-                        {locationsData?.data.map((location) => (
-                          <SelectItem key={location.id} value={location.id}>
-                            {location.name} ({location.type})
-                          </SelectItem>
-                        ))}
+                        {loadingFormOptions ? (
+                          <SelectItem value="loading" disabled>Loading locations...</SelectItem>
+                        ) : (
+                          formOptions?.data.locations.map((location) => (
+                            <SelectItem key={location.id} value={location.id}>
+                              {location.name} ({location.type})
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   )}

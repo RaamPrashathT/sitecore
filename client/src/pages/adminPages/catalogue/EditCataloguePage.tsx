@@ -82,8 +82,8 @@ const EditCataloguePage = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-4xl space-y-8 pb-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl space-y-8 pb-8 pr-4">
           <section>
             <h2 className="mb-4 font-sans text-lg font-semibold text-foreground">
               Master Information

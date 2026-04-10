@@ -10,7 +10,6 @@ export const requiredRole =
                 ? requiredRole
                 : [requiredRole];
             if (userRole && allowedRoles.includes(userRole)) {
-                console.log(request.tenant?.role)
                 return next();
             }
 

@@ -17,16 +17,15 @@ import { useGetCatalogueById, useUpdateInventory } from "@/features/catalogue/ho
 
 const EditInventoryPage = () => {
   const navigate = useNavigate();
-  const { catalogueId } = useParams();
+  const { catalogueId, inventoryId } = useParams();
   
   const { data, isLoading } = useGetCatalogueById(catalogueId || null);
   
-  // For simplicity, we'll edit the first inventory item
-  // In a real app, you might want to pass inventoryId as a param
-  const inventoryItem = data?.data?.inventoryItems[0];
+  // Find the specific inventory item by ID
+  const inventoryItem = data?.data?.inventoryItems.find(item => item.id === inventoryId);
   const updateInventoryMutation = useUpdateInventory(
     catalogueId || "",
-    inventoryItem?.id || ""
+    inventoryId || ""
   );
 
   const {
@@ -95,8 +94,8 @@ const EditInventoryPage = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-4xl space-y-8 pb-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl space-y-8 pb-8 pr-4">
           <section>
             <h2 className="mb-4 font-sans text-lg font-semibold text-foreground">
               Inventory Information

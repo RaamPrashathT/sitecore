@@ -67,7 +67,6 @@ const requisitionController = {
 
     async getRequisitionDetails(request: Request, response: Response) {
         try {
-            console.log("hi==================")
             const projectId = request.project!.id;
 
             const validatedParams = requisitionSlugParamSchema.safeParse(request.params);

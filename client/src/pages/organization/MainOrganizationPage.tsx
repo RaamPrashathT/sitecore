@@ -10,8 +10,6 @@ import { useMembership } from "@/hooks/useMembership";
 import IdlePage from "@/components/IdlePage";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, HardHat, UsersRound, ClipboardList } from "lucide-react";
-import { useRef } from "react";
-import { useContainerLenis } from "@/hooks/useContainerLenis";
 
 const MainOrganizationPage = () => {
     const { data: membership, isLoading: membershipLoading } = useMembership();
@@ -19,9 +17,6 @@ const MainOrganizationPage = () => {
         orgSlug: string;
         projectSlug?: string;
     }>();
-
-    const scrollRef = useRef<HTMLDivElement>(null);
-    useContainerLenis(scrollRef);
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -115,7 +110,7 @@ const MainOrganizationPage = () => {
                 </header>
 
                 <div className="flex flex-1 flex-col overflow-hidden">
-                    <div ref={scrollRef} className="flex-1 overflow-y-auto">
+                    <div  className="flex-1 overflow-y-auto">
                         <Outlet />
                     </div>
                 </div>

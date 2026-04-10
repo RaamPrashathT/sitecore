@@ -150,7 +150,7 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-4xl p-6 md:p-8"
             >
-                <h1 className="mb-8 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
+                <h1 className="mb-8 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
                     Create Catalogue Item:
                 </h1>
                 

@@ -20,6 +20,7 @@ import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
 import AddQuotePage from "./pages/adminPages/catalogue/AddQuotePage";
 import EditQuotePage from "./pages/adminPages/catalogue/EditQuotePage";
 import EditInventoryPage from "./pages/adminPages/catalogue/EditInventoryPage";
+import AddInventoryPage from "./pages/adminPages/catalogue/AddInventoryPage";
 
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
@@ -128,7 +129,11 @@ function App() {
                                     element={<EditQuotePage />}
                                 />
                                 <Route
-                                    path="catalogue/:catalogueId/inventory/edit"
+                                    path="catalogue/:catalogueId/inventory/add"
+                                    element={<AddInventoryPage />}
+                                />
+                                <Route
+                                    path="catalogue/:catalogueId/inventory/:inventoryId/edit"
                                     element={<EditInventoryPage />}
                                 />
 

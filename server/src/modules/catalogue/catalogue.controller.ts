@@ -14,6 +14,11 @@ import {
     catalogueAndQuoteParamsSchema,
     type CreateQuotePayload,
     type UpdateQuotePayload,
+    addInventorySchema,
+    updateInventorySchema,
+    catalogueAndInventoryParamsSchema,
+    type AddInventoryPayload,
+    type UpdateInventoryPayload,
 } from "./catalogue.schema.js";
 import { Prisma } from "../../shared/lib/prisma.js";
 import { z } from "zod";
@@ -328,6 +333,123 @@ const catalogueController = {
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === "P2025") {
                     return response.status(404).json({ success: false, message: "Quote not found." });
+                }
+            }
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async getFormOptions(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+
+            const result = await catalogueService.getFormOptions(orgId as string);
+
+            return response.status(200).json({
+                success: true,
+                data: result,
+            });
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async addInventory(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            const validatedParams = catalogueIdParamsSchema.safeParse(request.params);
+            
+            if (!validatedParams.success) {
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid catalogue ID";
+                throw new ValidationError(firstError);
+            }
+
+            const validatedData = addInventorySchema.safeParse(request.body);
+            if (!validatedData.success) {
+                const firstError = validatedData.error.issues[0]?.message || "Invalid Entries";
+                throw new ValidationError(firstError);
+            }
+
+            const result = await catalogueService.addInventory(
+                orgId as string,
+                validatedParams.data.id,
+                validatedData.data as AddInventoryPayload
+            );
+
+            return response.status(201).json({
+                success: true,
+                message: "Inventory added successfully",
+                data: result,
+            });
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ success: false, message: error.message });
+            }
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2002") {
+                    return response.status(400).json({
+                        success: false,
+                        message: "Inventory already exists for this location and catalogue item.",
+                    });
+                }
+                if (error.code === "P2025") {
+                    return response.status(404).json({
+                        success: false,
+                        message: "Catalogue item not found.",
+                    });
+                }
+            }
+            return response.status(500).json({ success: false, message: "Internal server error" });
+        }
+    },
+
+    async updateInventory(request: Request, response: Response) {
+        try {
+            const orgId = request.tenant?.orgId;
+            const validatedParams = catalogueAndInventoryParamsSchema.safeParse(request.params);
+            
+            if (!validatedParams.success) {
+                const firstError = validatedParams.error.issues[0]?.message || "Invalid parameters";
+                throw new ValidationError(firstError);
+            }
+
+            const validatedBody = updateInventorySchema.safeParse(request.body);
+            if (!validatedBody.success) {
+                const firstError = validatedBody.error.issues[0]?.message || "Invalid entries";
+                throw new ValidationError(firstError);
+            }
+
+            const result = await catalogueService.updateInventory(
+                orgId as string,
+                validatedParams.data.id,
+                validatedParams.data.inventoryId,
+                validatedBody.data as UpdateInventoryPayload
+            );
+
+            return response.status(200).json({
+                success: true,
+                message: "Inventory updated successfully",
+                data: result,
+            });
+        } catch (error) {
+            logger.error(error);
+            if (error instanceof UnAuthorizedError) {
+                return response.status(401).json({ success: false, message: error.message });
+            }
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ success: false, message: error.message });
+            }
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === "P2025") {
+                    return response.status(404).json({ success: false, message: "Inventory item not found." });
                 }
             }
             return response.status(500).json({ success: false, message: "Internal server error" });
