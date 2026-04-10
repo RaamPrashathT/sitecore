@@ -15,8 +15,11 @@ import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
 
 import DashboardPage from "./pages/adminPages/dashboard/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
-import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
+import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePage";
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
+import AddQuotePage from "./pages/adminPages/catalogue/AddQuotePage";
+import EditQuotePage from "./pages/adminPages/catalogue/EditQuotePage";
+import EditInventoryPage from "./pages/adminPages/catalogue/EditInventoryPage";
 
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
@@ -113,8 +116,20 @@ function App() {
                                     element={<CreateCataloguePage />}
                                 />
                                 <Route
-                                    path="catalogue/edit/:catalogueId/:quoteId"
+                                    path="catalogue/:catalogueId/edit"
                                     element={<EditCataloguePage />}
+                                />
+                                <Route
+                                    path="catalogue/:catalogueId/quotes/add"
+                                    element={<AddQuotePage />}
+                                />
+                                <Route
+                                    path="catalogue/:catalogueId/quotes/:quoteId/edit"
+                                    element={<EditQuotePage />}
+                                />
+                                <Route
+                                    path="catalogue/:catalogueId/inventory/edit"
+                                    element={<EditInventoryPage />}
                                 />
 
                                 {/* Users */}

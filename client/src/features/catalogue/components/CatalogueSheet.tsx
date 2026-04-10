@@ -3,7 +3,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetCatalogueById } from "../hooks/useCatalogue";
-import { ArrowLeft, MoreVertical, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Edit, Plus, MoreVertical, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Table,
@@ -13,7 +13,15 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useContainerLenis } from "@/hooks/useContainerLenis";
+import { Link } from "react-router-dom";
+import { useMembership } from "@/hooks/useMembership";
 
 interface CatalogueSheetProps {
     readonly catalogueId: string | null;
@@ -43,6 +51,7 @@ export default function CatalogueSheet({
     onOpenChange,
 }: CatalogueSheetProps) {
     const { data, isLoading } = useGetCatalogueById(catalogueId);
+    const { data: membership } = useMembership();
     const scrollRef = useRef<HTMLDivElement>(null);
     useContainerLenis(scrollRef);
 
@@ -97,19 +106,23 @@ export default function CatalogueSheet({
                                         Item Ledger
                                     </h1>
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 rounded-full"
-                                >
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
+                                {membership && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        asChild
+                                        className="font-sans"
+                                    >
+                                        <Link to={`/${membership.slug}/catalogue/${catalogueId}/edit`}>
+                                            <Edit className="mr-2 h-4 w-4" />
+                                            Edit Catalogue
+                                        </Link>
+                                    </Button>
+                                )}
                             </div>
                         </div>
-
-                        {/* Content */}
+ 
                         <div className="flex-1 space-y-8 px-6 py-6">
-                            {/* Section 1: Item Header */}
                             <section className="flex flex-col gap-3">
                                 <h2 className="truncate font-display text-4xl font-bold  leading-tight tracking-tight text-foreground">
                                     {data.data.name}
@@ -123,7 +136,6 @@ export default function CatalogueSheet({
                                 </p>
                             </section>
 
-                            {/* Section 2: Item Details */}
                             <section className="rounded-lg border-l-4 border-green-700/20 bg-muted/30 p-5">
                                 <div className="grid grid-cols-1 gap-y-3">
                                     <div className="flex flex-col">
@@ -149,9 +161,24 @@ export default function CatalogueSheet({
 
                             {/* Section 3: Pricing History */}
                             <section className="flex flex-col gap-4">
-                                <h3 className="border-b border-border pb-2 font-display text-2xl font-bold  text-foreground">
-                                    Pricing History
-                                </h3>
+                                <div className="flex items-center justify-between border-b border-border pb-2">
+                                    <h3 className="font-display text-2xl font-bold text-foreground">
+                                        Pricing History
+                                    </h3>
+                                    {membership && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
+                                            className="font-sans"
+                                        >
+                                            <Link to={`/${membership.slug}/catalogue/${catalogueId}/quotes/add`}>
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Add Supplier Quote
+                                            </Link>
+                                        </Button>
+                                    )}
+                                </div>
                                 {pricingItems.length > 0 ? (
                                     <>
                                         {/* Desktop/Tablet View */}
@@ -174,6 +201,7 @@ export default function CatalogueSheet({
                                                         <TableHead className="font-sans text-xs font-bold uppercase text-muted-foreground">
                                                             Quote Date
                                                         </TableHead>
+                                                        <TableHead className="w-12"></TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
@@ -260,6 +288,28 @@ export default function CatalogueSheet({
                                                                         item.quoteDate,
                                                                     ).toLocaleDateString(
                                                                         "en-IN",
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell className="py-3">
+                                                                    {membership && (
+                                                                        <DropdownMenu>
+                                                                            <DropdownMenuTrigger asChild>
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="icon"
+                                                                                    className="h-8 w-8"
+                                                                                >
+                                                                                    <MoreVertical className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </DropdownMenuTrigger>
+                                                                            <DropdownMenuContent align="end">
+                                                                                <DropdownMenuItem asChild>
+                                                                                    <Link to={`/${membership.slug}/catalogue/${catalogueId}/quotes/${item.id}/edit`}>
+                                                                                        Edit Quote
+                                                                                    </Link>
+                                                                                </DropdownMenuItem>
+                                                                            </DropdownMenuContent>
+                                                                        </DropdownMenu>
                                                                     )}
                                                                 </TableCell>
                                                             </TableRow>
@@ -353,9 +403,24 @@ export default function CatalogueSheet({
                             {/* Section 4: Warehouse Breakdown */}
                             {inventoryItems.length > 0 && (
                                 <section className="flex flex-col gap-4">
-                                    <h3 className="border-b border-border pb-2 font-display text-2xl font-bold  text-foreground">
-                                        Warehouse Breakdown
-                                    </h3>
+                                    <div className="flex items-center justify-between border-b border-border pb-2">
+                                        <h3 className="font-display text-2xl font-bold text-foreground">
+                                            Warehouse Breakdown
+                                        </h3>
+                                        {membership && inventoryItems.length > 0 && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                asChild
+                                                className="font-sans"
+                                            >
+                                                <Link to={`/${membership.slug}/catalogue/${catalogueId}/inventory/edit`}>
+                                                    <Edit className="mr-2 h-4 w-4" />
+                                                    Edit Inventory
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    </div>
 
                                     {/* Desktop/Tablet View */}
                                     <div className="hidden md:block overflow-x-auto">

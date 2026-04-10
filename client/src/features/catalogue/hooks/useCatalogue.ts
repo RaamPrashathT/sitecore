@@ -1,5 +1,12 @@
 import api from "@/lib/axios";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import type {
+  CreateCatalogueInput,
+  UpdateCatalogueInput,
+  CreateQuoteInput,
+  UpdateQuoteInput,
+  UpdateInventoryInput,
+} from "../catalogueSchema";
 
 // Type definitions based on API response
 export interface Supplier {
@@ -81,6 +88,8 @@ export interface CatalogueDetailResponse {
   data: CatalogueItem;
 }
 
+// QUERIES
+
 // Hook to fetch paginated catalogue list
 export const useGetCatalogues = (pageIndex: number = 0, pageSize: number = 10) => {
   return useQuery({
@@ -104,5 +113,117 @@ export const useGetCatalogueById = (id: string | null) => {
       return response.data;
     },
     enabled: !!id,
+  });
+};
+
+// MUTATIONS
+
+// Create Catalogue
+export const useCreateCatalogue = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateCatalogueInput) => {
+      const response = await api.post("/catalogue", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+    },
+  });
+};
+
+// Update Catalogue (Master info only)
+export const useUpdateCatalogue = (catalogueId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UpdateCatalogueInput) => {
+      const response = await api.put(`/catalogue/${catalogueId}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogue", catalogueId] });
+    },
+  });
+};
+
+// Delete Catalogue
+export const useDeleteCatalogue = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (catalogueId: string) => {
+      const response = await api.delete(`/catalogue/${catalogueId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+    },
+  });
+};
+
+// Create Quote
+export const useCreateQuote = (catalogueId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateQuoteInput) => {
+      const response = await api.post(`/catalogue/${catalogueId}/quote`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogue", catalogueId] });
+    },
+  });
+};
+
+// Update Quote
+export const useUpdateQuote = (catalogueId: string, quoteId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UpdateQuoteInput) => {
+      const response = await api.put(`/catalogue/${catalogueId}/quote/${quoteId}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogue", catalogueId] });
+    },
+  });
+};
+
+// Delete Quote
+export const useDeleteQuote = (catalogueId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (quoteId: string) => {
+      const response = await api.delete(`/catalogue/${catalogueId}/quote/${quoteId}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogue", catalogueId] });
+    },
+  });
+};
+
+// Update Inventory
+export const useUpdateInventory = (catalogueId: string, inventoryId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: UpdateInventoryInput) => {
+      const response = await api.put(`/catalogue/${catalogueId}/inventory/${inventoryId}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["catalogues"] });
+      queryClient.invalidateQueries({ queryKey: ["catalogue", catalogueId] });
+    },
   });
 };
