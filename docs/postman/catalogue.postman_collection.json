@@ -1,0 +1,1111 @@
+{
+  "info": {
+    "name": "Catalogue API",
+    "description": "Auth: Cookie-based session (Redis). Headers: x-tenant-slug required on all routes. No /api prefix. Generated from server/src/modules/catalogue/catalogue.route.ts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",       "value": "http://localhost:5000", "type": "string" },
+    { "key": "tenantSlug",    "value": "globalspan-infrastructure", "type": "string" },
+    { "key": "projectSlug",   "value": "skyline-apartments", "type": "string" },
+    { "key": "sessionCookie", "value": "", "type": "string" },
+    { "key": "orgId",         "value": "", "type": "string" },
+    { "key": "resolvedRole",  "value": "", "type": "string" },
+    { "key": "recordId",      "value": "", "type": "string" },
+    { "key": "quoteId",       "value": "", "type": "string" },
+    { "key": "inventoryId",   "value": "", "type": "string" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const session = pm.collectionVariables.get('sessionCookie');",
+          "if (session) {",
+          "    pm.request.headers.upsert({ key: 'Cookie', value: `session=${session}` });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "🔧 Setup",
+      "item": [
+        {
+          "name": "1. Login — saves session cookie",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"raamthiruna@gmail.com\",\n  \"password\": \"asdfghjkl\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login successful', () => pm.response.to.have.status(200));",
+                  "const cookieHeader = pm.response.headers.get('Set-Cookie');",
+                  "if (cookieHeader) {",
+                  "    const match = cookieHeader.match(/session=([^;]+)/);",
+                  "    if (match) {",
+                  "        pm.collectionVariables.set('sessionCookie', match[1]);",
+                  "        pm.test('Session cookie saved', () => pm.expect(match[1]).to.be.a('string'));",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Org Identity — saves orgId + role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/org/identity", "host": ["{{baseUrl}}"], "path": ["org", "identity"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"{{tenantSlug}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Org identity loaded', () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.test('Has org data', () => {",
+                  "    pm.expect(res).to.have.property('id');",
+                  "    pm.expect(res).to.have.property('slug');",
+                  "    pm.expect(res).to.have.property('role');",
+                  "});",
+                  "pm.collectionVariables.set('orgId', res.id);",
+                  "pm.collectionVariables.set('resolvedRole', res.role);",
+                  "pm.test('Org ID saved', () => pm.expect(res.id).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "✅ Success Cases",
+      "item": [
+        {
+          "name": "Get Catalogue List",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/catalogue?index=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogue"],
+              "query": [
+                { "key": "index", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns paginated data', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res).to.have.property('data');",
+                  "    pm.expect(res).to.have.property('meta');",
+                  "    pm.expect(res.meta).to.have.property('total');",
+                  "    pm.expect(res.meta).to.have.property('totalPages');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue List — with search",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/catalogue?index=0&size=10&search=Steel",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogue"],
+              "query": [
+                { "key": "index", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "search", "value": "Steel" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns filtered data', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Form Options",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/form-options", "host": ["{{baseUrl}}"], "path": ["catalogue", "form-options"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns suppliers and locations', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('suppliers');",
+                  "    pm.expect(res.data).to.have.property('locations');",
+                  "    pm.expect(res.data.suppliers).to.be.an('array');",
+                  "    pm.expect(res.data.locations).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns catalogue item', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.data).to.have.property('name');",
+                  "    pm.expect(res.data).to.have.property('supplierQuotes');",
+                  "    pm.expect(res.data).to.have.property('inventoryItems');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue Item — new supplier + new location",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Rebar 12mm\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"MT\",\n  \"defaultLeadTime\": 7,\n  \"supplier\": {\n    \"name\": \"Tata Steel Distributors\",\n    \"truePrice\": 58000,\n    \"standardRate\": 62000,\n    \"leadTimeDays\": 5\n  },\n  \"inventory\": {\n    \"locationName\": \"Main Warehouse\",\n    \"locationType\": \"WAREHOUSE\",\n    \"quantityOnHand\": 200,\n    \"averageUnitCost\": 59000\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Returns created catalogue item', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.data.name).to.equal('Steel Rebar 12mm');",
+                  "    pm.expect(res.data.supplierQuotes).to.be.an('array').with.length.greaterThan(0);",
+                  "    pm.collectionVariables.set('recordId', res.data.id);",
+                  "    if (res.data.supplierQuotes.length > 0) {",
+                  "        pm.collectionVariables.set('quoteId', res.data.supplierQuotes[0].id);",
+                  "    }",
+                  "    if (res.data.inventoryItems && res.data.inventoryItems.length > 0) {",
+                  "        pm.collectionVariables.set('inventoryId', res.data.inventoryItems[0].id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue Item — existing supplier, no inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Portland Cement 50kg\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"BAG\",\n  \"defaultLeadTime\": 3,\n  \"supplier\": {\n    \"id\": \"{{orgId}}\",\n    \"truePrice\": 380,\n    \"standardRate\": 420,\n    \"leadTimeDays\": 2\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Returns created catalogue item', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Catalogue Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Rebar 12mm — Grade Fe500\",\n  \"defaultLeadTime\": 10,\n  \"supplier\": {\n    \"truePrice\": 60000,\n    \"standardRate\": 65000\n  },\n  \"inventory\": {\n    \"quantityOnHand\": 350\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns updated catalogue item', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.message).to.equal('Catalogue item updated successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Catalogue Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Deletion confirmed', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.message).to.equal('Catalogue item deleted successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Supplier Quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/quotes", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "quotes"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"{{orgId}}\",\n  \"truePrice\": 57500,\n  \"standardRate\": 61000,\n  \"leadTimeDays\": 4\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Returns created quote', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.data).to.have.property('supplier');",
+                  "    pm.collectionVariables.set('quoteId', res.data.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Supplier Quote",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/quotes/{{quoteId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "quotes", "{{quoteId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"truePrice\": 59000,\n  \"standardRate\": 63500,\n  \"leadTimeDays\": 6\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns updated quote', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.message).to.equal('Supplier quote updated successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Supplier Quote",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/quotes/{{quoteId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "quotes", "{{quoteId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Deletion confirmed', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.message).to.equal('Supplier quote deleted successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Inventory — new location",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/inventory", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "inventory"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"locationName\": \"Skyline Site Store\",\n  \"locationType\": \"SITE\",\n  \"quantityOnHand\": 50,\n  \"averageUnitCost\": 59500\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Returns created inventory item', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.data).to.have.property('location');",
+                  "    pm.collectionVariables.set('inventoryId', res.data.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Inventory",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/inventory/{{inventoryId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "inventory", "{{inventoryId}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantityOnHand\": 175,\n  \"averageUnitCost\": 60200\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns updated inventory item', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(true);",
+                  "    pm.expect(res.data).to.have.property('id');",
+                  "    pm.expect(res.message).to.equal('Inventory updated successfully');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "❌ Error Cases",
+      "item": [
+        {
+          "name": "Get Catalogue — No session cookie",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "type": "text/javascript", "exec": ["pm.request.headers.remove('Cookie');"] }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue — Expired session",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" },
+              { "key": "Cookie", "value": "session=invalid-session-xyz" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue — Missing x-tenant-slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400 or 401', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+                  "});",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue — Wrong org slug",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "nonexistent-org-xyz" }],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue By ID — Not found",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["catalogue", "00000000-0000-0000-0000-000000000000"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Catalogue By ID — Invalid UUID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/not-a-valid-uuid", "host": ["{{baseUrl}}"], "path": ["catalogue", "not-a-valid-uuid"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue — Missing required fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"MATERIALS\",\n  \"unit\": \"MT\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue — Invalid category enum",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Rebar 12mm\",\n  \"category\": \"INVALID_CATEGORY\",\n  \"unit\": \"MT\",\n  \"supplier\": {\n    \"name\": \"Tata Steel\",\n    \"truePrice\": 58000,\n    \"standardRate\": 62000\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue — Negative price",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Rebar 12mm\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"MT\",\n  \"supplier\": {\n    \"name\": \"Tata Steel\",\n    \"truePrice\": -500,\n    \"standardRate\": 62000\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue — No supplier id or name",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Rebar 12mm\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"MT\",\n  \"supplier\": {\n    \"truePrice\": 58000,\n    \"standardRate\": 62000\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error about supplier', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Catalogue — Wrong role (Engineer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" },
+              { "key": "Cookie", "value": "session=engineer-session-token" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue", "host": ["{{baseUrl}}"], "path": ["catalogue"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Steel Rebar 12mm\",\n  \"category\": \"MATERIALS\",\n  \"unit\": \"MT\",\n  \"supplier\": {\n    \"name\": \"Tata Steel\",\n    \"truePrice\": 58000,\n    \"standardRate\": 62000\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401 or 403', () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Catalogue — Empty body",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Catalogue — Not found",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["catalogue", "00000000-0000-0000-0000-000000000000"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Name\"\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Catalogue — Not found",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "x-tenant-slug", "value": "{{tenantSlug}}" }],
+            "url": { "raw": "{{baseUrl}}/catalogue/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["catalogue", "00000000-0000-0000-0000-000000000000"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Quote — Invalid supplier UUID",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/quotes", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "quotes"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"not-a-uuid\",\n  \"truePrice\": 57500,\n  \"standardRate\": 61000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Quote — Catalogue not found",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/00000000-0000-0000-0000-000000000000/quotes", "host": ["{{baseUrl}}"], "path": ["catalogue", "00000000-0000-0000-0000-000000000000", "quotes"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"00000000-0000-0000-0000-000000000001\",\n  \"truePrice\": 57500,\n  \"standardRate\": 61000\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Quote — Empty body",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/quotes/{{quoteId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "quotes", "{{quoteId}}"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Quote — Not found",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/quotes/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "quotes", "00000000-0000-0000-0000-000000000000"] },
+            "body": { "mode": "raw", "raw": "{\n  \"truePrice\": 59000\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Inventory — Missing location info",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/inventory", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "inventory"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantityOnHand\": 50,\n  \"averageUnitCost\": 59500\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error about location', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Inventory — Empty body",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/inventory/{{inventoryId}}", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "inventory", "{{inventoryId}}"] },
+            "body": { "mode": "raw", "raw": "{}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has validation error', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Inventory — Not found",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-slug", "value": "{{tenantSlug}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/catalogue/{{recordId}}/inventory/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["catalogue", "{{recordId}}", "inventory", "00000000-0000-0000-0000-000000000000"] },
+            "body": { "mode": "raw", "raw": "{\n  \"quantityOnHand\": 100\n}" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.success).to.equal(false);",
+                  "    pm.expect(res).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
