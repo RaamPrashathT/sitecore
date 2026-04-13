@@ -52,32 +52,16 @@ const coreService = {
         role: string,
     ) {
         const skip = pageIndex * pageSize;
-        const whereClause: any = {
-            organizationId: organizationId,
-        };
+        const whereClause: any = { organizationId };
 
         if (role !== "ADMIN") {
-            whereClause.assignments = {
-                some: {
-                    userId: userId,
-                },
-            };
+            whereClause.assignments = { some: { userId } };
         }
 
         if (searchQuery) {
             whereClause.OR = [
-                {
-                    name: {
-                        contains: searchQuery,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    slug: {
-                        contains: searchQuery,
-                        mode: "insensitive",
-                    },
-                },
+                { name: { contains: searchQuery, mode: "insensitive" } },
+                { slug: { contains: searchQuery, mode: "insensitive" } },
             ];
         }
 
@@ -86,31 +70,23 @@ const coreService = {
                 where: whereClause,
                 include: {
                     phases: true,
-                    _count: {
-                        select: { assignments: true },
-                    },
+                    _count: { select: { assignments: true } },
                 },
                 take: pageSize,
                 skip: skip,
             }),
-            prisma.project.count({
-                where: whereClause,
-            }),
+            prisma.project.count({ where: whereClause }),
         ]);
 
-        const data = projects.map((project) => {
-            return {
-                id: project.id,
-                name: project.name,
-                slug: project.slug,
-                estimatedBudget: Number(project.estimatedBudget),
-                phases: project.phases.length,
-                assignments: project._count.assignments,
-            };
-        });
-
         return {
-            data,
+            data: projects.map((p) => ({
+                id: p.id,
+                name: p.name,
+                slug: p.slug,
+                estimatedBudget: Number(p.estimatedBudget),
+                phases: p.phases.length,
+                assignments: p._count.assignments,
+            })),
             count,
         };
     },
@@ -120,26 +96,7 @@ const coreService = {
             where: { id: projectId },
             include: {
                 phases: {
-                    select: {
-                        id: true,
-                        name: true,
-                        status: true,
-                        budget: true,
-                        requisitions: {
-                            select: {
-                                items: {
-                                    where: { status: "ORDERED" },
-                                    select: {
-                                        quantity: true,
-                                        estimatedUnitCost: true,
-                                        assignedSupplier: {
-                                            select: { truePrice: true },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
+                    select: { id: true, name: true, status: true },
                     orderBy: { sequenceOrder: "asc" },
                 },
             },
@@ -147,42 +104,36 @@ const coreService = {
 
         if (!project) throw new Error("Project not found");
 
+        // Site Logs are now tied to Project directly
         const recentLogs = await prisma.siteLog.findMany({
-            where: { phase: { projectId: projectId } },
+            where: { projectId },
             orderBy: { workDate: "desc" },
             take: 5,
             include: { author: { select: { userId: true } } },
         });
 
-        const authorUserIds = [
-            ...new Set(recentLogs.map((log) => log.author.userId)),
-        ];
-        const { User } = await import("../../../shared/models/user.js");
+        const authorUserIds = [...new Set(recentLogs.map((log) => log.author.userId))];
         const users = await User.find({ _id: { $in: authorUserIds } }).lean();
         const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
-        const mappedLogs = recentLogs.map((log) => {
-            const author = userMap.get(log.author.userId);
-            return {
-                id: log.id,
-                title: log.title,
-                workDate: log.workDate as any,
-                authorName: author ? author.username : "Unknown",
-            };
+        // Calculate Consumption across all PhaseLineItems
+        const totalConsumed = await prisma.requisitionItem.aggregate({
+            where: {
+                status: "ORDERED",
+                requisition: { phase: { projectId } }
+            },
+            _sum: { actualUnitCost: true, quantity: true }
         });
 
-        let consumedBudget = 0;
-        project.phases.forEach((phase) => {
-            phase.requisitions.forEach((req) => {
-                req.items.forEach((item) => {
-                    const priceToUse = item.assignedSupplier?.truePrice
-                        ? Number(item.assignedSupplier.truePrice)
-                        : Number(item.estimatedUnitCost);
-
-                    consumedBudget += priceToUse * Number(item.quantity);
-                });
-            });
+        // We calculate sum manually for precision since we have many items
+        const items = await prisma.requisitionItem.findMany({
+             where: { status: "ORDERED", requisition: { phase: { projectId } } },
+             select: { actualUnitCost: true, quantity: true }
         });
+        
+        const consumedBudget = items.reduce((acc, curr) => 
+            acc + (Number(curr.actualUnitCost || 0) * Number(curr.quantity)), 0
+        );
 
         return {
             id: project.id,
@@ -195,12 +146,13 @@ const coreService = {
                 consumed: consumedBudget,
                 remaining: Number(project.estimatedBudget) - consumedBudget,
             },
-            phases: project.phases.map((phase) => ({
-                id: phase.id,
-                name: phase.name,
-                status: phase.status,
+            phases: project.phases,
+            recentSiteLogs: recentLogs.map((log) => ({
+                id: log.id,
+                title: log.title,
+                workDate: log.workDate,
+                authorName: userMap.get(log.author.userId)?.username || "Unknown",
             })),
-            recentSiteLogs: mappedLogs,
         };
     },
 
@@ -214,7 +166,6 @@ const coreService = {
                 status: data.status,
             },
         });
-
         return { id: project.id, name: project.name, status: project.status };
     },
 
@@ -230,18 +181,8 @@ const coreService = {
             }),
         ]);
 
-        const allUserIds = [
-            ...new Set([
-                ...adminMembers.map((m) => m.userId),
-                ...projectAssignments.map((m) => m.userId),
-            ]),
-        ];
-
-        const usersDoc = await User.find(
-            { _id: { $in: allUserIds.map((id) => new Types.ObjectId(id)) } },
-            { username: 1, profileImage: 1, phone: 1, email: 1 },
-        ).lean();
-
+        const allUserIds = [...new Set([...adminMembers.map((m) => m.userId), ...projectAssignments.map((m) => m.userId)])];
+        const usersDoc = await User.find({ _id: { $in: allUserIds.map((id) => new Types.ObjectId(id)) } }).lean();
         const userMap = new Map(usersDoc.map((u) => [u._id.toString(), u]));
 
         const formatUser = (userId: string, role: string) => {
@@ -256,120 +197,42 @@ const coreService = {
             };
         };
 
-        const adminList = adminMembers.map((m) =>
-            formatUser(m.userId, "ADMIN"),
-        );
-        const engineerList: any[] = [];
-        const clientList: any[] = [];
-
-        projectAssignments.forEach((assign) => {
-            const formatted = formatUser(assign.userId, assign.role);
-            if (assign.role === "ENGINEER") engineerList.push(formatted);
-            if (assign.role === "CLIENT") clientList.push(formatted);
-        });
-
         return {
-            admin: { members: adminList, count: adminList.length },
-            engineers: { members: engineerList, count: engineerList.length },
-            clients: { members: clientList, count: clientList.length },
+            admin: { members: adminMembers.map(m => formatUser(m.userId, "ADMIN")), count: adminMembers.length },
+            engineers: { members: projectAssignments.filter(a => a.role === "ENGINEER").map(a => formatUser(a.userId, "ENGINEER")), count: projectAssignments.filter(a => a.role === "ENGINEER").length },
+            clients: { members: projectAssignments.filter(a => a.role === "CLIENT").map(a => formatUser(a.userId, "CLIENT")), count: projectAssignments.filter(a => a.role === "CLIENT").length },
         };
     },
 
-    async assignMember(
-        projectId: string,
-        organizationId: string,
-        userId: string,
-        role: "ENGINEER" | "CLIENT",
-    ) {
+    async assignMember(projectId: string, organizationId: string, userId: string, role: "ENGINEER" | "CLIENT") {
         const orgMember = await prisma.membership.findUnique({
-            where: {
-                userId_organizationId: {
-                    userId: userId,
-                    organizationId: organizationId,
-                },
-            },
+            where: { userId_organizationId: { userId, organizationId } },
         });
-
-        if (!orgMember) {
-            throw new ValidationError(
-                "User must be added to the Organization before being assigned to a Project.",
-            );
-        }
-
+        if (!orgMember) throw new ValidationError("User must be in Org first.");
         await prisma.assignment.upsert({
-            where: {
-                userId_projectId: {
-                    userId: userId,
-                    projectId: projectId,
-                },
-            },
-            update: {
-                role: role,
-            },
-            create: {
-                userId: userId,
-                projectId: projectId,
-                role: role,
-            },
+            where: { userId_projectId: { userId, projectId } },
+            update: { role },
+            create: { userId, projectId, role },
         });
     },
 
     async removeMember(projectId: string, userId: string) {
-        await prisma.assignment
-            .delete({
-                where: {
-                    userId_projectId: {
-                        userId: userId,
-                        projectId: projectId,
-                    },
-                },
-            })
-            .catch(() => {
-                // Catch error silently if record doesn't exist
-            });
+        await prisma.assignment.delete({ where: { userId_projectId: { userId, projectId } } }).catch(() => {});
     },
 
-    async createInvite(
-        organizationId: string,
-        projectId: string,
-        email: string,
-        role: "ENGINEER" | "CLIENT",
-    ) {
+    async createInvite(organizationId: string, projectId: string, email: string, role: "ENGINEER" | "CLIENT") {
         const existingInvite = await prisma.invitation.findFirst({
-            where: {
-                email: email,
-                organizationId: organizationId,
-                status: "PENDING",
-                projects: {
-                    some: { projectId: projectId },
-                },
-            },
+            where: { email, organizationId, status: "PENDING", projects: { some: { projectId } } },
         });
-
         if (existingInvite) {
             await sendInviteEmail(email, existingInvite.token);
             return;
         }
-
         const token = crypto.randomBytes(32).toString("hex");
-        // Expiration to 7 days (7 * 24 * 60 * 60 * 1000)
         const expiresAt = new Date(Date.now() + 604800000);
-
         await prisma.invitation.create({
-            data: {
-                email,
-                token,
-                role,
-                organizationId,
-                expiresAt,
-                projects: {
-                    create: {
-                        projectId,
-                    },
-                },
-            },
+            data: { email, token, role, organizationId, expiresAt, projects: { create: { projectId } } },
         });
-
         await sendInviteEmail(email, token);
     },
 };

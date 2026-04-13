@@ -38,7 +38,7 @@ projectRouter.get("/pendingRequisitions", authorize, orgAuthorize, requiredRole(
 projectRouter.get("/phase/:phaseSlug/all-requisitions", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), requisitionController.getAllPhaseRequisitions);
 projectRouter.post("/requisition-item/:itemId/order", authorize, orgAuthorize, requiredRole("ADMIN"), requisitionController.orderRequisitionItem);
 
-projectRouter.post("/phase/:phaseSlug/sitelog", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), sitelogController.createSiteLog);
+
 projectRouter.post("/sitelog/:sitelogId/comment", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), sitelogController.createComment);
 projectRouter.post("/sitelog", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), sitelogController.createSiteLog);
 projectRouter.post("/sitelog/:sitelogId/comment", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), sitelogController.createComment);
