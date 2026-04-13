@@ -7,7 +7,8 @@ import {
     ChartArea,
     Bell,
     Settings,
-    FolderDot 
+    FolderDot,
+    Folders,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import SidebarContents from "@/components/organization/sidebar/SidebarContents";
@@ -82,11 +83,12 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                 ],
             }
         ];
-        if (projectItems.length > 0) {
-            dynamicContents.push({
-                Projects: projectItems
-            });
-        }
+
+        const projectsGroup: SidebarItem[] = [
+            { title: "All Projects", url: "/projects", icon: Folders },
+            ...projectItems,
+        ];
+        dynamicContents.push({ Projects: projectsGroup });
 
         dynamicContents.push(
             {
@@ -111,11 +113,11 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             }
         ];
 
-        if (projectItems.length > 0) {
-            dynamicContents.push({
-                Projects: projectItems
-            });
-        }
+        const projectsGroupEngineer: SidebarItem[] = [
+            { title: "All Projects", url: "/projects", icon: Folders },
+            ...projectItems,
+        ];
+        dynamicContents.push({ Projects: projectsGroupEngineer });
     }
 
     return (

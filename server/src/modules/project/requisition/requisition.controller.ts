@@ -8,6 +8,8 @@ import {
     phaseIdParamSchema,
     requisitionIdParamSchema,
     requisitionSlugParamSchema,
+    requisitionItemIdParamSchema,
+    orderRequisitionItemSchema
 } from "./requisition.schema.js";
 
 const requisitionController = {
@@ -180,6 +182,7 @@ const requisitionController = {
                 .json({ message: "Internal server error" });
         }
     },
+
     async getRequisitionCatalogue(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;
@@ -210,6 +213,7 @@ const requisitionController = {
             return response.status(500).json({ message: "Internal server error" });
         }
     },  
+
     async getAllPhaseRequisitions(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;
@@ -224,6 +228,34 @@ const requisitionController = {
         } catch (error) {
             if (error instanceof ValidationError) {
                 return response.status(404).json({ message: error.message });
+            }
+            logger.error(error);
+            return response.status(500).json({ message: "Internal server error" });
+        }
+    },
+
+    async orderRequisitionItem(request: Request, response: Response) {
+        try {
+            const validatedParams = requisitionItemIdParamSchema.safeParse(request.params);
+            if (!validatedParams.success) {
+                throw new ValidationError("Invalid Requisition Item ID format");
+            }
+
+            const validatedData = orderRequisitionItemSchema.safeParse(request.body);
+            if (!validatedData.success) {
+                throw new ValidationError(validatedData.error.message);
+            }
+
+            await requisitionService.orderRequisitionItem(
+                validatedParams.data.itemId,
+                validatedData.data.actualUnitCost,
+                validatedData.data.billedUnitRate
+            );
+
+            return response.status(200).json({ message: "Item ordered and prices snapshotted successfully" });
+        } catch (error) {
+            if (error instanceof ValidationError) {
+                return response.status(400).json({ message: error.message });
             }
             logger.error(error);
             return response.status(500).json({ message: "Internal server error" });

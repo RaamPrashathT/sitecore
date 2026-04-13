@@ -108,6 +108,8 @@ const sitelogController = {
                 .json({ message: "Internal server error" });
         }
     },
+
+    
 };
 
 export default sitelogController;

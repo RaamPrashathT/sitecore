@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft } from "lucide-react";
 
 interface CreateProjectFormProps {
-    readonly orgId: string;
     readonly slug: string;
 }
 
@@ -24,7 +23,7 @@ type CreateProjectFormSchema = z.infer<typeof formSchema>;
 
 const GRID = { p: "p-6", gap: "gap-6", gapSm: "gap-2", radius: "rounded-lg" };
 
-const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
+const CreateProjectForm = ({ slug }: CreateProjectFormProps) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -46,11 +45,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await api.post("/project", data, {
-                headers: {
-                    "x-tenant-slug": orgId, // Assuming your org interceptor uses this
-                },
-            });
+            const response = await api.post("/project", data);
 
             // Redirect to the newly created project's dashboard
             navigate(`/${slug}/${response.data.slug}`);

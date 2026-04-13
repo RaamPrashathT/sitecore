@@ -9,6 +9,7 @@ const requisitionService = {
             where: { projectId: projectId },
             orderBy: { sequenceOrder: "desc" },
             include: {
+                lineItems: true,
                 requisitions: {
                     orderBy: { createdAt: "desc" },
                     include: {
@@ -36,12 +37,17 @@ const requisitionService = {
                 };
             });
 
+            const calculatedBudget = phase.lineItems.reduce(
+                (sum, item) => sum + Number(item.billedValue),
+                0,
+            );
+
             return {
                 id: phase.id,
                 name: phase.name,
                 slug: phase.slug,
                 status: phase.status,
-                budget: Number(phase.budget),
+                budget: calculatedBudget,
                 requisitions: mappedRequisitions,
             };
         });
@@ -65,7 +71,9 @@ const requisitionService = {
                 items: {
                     include: {
                         catalogue: true,
-                        assignedSupplier: true,
+                        assignedSupplier: {
+                            include: { supplier: true },
+                        },
                     },
                 },
             },
@@ -88,9 +96,15 @@ const requisitionService = {
                 Number(item.quantity) * Number(item.estimatedUnitCost),
             status: item.status,
             supplierName:
-                item.assignedSupplier?.supplier || "No specific supplier",
+                item.assignedSupplier?.supplier?.name || "No specific supplier",
             standardRate: item.assignedSupplier
                 ? Number(item.assignedSupplier.standardRate)
+                : null,
+            actualUnitCost: item.actualUnitCost
+                ? Number(item.actualUnitCost)
+                : null,
+            billedUnitRate: item.billedUnitRate
+                ? Number(item.billedUnitRate)
                 : null,
         }));
 
@@ -254,6 +268,7 @@ const requisitionService = {
             title: string;
             items: Array<{
                 catalogueId: string;
+                lineItemId: string;
                 quantity: number;
                 estimatedUnitCost: number;
                 assignedSupplierId?: string | undefined;
@@ -304,6 +319,7 @@ const requisitionService = {
                         data: data.items.map((item) => {
                             const itemData: any = {
                                 catalogueId: item.catalogueId,
+                                lineItemId: item.lineItemId,
                                 quantity: item.quantity,
                                 estimatedUnitCost: item.estimatedUnitCost,
                                 status: "UNORDERED",
@@ -339,6 +355,29 @@ const requisitionService = {
             budget: Number(requisition.budget),
             itemCount: requisition.items.length,
         };
+    },
+
+    async orderRequisitionItem(
+        itemId: string,
+        actualUnitCost: number,
+        billedUnitRate: number,
+    ) {
+        const item = await prisma.requisitionItem.findUnique({
+            where: { id: itemId },
+        });
+
+        if (!item) throw new ValidationError("Requisition item not found.");
+        if (item.status === "ORDERED")
+            throw new ValidationError("Item has already been ordered.");
+
+        await prisma.requisitionItem.update({
+            where: { id: itemId },
+            data: {
+                status: "ORDERED",
+                actualUnitCost: actualUnitCost,
+                billedUnitRate: billedUnitRate,
+            },
+        });
     },
 
     async approveRequisition(requisitionId: string) {
@@ -428,6 +467,7 @@ const requisitionService = {
             },
             include: {
                 project: { select: { organizationId: true } },
+                lineItems: true,
                 requisitions: {
                     where: { status: { not: "REJECTED" } },
                     select: { budget: true },
@@ -443,7 +483,11 @@ const requisitionService = {
             (sum, req) => sum + Number(req.budget),
             0,
         );
-        const remainingBudget = Number(phase.budget) - usedBudget;
+        const calculatedBudget = phase.lineItems.reduce(
+            (sum, item) => sum + Number(item.billedValue),
+            0,
+        );
+        const remainingBudget = calculatedBudget - usedBudget;
 
         const skip = pageIndex * pageSize;
         const whereClause: any = {
@@ -457,8 +501,10 @@ const requisitionService = {
                     supplierQuotes: {
                         some: {
                             supplier: {
-                                contains: searchQuery,
-                                mode: "insensitive",
+                                name: {
+                                    contains: searchQuery,
+                                    mode: "insensitive",
+                                },
                             },
                         },
                     },
@@ -470,7 +516,9 @@ const requisitionService = {
             prisma.catalogue.findMany({
                 where: whereClause,
                 include: {
-                    supplierQuotes: true,
+                    supplierQuotes: {
+                        include: { supplier: true },
+                    },
                 },
                 skip: skip,
                 take: pageSize,
@@ -483,7 +531,7 @@ const requisitionService = {
             phase: {
                 id: phase.id,
                 name: phase.name,
-                budget: Number(phase.budget),
+                budget: calculatedBudget,
                 remainingBudget: remainingBudget,
             },
             catalogue: {
@@ -496,9 +544,9 @@ const requisitionService = {
                     organizationId: c.organizationId,
                     supplierQuotes: c.supplierQuotes.map((sq) => ({
                         id: sq.id,
-                        supplier: sq.supplier,
+                        supplier: sq.supplier.name,
                         standardRate: Number(sq.standardRate),
-                        leadTime: sq.leadTime,
+                        leadTime: sq.leadTimeDays,
                         catalogueId: sq.catalogueId,
                     })),
                 })),
@@ -506,6 +554,7 @@ const requisitionService = {
             },
         };
     },
+
     async getAllPhaseRequisitions(projectId: string, phaseSlug: string) {
         const phase = await prisma.phase.findUnique({
             where: {
@@ -518,7 +567,9 @@ const requisitionService = {
                         items: {
                             include: {
                                 catalogue: true,
-                                assignedSupplier: true,
+                                assignedSupplier: {
+                                    include: { supplier: true },
+                                },
                             },
                         },
                     },
@@ -552,8 +603,7 @@ const requisitionService = {
                         Number(item.quantity) * Number(item.estimatedUnitCost),
                     status: item.status,
                     supplierName:
-                        item.assignedSupplier?.supplier ||
-                        "No specific supplier",
+                        item.assignedSupplier?.supplier?.name || "No specific supplier",
                     standardRate: item.assignedSupplier
                         ? Number(item.assignedSupplier.standardRate)
                         : null,

@@ -12,7 +12,7 @@ const CreateProjectPage = () => {
 
     return (
         <div className="">
-            <CreateProjectForm orgId={membership.id} slug={membership.slug} />
+            <CreateProjectForm slug={membership.slug} />
         </div>
     );
 };
