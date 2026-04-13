@@ -5,56 +5,46 @@ import { prisma } from "../../../shared/lib/prisma.js";
 const sitelogService = {
     async createSiteLog(
         projectId: string,
-        phaseSlug: string,
         userId: string,
         data: {
             title: string;
             description?: string | undefined;
+            isDelayEvent: boolean;
+            delayReason?: string | undefined;
+            weatherConditions?: string | undefined;
             workDate: Date;
             images: string[];
+            progressUpdates: Array<{ lineItemId: string; percentageChange: number }>;
         },
     ) {
-        const phase = await prisma.phase.findUnique({
-            where: {
-                slug_projectId: {
-                    slug: phaseSlug,
-                    projectId: projectId,
-                },
-            },
-            include: { project: { include: { organization: true } } },
-        });
-
-        if (!phase) {
-            throw new ValidationError(
-                "Phase not found or does not belong to this project.",
-            );
-        }
-
-        if (phase.status !== "ACTIVE") {
-            throw new ValidationError(
-                "Site logs can only be added to an ACTIVE phase.",
-            );
-        }
-
+        // Find membership directly via project's organization
         const membership = await prisma.membership.findFirst({
             where: {
                 userId: userId,
-                organizationId: phase.project.organizationId,
+                organization: {
+                    projects: { some: { id: projectId } }
+                }
             },
+            include: { organization: true }
         });
 
         if (!membership) {
-            throw new ValidationError(
-                "User is not a member of this organization.",
-            );
+            throw new ValidationError("User is not a member of this organization.");
         }
+
+        const project = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
         const siteLog = await prisma.siteLog.create({
             data: {
-                phaseId: phase.id,
+                projectId: projectId,
                 authorId: membership.id,
                 title: data.title,
                 description: data.description ?? null,
+                isDelayEvent: data.isDelayEvent,
+                delayReason: data.delayReason ?? null,
+                weatherConditions: data.weatherConditions ?? null,
                 workDate: data.workDate,
                 images: {
                     create: data.images.map((url) => ({
@@ -62,18 +52,38 @@ const sitelogService = {
                         uploaderId: membership.id,
                     })),
                 },
+                progressUpdates: {
+                    create: data.progressUpdates.map((update) => ({
+                        lineItemId: update.lineItemId,
+                        percentageChange: update.percentageChange
+                    }))
+                }
             },
+            include: { progressUpdates: true }
         });
+
+        // The Engine: Update the master completion percentage on the Line Items
+        // This ensures the Draw Request math is always ready to go.
+        for (const update of data.progressUpdates) {
+            await prisma.phaseLineItem.update({
+                where: { id: update.lineItemId },
+                data: {
+                    percentageComplete: {
+                        increment: update.percentageChange
+                    }
+                }
+            });
+        }
 
         await notify({
             type: "SITE_LOG_CREATED",
             title: "New Site Log Added",
-            body: `${data.title} was just added to ${phase.name}.`,
+            body: `${data.title} was just added to ${project?.name}.`,
             entityType: "SITE_LOG",
             entityId: siteLog.id,
-            projectId: phase.projectId,
-            orgId: phase.project.organizationId,
-            actionUrl: `/${phase.project.organization.slug}/${phase.project.slug}/progress/${phase.slug}`,
+            projectId: projectId,
+            orgId: membership.organizationId,
+            actionUrl: `/${membership.organization.slug}/${project?.slug}/timeline`,
         });
 
         return siteLog;
@@ -85,33 +95,27 @@ const sitelogService = {
         userId: string,
         data: {
             text: string;
-            imageId?: string | null;
+            imageId?: string | null | undefined;
         },
     ) {
         const siteLog = await prisma.siteLog.findUnique({
             where: { id: sitelogId },
-            include: {
-                phase: {
-                    include: { project: { include: { organization: true } } },
-                },
-            },
+            include: { project: { include: { organization: true } } },
         });
 
-        if (!siteLog || siteLog.phase.projectId !== projectId) {
+        if (!siteLog || siteLog.projectId !== projectId) {
             throw new ValidationError("Site log not found.");
         }
 
         const membership = await prisma.membership.findFirst({
             where: {
                 userId: userId,
-                organizationId: siteLog.phase.project.organizationId,
+                organizationId: siteLog.project.organizationId,
             },
         });
 
         if (!membership) {
-            throw new ValidationError(
-                "User is not a member of this organization.",
-            );
+            throw new ValidationError("User is not a member of this organization.");
         }
 
         const comment = await prisma.comment.create({
@@ -129,9 +133,9 @@ const sitelogService = {
             body: `Someone commented on the site log: "${siteLog.title}".`,
             entityType: "SITE_LOG",
             entityId: siteLog.id,
-            projectId: siteLog.phase.projectId,
-            orgId: siteLog.phase.project.organizationId,
-            actionUrl: `/${siteLog.phase.project.organization.slug}/${siteLog.phase.project.slug}/progress/${siteLog.phase.slug}`,
+            projectId: siteLog.projectId,
+            orgId: siteLog.project.organizationId,
+            actionUrl: `/${siteLog.project.organization.slug}/${siteLog.project.slug}/timeline`,
         });
 
         return {
@@ -146,18 +150,15 @@ const sitelogService = {
         const comment = await prisma.comment.findFirst({
             where: { id: commentId },
             include: {
-                image: {
-                    include: {
-                        siteLog: {
-                            include: { phase: true },
-                        },
-                    },
-                },
+                image: { include: { siteLog: true } },
+                sitelog: true, // In case it's a log-level comment, not an image-level comment
                 author: true,
             },
         });
 
-        if (!comment || comment.image?.siteLog.phase.projectId !== projectId) {
+        const targetProjectId = comment?.image?.siteLog.projectId || comment?.sitelog?.projectId;
+
+        if (!comment || targetProjectId !== projectId) {
             throw new ValidationError("Comment not found.");
         }
 
@@ -172,9 +173,7 @@ const sitelogService = {
         const isAuthor = comment.author.userId === userId;
 
         if (!isAuthor && !isAdmin) {
-            throw new ValidationError(
-                "You do not have permission to delete this comment.",
-            );
+            throw new ValidationError("You do not have permission to delete this comment.");
         }
 
         await prisma.comment.delete({

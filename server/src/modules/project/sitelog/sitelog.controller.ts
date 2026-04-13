@@ -5,25 +5,15 @@ import { ValidationError } from "../../../shared/error/validation.error.js";
 import {
     createSiteLogSchema,
     createCommentSchema,
-    phaseIdParamSchema,
-    imageIdParamSchema,
     commentIdParamSchema,
     sitelogIdParamSchema,
 } from "./sitelog.schema.js";
-import { phaseSlugParamSchema } from "../phase/phase.schema.js";
 
 const sitelogController = {
     async createSiteLog(request: Request, response: Response) {
         try {
             const projectId = request.project!.id;
             const authorId = request.session!.userId;
-
-            const validatedParams = phaseSlugParamSchema.safeParse(
-                request.params,
-            );
-            if (!validatedParams.success) {
-                throw new ValidationError("Invalid Phase Slug format");
-            }
 
             const validatedData = createSiteLogSchema.safeParse(request.body);
             if (!validatedData.success) {
@@ -32,7 +22,6 @@ const sitelogController = {
 
             const result = await sitelogService.createSiteLog(
                 projectId,
-                validatedParams.data.phaseSlug,
                 authorId,
                 validatedData.data,
             );
