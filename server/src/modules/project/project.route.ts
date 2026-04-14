@@ -7,6 +7,7 @@ import coreController from "./core/core.controller.js";
 import phaseController from "./phase/phase.controller.js";
 import requisitionController from "./requisition/requisition.controller.js";
 import sitelogController from "./sitelog/sitelog.controller.js";
+import invoiceController from "./invoice/invoice.controller.js";
 
 const projectRouter = Router();
 
@@ -44,5 +45,10 @@ projectRouter.get("/phase/:phaseSlug/all-requisitions", authorize, orgAuthorize,
 
 projectRouter.post("/phase/:phaseSlug/sitelog", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER"]), sitelogController.createSiteLog);
 projectRouter.post("/sitelog/:sitelogId/comment", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), sitelogController.createComment);
+
+projectRouter.post("/phase/:phaseId/generate-invoice", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), invoiceController.generateInvoice);
+projectRouter.get("/phase/:phaseId/invoices", authorize, orgAuthorize, projectAuthorize, requiredRole(["ADMIN", "ENGINEER", "CLIENT"]), invoiceController.getInvoices);
+projectRouter.put("/invoice/:invoiceId/pay", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), invoiceController.payInvoice);
+projectRouter.post("/invoice/:invoiceId/send", authorize, orgAuthorize, projectAuthorize, requiredRole("ADMIN"), invoiceController.sendInvoice);
 
 export default projectRouter;

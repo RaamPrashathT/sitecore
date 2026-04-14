@@ -27,7 +27,8 @@ const sitelogController = {
 
             const validatedData = createSiteLogSchema.safeParse(request.body);
             if (!validatedData.success) {
-                throw new ValidationError(validatedData.error.message);
+                const firstIssue = validatedData.error.issues[0];
+                throw new ValidationError(firstIssue?.message ?? "Invalid request body");
             }
 
             const result = await sitelogService.createSiteLog(
@@ -35,10 +36,12 @@ const sitelogController = {
                 validatedParams.data.phaseSlug,
                 authorId,
                 validatedData.data,
+                validatedData.data.materialsConsumed,
             );
 
             return response.status(201).json(result);
         } catch (error) {
+            console.log(error)
             if (error instanceof ValidationError) {
                 return response.status(400).json({ message: error.message });
             }

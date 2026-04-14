@@ -13,8 +13,12 @@ const sitelogService = {
             workDate: Date;
             images: string[];
         },
+        materialsConsumed: Array<{
+            catalogueId: string;
+            locationId: string;
+            quantity: number;
+        }> = [],
     ) {
-        // 1. Updated query to include the organization so we can get its slug for the URL
         const phase = await prisma.phase.findUnique({
             where: {
                 slug_projectId: {
@@ -50,23 +54,90 @@ const sitelogService = {
             );
         }
 
-        const siteLog = await prisma.siteLog.create({
-            data: {
-                phaseId: phase.id,
-                authorId: membership.id,
-                title: data.title,
-                description: data.description ?? null,
-                workDate: data.workDate,
-                images: {
-                    create: data.images.map((url) => ({
-                        url,
-                        uploaderId: membership.id,
-                    })),
+        // Pre-validate all inventory items before starting the transaction
+        for (const item of materialsConsumed) {
+            const inventoryItem = await prisma.inventoryItem.findUnique({
+                where: {
+                    locationId_catalogueId: {
+                        locationId: item.locationId,
+                        catalogueId: item.catalogueId,
+                    },
                 },
-            },
+            });
+
+            if (!inventoryItem) {
+                throw new ValidationError(
+                    `Inventory item not found for catalogueId ${item.catalogueId} at locationId ${item.locationId}.`,
+                );
+            }
+
+            if (Number(inventoryItem.quantityOnHand) < item.quantity) {
+                throw new ValidationError(
+                    `Insufficient stock for catalogueId ${item.catalogueId}. Available: ${inventoryItem.quantityOnHand}, Requested: ${item.quantity}.`,
+                );
+            }
+        }
+
+        const siteLog = await prisma.$transaction(async (tx) => {
+            // a. Create the SiteLog
+            const newSiteLog = await tx.siteLog.create({
+                data: {
+                    phaseId: phase.id,
+                    authorId: membership.id,
+                    title: data.title,
+                    description: data.description ?? null,
+                    workDate: data.workDate,
+                    images: {
+                        create: data.images.map((url) => ({
+                            url,
+                            uploaderId: membership.id,
+                        })),
+                    },
+                },
+            });
+
+            // b. Process each material consumption
+            for (const item of materialsConsumed) {
+                const inventoryItem = await tx.inventoryItem.findUnique({
+                    where: {
+                        locationId_catalogueId: {
+                            locationId: item.locationId,
+                            catalogueId: item.catalogueId,
+                        },
+                    },
+                });
+
+                if (!inventoryItem || Number(inventoryItem.quantityOnHand) < item.quantity) {
+                    throw new ValidationError(
+                        `Insufficient stock for catalogueId ${item.catalogueId}.`,
+                    );
+                }
+
+                await tx.inventoryItem.update({
+                    where: { id: inventoryItem.id },
+                    data: {
+                        quantityOnHand: {
+                            decrement: item.quantity,
+                        },
+                    },
+                });
+
+                await tx.inventoryTransaction.create({
+                    data: {
+                        type: "CONSUMED",
+                        quantityChange: -item.quantity,
+                        inventoryItemId: inventoryItem.id,
+                        recordedById: membership.id,
+                        phaseId: phase.id,
+                        siteLogId: newSiteLog.id,
+                    },
+                });
+            }
+
+            return newSiteLog;
         });
 
-        // 2. SEND NOTIFICATION
+        // Send notification after transaction
         await notify({
             type: "SITE_LOG_CREATED",
             title: "New Site Log Added",
@@ -87,7 +158,7 @@ const sitelogService = {
         userId: string,
         data: {
             text: string;
-            imageId?: string | null;
+            imageId?: string | null |undefined;
         },
     ) {
         // 1. Fetch the SiteLog with all nested relations to get our slugs

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export interface RequisitionItemDetail {
     id: string;
+    catalogueId: string;
     itemName: string;
     category: string;
     unit: string;

@@ -7,6 +7,8 @@ generator client {
     output   = "../generated/prisma"
 }
 
+// --- ENUMS ---
+
 enum Role {
     IDLE
     ADMIN
@@ -104,6 +106,11 @@ enum TransactionType {
     RECEIVED
     CONSUMED
     ADJUSTED
+}
+
+enum InvoiceStatus {
+    PENDING
+    PAID
 }
 
 // --- CORE MODELS ---
@@ -251,9 +258,12 @@ model InventoryTransaction {
 
     phaseId String?
     phase   Phase?  @relation(fields: [phaseId], references: [id])
+
+    siteLogId   String?
+    siteLog     SiteLog? @relation(fields: [siteLogId], references: [id])
 }
 
-// --- PROJECT EXECUTION ---
+// --- PROJECT EXECUTION & BILLING ---
 
 model Project {
     id              String        @id @default(uuid())
@@ -297,7 +307,6 @@ model Phase {
     budget          Decimal
     paymentDeadline DateTime
     startDate       DateTime
-    isPaid          Boolean     @default(false)
     status          PhaseStatus @default(PLANNING)
     sequenceOrder   Decimal     @default(1.0)
 
@@ -307,11 +316,27 @@ model Phase {
     requisitions  Requisition[]
     siteLogs      SiteLog[]
     inventoryUsed InventoryTransaction[]
+    invoices      Invoice[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@unique([slug, projectId])
+}
+
+model Invoice {
+    id          String        @id @default(uuid())
+    amount      Decimal
+    status      InvoiceStatus @default(PENDING)
+    pdfUrl      String?
+    
+    phaseId     String
+    phase       Phase         @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+
+    billedLogs  SiteLog[]
+
+    createdAt   DateTime      @default(now())
+    paidAt      DateTime?
 }
 
 model SiteLog {
@@ -327,6 +352,11 @@ model SiteLog {
 
     images   Image[]
     comments Comment[]
+    
+    invoiceId   String?
+    invoice     Invoice? @relation(fields: [invoiceId], references: [id])
+    
+    materialsUsed InventoryTransaction[]
 
     workDate  DateTime
     createdAt DateTime @default(now())

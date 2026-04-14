@@ -336,7 +336,7 @@ const phaseService = {
             0,
         );
 
-        const isOverdue = phase.paymentDeadline < new Date() && !phase.isPaid;
+        const isOverdue = phase.paymentDeadline < new Date() && phase.status !== "ACTIVE";
 
         const authorUserIds = [
             ...new Set(phase.siteLogs.map((log) => log.author.userId)),
@@ -626,7 +626,6 @@ const phaseService = {
             where: { id: phaseId },
             data: {
                 status: "ACTIVE",
-                isPaid: true,
                 startDate: new Date(),
             },
         });
@@ -697,7 +696,6 @@ const phaseService = {
         const result = await prisma.phase.findMany({
             where: {
                 status: "PAYMENT_PENDING",
-                isPaid: false,
                 project: {
                     organizationId: organizationId,
                 },

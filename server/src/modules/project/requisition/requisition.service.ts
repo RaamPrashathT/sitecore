@@ -553,6 +553,7 @@ const requisitionService = {
                 createdAt: req.createdAt,
                 items: req.items.map((item) => ({
                     id: item.id,
+                    catalogueId: item.catalogueId,
                     itemName: item.catalogue.name,
                     category: item.catalogue.category,
                     unit: item.catalogue.unit,

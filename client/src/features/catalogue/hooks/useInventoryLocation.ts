@@ -81,3 +81,31 @@ export function useDeleteInventoryLocation() {
         },
     });
 }
+
+// ─── Inventory Balances ───────────────────────────────────────────────────────
+
+export type InventoryItemType = {
+    id: string;
+    quantityOnHand: number;
+    averageUnitCost: number;
+    catalogueId: string;
+    locationId: string;
+    catalogue: { id: string; name: string; unit: string };
+    location: InventoryLocationType;
+};
+
+export const inventoryBalanceKeys = {
+    all: (orgId: string) => ["inventory-balances", orgId] as const,
+};
+
+export function useGetInventoryBalances() {
+    const orgId = useOrgId();
+    return useQuery({
+        queryKey: inventoryBalanceKeys.all(orgId),
+        queryFn: async () => {
+            const res = await api.get<InventoryItemType[]>("/catalogue/inventory");
+            return res.data;
+        },
+        enabled: !!orgId,
+    });
+}

@@ -1,11 +1,7 @@
-import AddSiteLogForm from "@/features/project/progress/components/CreateLogForm";
+import SiteLogForm from "@/features/siteLog/components/SiteLogForm";
 
 const CreateLogPage = () => {
-    return (
-        <div>
-            <AddSiteLogForm />
-        </div>
-    );
+    return <SiteLogForm />;
 };
 
 export default CreateLogPage;
