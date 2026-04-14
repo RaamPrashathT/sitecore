@@ -167,6 +167,7 @@ const authController = {
                 message: "OTP verified successfully",
             });
         } catch (error) {
+            console.log(error)
             logger.error("OTP verification failed", {
                 traceId: request.traceId,
                 service: "sitecore-service",

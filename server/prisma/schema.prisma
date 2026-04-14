@@ -76,6 +76,38 @@ enum NotificationEntityType {
     INVITATION
 }
 
+enum MeasurementUnit {
+    NOS
+    BAG
+    ROLL
+    BUNDLE
+    SET
+    PAIR
+    KG
+    MT
+    QUINTAL
+    CUM
+    CFT
+    LITRE
+    SQM
+    SQFT
+    RMT
+    RFT
+    DAY
+    HOUR
+    MONTH
+    TRIP
+    LS
+}
+
+enum TransactionType {
+    RECEIVED
+    CONSUMED
+    ADJUSTED
+}
+
+// --- CORE MODELS ---
+
 model Organization {
     id        String   @id @default(uuid())
     name      String
@@ -86,10 +118,12 @@ model Organization {
     updatedAt DateTime @updatedAt
     image     String?
 
-    notifications Notification[]
-    catalogue     Catalogue[]
-    members       Membership[]
-    projects      Project[]
+    notifications      Notification[]
+    catalogue          Catalogue[]
+    members            Membership[]
+    projects           Project[]
+    suppliers          Supplier[]
+    inventoryLocations InventoryLocation[]
 }
 
 model Membership {
@@ -104,55 +138,135 @@ model Membership {
     images                 Image[]
     comments               Comment[]
     notificationRecipients NotificationRecipient[]
+    inventoryLogs          InventoryTransaction[]
 
     @@unique([userId, organizationId])
+}
+
+// --- PROCUREMENT & CATALOGUE ---
+
+model Supplier {
+    id          String  @id @default(uuid())
+    name        String
+    contactName String?
+    email       String?
+    phone       String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    quotes SupplierQuote[]
+
+    @@unique([name, organizationId])
 }
 
 model Catalogue {
     id              String            @id @default(uuid())
     name            String
     category        CatalogueCategory
-    unit            String
+    unit            MeasurementUnit
     defaultLeadTime Int               @default(0)
 
-    supplierQuotes SupplierQuote[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId   String
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    supplierQuotes   SupplierQuote[]
+    inventoryItems   InventoryItem[]
     requisitionItems RequisitionItem[]
 
     @@unique([name, organizationId])
 }
 
 model SupplierQuote {
-    id           String  @id @default(uuid())
-    supplier     String
+    id           String    @id @default(uuid())
     truePrice    Decimal
     standardRate Decimal
-    leadTime     Int?
-    email        String?
-    inventory    Int     @default(0)
+    leadTimeDays Int?
+    validUntil   DateTime?
 
-    catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
-    catalogueId  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    supplierId String
+    supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+    catalogueId String
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+
     assignedItem RequisitionItem[]
 
-    @@unique([catalogueId, supplier])
+    @@unique([catalogueId, supplierId])
 }
 
-model Project {
+// --- INVENTORY MANAGEMENT ---
+
+model InventoryLocation {
+    id   String @id @default(uuid())
+    name String
+    type String
+
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    items InventoryItem[]
+
+    @@unique([name, organizationId])
+}
+
+model InventoryItem {
     id              String  @id @default(uuid())
+    quantityOnHand  Decimal @default(0)
+    averageUnitCost Decimal @default(0)
+
+    locationId String
+    location   InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+    catalogueId String
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+
+    transactions InventoryTransaction[]
+
+    @@unique([locationId, catalogueId])
+}
+
+model InventoryTransaction {
+    id             String          @id @default(uuid())
+    quantityChange Decimal
+    type           TransactionType
+    notes          String?
+
+    createdAt DateTime @default(now())
+
+    recordedById String
+    recordedBy   Membership @relation(fields: [recordedById], references: [id])
+
+    inventoryItemId String
+    inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+    phaseId String?
+    phase   Phase?  @relation(fields: [phaseId], references: [id])
+}
+
+// --- PROJECT EXECUTION ---
+
+model Project {
+    id              String        @id @default(uuid())
     name            String
     slug            String
     slugBase        String
     slugIndex       Int
     address         String
     estimatedBudget Decimal
+    status          ProjectStatus @default(ACTIVE)
 
-    status ProjectStatus @default(ACTIVE)
-
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
     assignments   Assignment[]
     phases        Phase[]
@@ -167,8 +281,8 @@ model Assignment {
     userId String
     role   Role
 
-    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
     @@unique([userId, projectId])
 }
@@ -185,14 +299,14 @@ model Phase {
     startDate       DateTime
     isPaid          Boolean     @default(false)
     status          PhaseStatus @default(PLANNING)
-
-    sequenceOrder Decimal @default(1.0)
+    sequenceOrder   Decimal     @default(1.0)
 
     projectId String
     project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-    requisitions Requisition[]
-    siteLogs     SiteLog[]
+    requisitions  Requisition[]
+    siteLogs      SiteLog[]
+    inventoryUsed InventoryTransaction[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -210,6 +324,7 @@ model SiteLog {
 
     authorId String
     author   Membership @relation(fields: [authorId], references: [id])
+
     images   Image[]
     comments Comment[]
 
@@ -257,14 +372,16 @@ model Requisition {
     slugBase    String
     slugIndex   Int
     status      RequisitionStatus @default(DRAFT)
-    phaseId     String
-    phase       Phase             @relation(fields: [phaseId], references: [id], onDelete: Cascade)
-    requestedBy String
     budget      Decimal
+    requestedBy String
 
-    items     RequisitionItem[]
-    createdAt DateTime          @default(now())
-    updatedAt DateTime          @updatedAt
+    phaseId String
+    phase   Phase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+
+    items RequisitionItem[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@unique([slug, phaseId])
 }
@@ -285,6 +402,8 @@ model RequisitionItem {
     requisition   Requisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
 }
 
+// --- UTILITIES & NOTIFICATIONS ---
+
 model Invitation {
     id        String   @id @default(uuid())
     token     String   @unique
@@ -292,12 +411,13 @@ model Invitation {
     role      Role
     expiresAt DateTime
 
-    status          InvitationStatus    @default(PENDING)
+    status          InvitationStatus @default(PENDING)
     organizationId  String
-    createdAt       DateTime            @default(now())
-    accepted        Boolean             @default(false)
+    createdAt       DateTime         @default(now())
+    accepted        Boolean          @default(false)
     claimedByUserId String?
-    projects        InvitationProject[]
+
+    projects InvitationProject[]
 }
 
 model InvitationProject {
@@ -312,22 +432,19 @@ model InvitationProject {
 }
 
 model Notification {
-    id    String           @id @default(uuid())
-    type  NotificationType
-    title String
-    body  String?
-
-    // NEW: Store the exact relative URL here!
-    actionUrl String?
-
+    id         String                 @id @default(uuid())
+    type       NotificationType
+    title      String
+    body       String?
+    actionUrl  String?
     entityType NotificationEntityType
     entityId   String
 
-    organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
     orgId        String
+    organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
-    project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
     projectId String?
+    project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
     createdAt  DateTime                @default(now())
     recipients NotificationRecipient[]
