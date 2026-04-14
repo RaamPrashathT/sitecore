@@ -9,7 +9,7 @@ import { Outlet, useLocation, useParams, useNavigate } from "react-router-dom";
 import { useMembership } from "@/hooks/useMembership";
 import IdlePage from "@/components/IdlePage";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, HardHat, UsersRound, ClipboardList } from "lucide-react";
+import { Form, HardHat, UsersRound, ClipboardList, Banknote } from "lucide-react";
 
 const MainOrganizationPage = () => {
     const { data: membership, isLoading: membershipLoading } = useMembership();
@@ -101,6 +101,13 @@ const MainOrganizationPage = () => {
                                         >
                                             <UsersRound className="w-4 h-4" />
                                             Members
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="payments"
+                                            className="flex items-center gap-1 px-2 py-1 text-sm border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700"
+                                        >
+                                            <Banknote className="w-4 h-4" />
+                                            Payment
                                         </TabsTrigger>
                                     </TabsList>
                                 </Tabs>

@@ -51,8 +51,9 @@ import ProjectRequisitionPage from "./pages/project/ProjectRequisitionPage";
 import ProjectMemberInvitePage from "./pages/project/ProjectMemberInvitePage";
 import ProjectPhaseMain from "./features/project/progress/components/ProjectPhaseMain";
 import RequisitionDetailsPage from "./pages/project/RequisitionDetailsPage";
-import IndividualPaymentAcceptancePage from "./pages/adminPages/dashboard/IndividualPaymentAcceptancePage";
 import IndividualRequisitionAcceptancePage from "./pages/adminPages/dashboard/IndividualRequisitionAcceptancepage";
+import IndividualPaymentAcceptancePage from "./pages/adminPages/dashboard/IndividualPaymentAcceptancePage";
+import ProjectPaymentsPage from "./pages/project/ProjectPaymentsPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -214,10 +215,13 @@ function App() {
                                         path="members"
                                         element={<ProjectMembersMain />}
                                     />
-                                    {/* Move Invite HERE */}
                                     <Route
                                         path="members/invite"
                                         element={<ProjectMemberInvitePage />}
+                                    />
+                                    <Route
+                                        path="payments"
+                                        element={<ProjectPaymentsPage />}
                                     />
                                 </Route>
 

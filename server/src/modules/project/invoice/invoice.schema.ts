@@ -17,5 +17,5 @@ export const sendInvoiceParamsSchema = z.object({
 });
 
 export const sendInvoiceBodySchema = z.object({
-    pdfUrl: z.string().min(1, "pdfUrl is required"),
+    // no body needed — invoice data is fetched server-side
 });
