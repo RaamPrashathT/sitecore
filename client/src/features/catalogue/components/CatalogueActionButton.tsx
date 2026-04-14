@@ -1,27 +1,20 @@
-import { Edit, EllipsisVertical } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
+import { Edit, EllipsisVertical, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Link } from "react-router-dom";
-import DeleteCatalogueButton from "./DeleteCatalogueButton";
 import { useMembership } from "@/hooks/useMembership";
+import { useDeleteCatalogue } from "../hooks/useCatalogue";
 
 interface CatalogueActionButtonProps {
     catalogueId: string;
-    quoteId: string;
 }
 
-const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
-    const { data: membership, isLoading } = useMembership();
-    if(isLoading) return (
-        <div className="font-sans text-sm text-muted-foreground">
-            Loading...
-        </div>
-    )
-    if(!membership) return (
-        <div className="font-sans text-sm text-muted-foreground">
-            No access
-        </div>
-    )
+const CatalogueActionButton = ({ catalogueId }: CatalogueActionButtonProps) => {
+    const { data: membership } = useMembership();
+    const deleteMutation = useDeleteCatalogue();
+
+    if (!membership) return null;
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -32,21 +25,30 @@ const CatalogueActionButton = (props: CatalogueActionButtonProps) => {
                     <EllipsisVertical className="size-4" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="flex w-36 flex-col gap-1 rounded-lg border border-border/70 p-1.5">
-                <Button className="justify-start border-0 bg-transparent px-2 font-sans text-sm font-medium text-foreground shadow-none hover:bg-green-50 hover:text-green-700">
-                    <Link 
-                        className="flex w-full items-center gap-x-2" 
-                        to={`/${membership.slug}/catalogue/edit/${props.catalogueId}/${props.quoteId}`}
-                    >
+            <PopoverContent
+                align="end"
+                className="flex w-36 flex-col gap-1 rounded-lg border border-border/70 p-1.5"
+            >
+                <Button
+                    asChild
+                    variant="ghost"
+                    className="justify-start px-2 font-sans text-sm font-medium text-foreground hover:bg-green-50 hover:text-green-700"
+                >
+                    <Link to={`/${membership.slug}/catalogue/edit/${catalogueId}`}>
                         <Edit className="size-4" />
                         Edit
                     </Link>
                 </Button>
-                <DeleteCatalogueButton 
-                    orgId={membership.id}
-                    catalogueId={props.catalogueId}
-                    quoteId={props.quoteId}
-                />
+
+                <Button
+                    variant="ghost"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => deleteMutation.mutate(catalogueId)}
+                    className="justify-start px-2 font-sans text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                >
+                    <Trash className="size-4" />
+                    {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                </Button>
             </PopoverContent>
         </Popover>
     );

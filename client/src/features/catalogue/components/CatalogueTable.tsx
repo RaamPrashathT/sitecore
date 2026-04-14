@@ -1,7 +1,6 @@
-import {
-    flexRender,
-} from "@tanstack/react-table";
+import { flexRender } from "@tanstack/react-table";
 import type { Table as ReactTableType } from "@tanstack/react-table";
+import { useNavigate } from "react-router-dom";
 import {
     Table,
     TableBody,
@@ -10,13 +9,23 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { CatalogueItemType } from "../hooks/useGetCatalogues";
+import { useMembership } from "@/hooks/useMembership";
+import type { CatalogueItemType } from "../hooks/useCatalogue";
 
 interface CatalogueDataTableProps {
     table: ReactTableType<CatalogueItemType>;
 }
 
 const CatalogueDataTable = ({ table }: CatalogueDataTableProps) => {
+    const navigate = useNavigate();
+    const { data: membership } = useMembership();
+    const rows = table.getRowModel().rows;
+
+    const handleRowClick = (catalogueId: string) => {
+        if (!membership) return;
+        navigate(`/${membership.slug}/catalogue/${catalogueId}/dashboard`);
+    };
+
     return (
         <div className="overflow-x-auto">
             <Table className="font-sans">
@@ -41,24 +50,42 @@ const CatalogueDataTable = ({ table }: CatalogueDataTableProps) => {
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow
-                            key={row.id}
-                            className="border-b border-border/60 transition-colors hover:bg-green-50/70"
-                        >
-                            {row.getVisibleCells().map((cell) => (
-                                <TableCell
-                                    key={cell.id}
-                                    className="p-0 align-middle first:rounded-l-lg last:rounded-r-lg"
-                                >
-                                    {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext(),
-                                    )}
-                                </TableCell>
-                            ))}
+                    {rows.length === 0 ? (
+                        <TableRow>
+                            <TableCell
+                                colSpan={table.getAllColumns().length}
+                                className="h-32 text-center font-sans text-sm text-muted-foreground"
+                            >
+                                No catalogue items found.
+                            </TableCell>
                         </TableRow>
-                    ))}
+                    ) : (
+                        rows.map((row) => (
+                            <TableRow
+                                key={row.id}
+                                onClick={() => handleRowClick(row.original.id)}
+                                className="border-b border-border/60 cursor-pointer transition-colors hover:bg-green-50/70"
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell
+                                        key={cell.id}
+                                        className="p-0 align-top first:rounded-l-lg last:rounded-r-lg"
+                                        onClick={
+                                            // Prevent row nav when clicking the actions column
+                                            cell.column.id === "actions"
+                                                ? (e) => e.stopPropagation()
+                                                : undefined
+                                        }
+                                    >
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext(),
+                                        )}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
         </div>

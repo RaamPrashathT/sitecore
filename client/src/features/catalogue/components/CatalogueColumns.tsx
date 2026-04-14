@@ -1,8 +1,18 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import type { CatalogueWithQuotes } from "@/hooks/useGetCatalogs";
+import type { CatalogueItemType } from "../hooks/useCatalogue";
 import CatalogueActionButton from "./CatalogueActionButton";
+import { Badge } from "@/components/ui/badge";
 
-const columnHelper = createColumnHelper<CatalogueWithQuotes>();
+const columnHelper = createColumnHelper<CatalogueItemType>();
+
+const CATEGORY_LABELS: Record<string, string> = {
+    MATERIALS: "Materials",
+    LABOUR: "Labour",
+    EQUIPMENT: "Equipment",
+    SUBCONTRACTORS: "Subcontractors",
+    TRANSPORT: "Transport",
+    OVERHEAD: "Overhead",
+};
 
 export const CatalogueColumns = [
     columnHelper.accessor("name", {
@@ -17,8 +27,19 @@ export const CatalogueColumns = [
     columnHelper.accessor("category", {
         header: "Category",
         cell: (info) => (
-            <div className="flex h-full min-h-12 items-center px-4 font-sans text-sm font-medium capitalize text-muted-foreground">
-                {info.getValue().toLowerCase()}
+            <div className="flex h-full min-h-12 items-center px-4">
+                <Badge variant="outline" className="font-sans text-xs font-normal capitalize text-muted-foreground">
+                    {CATEGORY_LABELS[info.getValue()] ?? info.getValue().toLowerCase()}
+                </Badge>
+            </div>
+        ),
+    }),
+
+    columnHelper.accessor("unit", {
+        header: "Unit",
+        cell: (info) => (
+            <div className="flex h-full min-h-12 items-center px-4 font-mono text-sm text-muted-foreground">
+                {info.getValue()}
             </div>
         ),
     }),
@@ -27,14 +48,22 @@ export const CatalogueColumns = [
         id: "supplier",
         header: "Supplier",
         cell: ({ row }) => {
+            const quotes = row.original.supplierQuotes;
+            if (quotes.length === 0) {
+                return (
+                    <div className="flex min-h-12 items-center px-4 font-sans text-sm text-muted-foreground/50 italic">
+                        No quotes
+                    </div>
+                );
+            }
             return (
                 <div className="flex w-full flex-col divide-y divide-border/60">
-                    {row.original.supplierQuotes.map((quote) => (
+                    {quotes.map((quote) => (
                         <div
                             key={quote.id}
                             className="flex min-h-12 items-center px-4 font-sans text-sm text-foreground"
                         >
-                            {quote.supplier}
+                            {quote.supplier.name}
                         </div>
                     ))}
                 </div>
@@ -47,14 +76,16 @@ export const CatalogueColumns = [
         header: "True Price",
         cell: ({ row }) => {
             const unit = row.original.unit;
+            const quotes = row.original.supplierQuotes;
+            if (quotes.length === 0) return <div className="min-h-12" />;
             return (
                 <div className="flex w-full flex-col divide-y divide-border/60">
-                    {row.original.supplierQuotes.map((quote) => (
+                    {quotes.map((quote) => (
                         <div
                             key={quote.id}
                             className="flex min-h-12 items-center px-4 font-mono text-sm text-foreground tabular-nums"
                         >
-                            {quote.truePrice}/{unit}
+                            {Number(quote.truePrice).toLocaleString()}/{unit}
                         </div>
                     ))}
                 </div>
@@ -67,14 +98,16 @@ export const CatalogueColumns = [
         header: "Standard Rate",
         cell: ({ row }) => {
             const unit = row.original.unit;
+            const quotes = row.original.supplierQuotes;
+            if (quotes.length === 0) return <div className="min-h-12" />;
             return (
                 <div className="flex w-full flex-col divide-y divide-border/60">
-                    {row.original.supplierQuotes.map((quote) => (
+                    {quotes.map((quote) => (
                         <div
                             key={quote.id}
                             className="flex min-h-12 items-center px-4 font-mono text-sm text-foreground tabular-nums"
                         >
-                            {quote.standardRate}/{unit}
+                            {Number(quote.standardRate).toLocaleString()}/{unit}
                         </div>
                     ))}
                 </div>
@@ -86,15 +119,16 @@ export const CatalogueColumns = [
         id: "leadTime",
         header: "Lead Time",
         cell: ({ row }) => {
-            const defaultLeadTime = row.original.defaultLeadTime;
+            const quotes = row.original.supplierQuotes;
+            if (quotes.length === 0) return <div className="min-h-12" />;
             return (
                 <div className="flex w-full flex-col divide-y divide-border/60">
-                    {row.original.supplierQuotes.map((quote) => (
+                    {quotes.map((quote) => (
                         <div
                             key={quote.id}
                             className="flex min-h-12 items-center px-4 font-mono text-sm text-muted-foreground tabular-nums"
                         >
-                            {quote.leadTime ? quote.leadTime : defaultLeadTime}
+                            {quote.leadTimeDays != null ? `${quote.leadTimeDays}d` : "—"}
                         </div>
                     ))}
                 </div>
@@ -103,43 +137,12 @@ export const CatalogueColumns = [
     }),
 
     columnHelper.display({
-        id: "inventory",
-        header: "In Inventory",
-        cell: ({ row }) => {
-            return (
-                <div className="flex w-full flex-col divide-y divide-border/60">
-                    {row.original.supplierQuotes.map((quote) => (
-                        <div
-                            key={quote.id}
-                            className="flex min-h-12 items-center px-4 font-mono text-sm text-muted-foreground tabular-nums"
-                        >
-                            {quote.inventory}
-                        </div>
-                    ))}
-                </div>
-            );
-        },
-    }),
-
-    columnHelper.display({
-        id: "Actions",
-        header: "Actions",
-        cell: ({ row }) => {
-            return (
-                <div className="flex w-full flex-col divide-y divide-border/60">
-                    {row.original.supplierQuotes.map((quote) => (
-                        <div
-                            key={quote.id}
-                            className="flex min-h-12 items-center px-3"
-                        >
-                            <CatalogueActionButton
-                                quoteId={quote.id}
-                                catalogueId={quote.catalogueId}
-                            />
-                        </div>
-                    ))}
-                </div>
-            );
-        },
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+            <div className="flex min-h-12 items-center px-3">
+                <CatalogueActionButton catalogueId={row.original.id} />
+            </div>
+        ),
     }),
 ];

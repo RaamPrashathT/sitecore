@@ -1,5 +1,5 @@
 import type { Table as ReactTableType } from "@tanstack/react-table";
-import { type CatalogueItemType } from "../hooks/useGetCatalogues";
+import type { CatalogueItemType } from "../hooks/useCatalogue";
 import {
     Pagination,
     PaginationContent,
@@ -12,9 +12,9 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
     Select,
+    SelectContent,
     SelectGroup,
     SelectItem,
-    SelectContent,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
@@ -23,55 +23,42 @@ interface CataloguePaginationProps {
     table: ReactTableType<CatalogueItemType>;
 }
 
-const getPaginationNumbers = (pageIndex: number, pageCount: number) => {
-    const currentPage = pageIndex + 1; 
-    const totalPages = pageCount;
-
-    if (totalPages <= 5) {
-        return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    if (currentPage <= 3) {
-        return [1, 2, 3, 4, "...", totalPages];
-    }
-
-    if (currentPage >= totalPages - 2) {
-        return [1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-    }
-
-    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
-};
+function getPaginationNumbers(pageIndex: number, pageCount: number): (number | "...")[] {
+    const current = pageIndex + 1;
+    const total = pageCount;
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+    if (current <= 3) return [1, 2, 3, 4, "...", total];
+    if (current >= total - 2) return [1, "...", total - 3, total - 2, total - 1, total];
+    return [1, "...", current - 1, current, current + 1, "...", total];
+}
 
 const CataloguePagination = ({ table }: CataloguePaginationProps) => {
     const { pageIndex, pageSize } = table.getState().pagination;
     const pageCount = table.getPageCount();
-    
-    const paginationNumbers = getPaginationNumbers(pageIndex, pageCount);
+    const pages = getPaginationNumbers(pageIndex, pageCount);
 
     return (
-        <div className="flex flex-row relative">
+        <div className="flex flex-row relative items-center">
             <Field className="flex flex-row w-70 items-center gap-x-1">
                 <FieldLabel>Rows per page:</FieldLabel>
-                
-                <Select 
-                    defaultValue={pageSize.toString()} 
+                <Select
                     value={pageSize.toString()}
-                    onValueChange={(value) => table.setPageSize(Number(value))}
+                    onValueChange={(v) => table.setPageSize(Number(v))}
                 >
-                    <SelectTrigger className="" size="sm" id="select-rows-per-page">
+                    <SelectTrigger size="sm" id="select-rows-per-page">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent align="start">
                         <SelectGroup>
                             <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="24">24</SelectItem>
                             <SelectItem value="50">50</SelectItem>
                             <SelectItem value="100">100</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
             </Field>
-            
+
             <Pagination className="pr-80">
                 <PaginationContent>
                     <PaginationItem>
@@ -81,25 +68,25 @@ const CataloguePagination = ({ table }: CataloguePaginationProps) => {
                             className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                     </PaginationItem>
-                    
-                    {paginationNumbers.map((pageNumber, index) => (
-                        <PaginationItem key={index}>
-                            {pageNumber === "..." ? (
+
+                    {pages.map((page, i) => (
+                        <PaginationItem key={i}>
+                            {page === "..." ? (
                                 <PaginationEllipsis />
                             ) : (
                                 <PaginationLink
-                                    isActive={pageIndex === (pageNumber as number) - 1}
-                                    onClick={() => table.setPageIndex((pageNumber as number) - 1)}
+                                    isActive={pageIndex === (page as number) - 1}
+                                    onClick={() => table.setPageIndex((page as number) - 1)}
                                     className="cursor-pointer"
                                 >
-                                    {pageNumber}
+                                    {page}
                                 </PaginationLink>
                             )}
                         </PaginationItem>
                     ))}
 
                     <PaginationItem>
-                        <PaginationNext 
+                        <PaginationNext
                             onClick={() => table.getCanNextPage() && table.nextPage()}
                             aria-disabled={!table.getCanNextPage()}
                             className={!table.getCanNextPage() ? "pointer-events-none opacity-50" : "cursor-pointer"}

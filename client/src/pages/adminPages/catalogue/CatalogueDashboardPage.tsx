@@ -1,16 +1,16 @@
 import { useParams, Navigate } from "react-router-dom";
-import EditCatalogueForm from "@/features/catalogue/components/EditCatalogueForm";
+import CatalogueDashboard from "@/features/catalogue/components/CatalogueDashboard";
 
-const EditCataloguePage = () => {
+const CatalogueDashboardPage = () => {
     const { catalogueId } = useParams();
 
     if (!catalogueId) return <Navigate to=".." replace />;
 
     return (
         <div className="h-full">
-            <EditCatalogueForm catalogueId={catalogueId} />
+            <CatalogueDashboard catalogueId={catalogueId} />
         </div>
     );
 };
 
-export default EditCataloguePage;
+export default CatalogueDashboardPage;

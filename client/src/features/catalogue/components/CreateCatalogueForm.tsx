@@ -1,3 +1,7 @@
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
+import z from "zod";
 import {
     Select,
     SelectContent,
@@ -6,181 +10,83 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Field,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "../../../components/ui/input";
-import { Controller, useForm } from "react-hook-form";
-import { Button } from "../../../components/ui/button";
-import { Spinner } from "../../../components/ui/spinner";
-import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/lib/axios";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { useMembership } from "@/hooks/useMembership";
+import { useCreateCatalogue } from "../hooks/useCatalogue";
 
-import type { CatalogueInputSchema, CatalogueItemType } from "../hooks/useGetCatalogues"; 
+const UNITS = [
+    "NOS", "BAG", "ROLL", "BUNDLE", "SET", "PAIR",
+    "KG", "MT", "QUINTAL", "CUM", "CFT", "LITRE",
+    "SQM", "SQFT", "RMT", "RFT",
+    "DAY", "HOUR", "MONTH", "TRIP", "LS",
+];
 
-// FIXED: Removed z.coerce and replaced with standard z.number()
 const formSchema = z.object({
-    name: z.string().min(1, "Item Name is required"),
-    supplier: z.string().min(1, "Supplier is required"),
-    email: z.string().email("Invalid email address"),
+    name: z.string().min(1, "Item name is required"),
     category: z.enum(["MATERIALS", "LABOUR", "EQUIPMENT", "SUBCONTRACTORS", "TRANSPORT", "OVERHEAD"]),
     unit: z.string().min(1, "Unit is required"),
-    truePrice: z.number().min(0.01, "Price must be > 0"),
-    standardRate: z.number().min(0.01, "Rate must be > 0"),
-    leadTime: z.number().min(0, "Cannot be negative"),
-    inventory: z.number().min(0, "Cannot be negative"),
 });
 
-type createCatalogueFormSchema = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
-interface CreateCatalogueFormProps {
-    orgId: string;
-    slug: string;
-}
-
-const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
+const CreateCatalogueForm = () => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
+    const { data: membership } = useMembership();
+    const createMutation = useCreateCatalogue();
 
     const {
         register,
         control,
         handleSubmit,
         formState: { errors },
-    } = useForm<createCatalogueFormSchema>({
+    } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: "",
-            supplier: "",
-            email: "",
-            unit: "",
-            // Provide sensible defaults to prevent NaN errors
-            truePrice: 0,
-            standardRate: 0,
-            leadTime: 0,
-            inventory: 0,
-        },
+        defaultValues: { name: "", unit: "" },
     });
 
-    const createMutation = useMutation({
-        mutationFn: async (data: createCatalogueFormSchema) => {
-            const response = await api.post("/catalogue", data, {
-                headers: {
-                    "x-organization-id": orgId,
-                },
-            });
-            if (!response.data.success) {
-                throw new Error(response.data.message);
-            }
-            return response.data;
-        },
-        onMutate: async (newCatalogueData) => {
-            const queryFilter = { queryKey: ["catalogue", orgId] };
-
-            await queryClient.cancelQueries(queryFilter);
-
-            const previousQueries = queryClient.getQueriesData<CatalogueInputSchema>(queryFilter);
-
-            const tempId = `temp-${Date.now()}`;
-            const optimisticItem: CatalogueItemType = {
-                id: tempId,
-                name: newCatalogueData.name,
-                category: newCatalogueData.category,
-                unit: newCatalogueData.unit,
-                defaultLeadTime: newCatalogueData.leadTime,
-                organizationId: orgId,
-                inventory: newCatalogueData.inventory,
-                supplierQuotes: [
-                    {
-                        id: `temp-quote-${Date.now()}`,
-                        supplier: newCatalogueData.supplier,
-                        email: newCatalogueData.email,
-                        truePrice: newCatalogueData.truePrice,
-                        standardRate: newCatalogueData.standardRate,
-                        leadTime: newCatalogueData.leadTime,
-                        catalogueId: tempId,
-                    },
-                ],
-            };
-
-            queryClient.setQueriesData<CatalogueInputSchema>(
-                queryFilter,
-                (oldData) => {
-                    if (!oldData) return oldData;
-                    return {
-                        ...oldData,
-                        count: oldData.count + 1,
-                        data: [optimisticItem, ...oldData.data],
-                    };
-                }
-            );
-
-            navigate(`/${slug}/catalogue`);
-
-            return { previousQueries };
-        },
-        onError: (error, _variables, context) => {
-            console.error("Failed to create catalogue item:", error);
-            if (context?.previousQueries) {
-                context.previousQueries.forEach(([queryKey, previousData]) => {
-                    if (previousData) {
-                        queryClient.setQueryData(queryKey, previousData);
-                    }
-                });
-            }
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["catalogue", orgId] });
-        },
-    });
-
-    const onSubmit = (data: createCatalogueFormSchema) => {
-        createMutation.mutate(data);
+    const onSubmit = (data: FormValues) => {
+        createMutation.mutate(data, {
+            onSuccess: () => { navigate(`/${membership?.slug}/catalogue`); },
+        });
     };
 
     return (
         <div className="flex items-center justify-center px-4 py-2 font-sans mt-5">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-4xl p-6 md:p-8"
+                className="w-full max-w-2xl p-6 md:p-8"
             >
                 <h1 className="mb-8 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
-                    Create Catalogue Item:
+                    Create Catalogue Item
                 </h1>
-                
+
                 <FieldGroup className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Item Name</FieldLabel>
-                        <Input {...register("name")} id="name" className="font-sans text-sm" />
+                    <Field className="md:col-span-2">
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Item Name
+                        </FieldLabel>
+                        <Input
+                            {...register("name")}
+                            placeholder="e.g. Portland Cement"
+                            className="font-sans text-sm"
+                        />
                         {errors.name && <FieldError>{errors.name.message}</FieldError>}
-                    </Field>
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Supplier</FieldLabel>
-                        <Input {...register("supplier")} id="supplier" className="font-sans text-sm" />
-                        {errors.supplier && <FieldError>{errors.supplier.message}</FieldError>}
-                    </Field>
-                    
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Supplier Email</FieldLabel>
-                        <Input {...register("email")} id="email" type="email" placeholder="contact@supplier.com" className="font-sans text-sm" />
-                        {errors.email && <FieldError>{errors.email.message}</FieldError>}
                     </Field>
 
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Category</FieldLabel>
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Category
+                        </FieldLabel>
                         <Controller
                             name="category"
                             control={control}
                             render={({ field }) => (
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <SelectTrigger className="font-sans text-sm">
-                                        <SelectValue placeholder="Select Category" />
+                                        <SelectValue placeholder="Select category" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
@@ -199,49 +105,49 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
                     </Field>
 
                     <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Unit</FieldLabel>
-                        <Input {...register("unit")} placeholder="KG/Hour/Litre" className="font-sans text-sm" />
+                        <FieldLabel className="font-sans text-sm text-muted-foreground">
+                            Unit of Measure
+                        </FieldLabel>
+                        <Controller
+                            name="unit"
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <SelectTrigger className="font-sans text-sm">
+                                        <SelectValue placeholder="Select unit" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {UNITS.map((u) => (
+                                                <SelectItem key={u} value={u}>
+                                                    {u}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
                         {errors.unit && <FieldError>{errors.unit.message}</FieldError>}
                     </Field>
-
-                    {/* FIXED: Added type="number" and { valueAsNumber: true } to all numeric fields */}
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">True Price</FieldLabel>
-                        <Input type="number" step="any" {...register("truePrice", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
-                        {errors.truePrice && <FieldError>{errors.truePrice.message}</FieldError>}
-                    </Field>
-
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Standard Rate</FieldLabel>
-                        <Input type="number" step="any" {...register("standardRate", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
-                        {errors.standardRate && <FieldError>{errors.standardRate.message}</FieldError>}
-                    </Field>
-
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Lead Time (Days)</FieldLabel>
-                        <Input type="number" step="1" {...register("leadTime", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
-                        {errors.leadTime && <FieldError>{errors.leadTime.message}</FieldError>}
-                    </Field>
-
-                    <Field>
-                        <FieldLabel className="font-sans text-sm text-muted-foreground">Inventory</FieldLabel>
-                        <Input type="number" step="1" {...register("inventory", { valueAsNumber: true })} placeholder="0" className="font-mono text-sm tabular-nums"/>
-                        {errors.inventory && <FieldError>{errors.inventory.message}</FieldError>}
-                    </Field>
                 </FieldGroup>
-                    
+
                 {createMutation.error && (
-                    <p className="text-red-500 py-2">{createMutation.error.message}</p>
+                    <p className="mt-4 font-sans text-sm text-red-500">
+                        {createMutation.error instanceof Error
+                            ? createMutation.error.message
+                            : "Something went wrong"}
+                    </p>
                 )}
 
                 <div className="mt-8 flex justify-end">
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         disabled={createMutation.isPending}
-                        className="h-10 w-60 bg-green-700 font-sans text-sm text-white hover:bg-green-800 disabled:opacity-50"
+                        className="h-10 w-48 bg-green-700 font-sans text-sm text-white hover:bg-green-800 disabled:opacity-50"
                     >
                         {createMutation.isPending && <Spinner />}
-                        <p>{createMutation.isPending ? "Creating..." : "Create Item"}</p>
+                        {createMutation.isPending ? "Creating..." : "Create Item"}
                     </Button>
                 </div>
             </form>

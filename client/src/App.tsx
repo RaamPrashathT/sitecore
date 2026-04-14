@@ -17,6 +17,7 @@ import DashboardPage from "./pages/adminPages/dashboard/DashboardPage";
 import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
 import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
 import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
+import CatalogueDashboardPage from "./pages/adminPages/catalogue/CatalogueDashboardPage";
 
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
@@ -113,8 +114,12 @@ function App() {
                                     element={<CreateCataloguePage />}
                                 />
                                 <Route
-                                    path="catalogue/edit/:catalogueId/:quoteId"
+                                    path="catalogue/edit/:catalogueId"
                                     element={<EditCataloguePage />}
+                                />
+                                <Route
+                                    path="catalogue/:catalogueId/dashboard"
+                                    element={<CatalogueDashboardPage />}
                                 />
 
                                 {/* Users */}

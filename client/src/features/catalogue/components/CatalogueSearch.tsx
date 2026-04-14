@@ -1,7 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import type {  CatalogueItemType } from "../hooks/useGetCatalogues";
 import type { Table as ReactTableType } from "@tanstack/react-table";
+import type { CatalogueItemType } from "../hooks/useCatalogue";
+
 interface CatalogueSearchProps {
     table: ReactTableType<CatalogueItemType>;
 }
@@ -15,9 +16,8 @@ const CatalogueSearch = ({ table }: CatalogueSearchProps) => {
                 value={(table.getState().globalFilter as string) ?? ""}
                 className="h-10 rounded-lg border-border bg-background pl-9 font-sans text-sm placeholder:font-sans focus-visible:ring-1 focus-visible:ring-green-700"
                 onChange={(e) => {
-                    const value = String(e.target.value);
-                    table.setGlobalFilter(value);
-                    table.setPageIndex(0); 
+                    table.setGlobalFilter(String(e.target.value));
+                    table.setPageIndex(0);
                 }}
             />
         </div>

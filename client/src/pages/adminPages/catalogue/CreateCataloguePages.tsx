@@ -1,24 +1,11 @@
-import CreateCatalogueForm from "@/features/catalogue/components/CreateCatalogueForm"
-import { useMembership } from "@/hooks/useMembership";
+import CreateCatalogueForm from "@/features/catalogue/components/CreateCatalogueForm";
 
 const CreateCataloguePage = () => {
-    const {data: membership, isLoading} = useMembership();
-
-    if(isLoading) return (
-        <div>
-            Loading...
-        </div>
-    )
-    if(!membership) return (
-        <div>
-            No access
-        </div>
-    )
     return (
-        <div>
-            <CreateCatalogueForm orgId={membership.id} slug={membership.slug}/>
+        <div className="h-full">
+            <CreateCatalogueForm />
         </div>
-    )
-}
+    );
+};
 
-export default CreateCataloguePage
+export default CreateCataloguePage;
