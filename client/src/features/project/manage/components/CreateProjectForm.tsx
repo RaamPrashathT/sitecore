@@ -17,16 +17,16 @@ interface CreateProjectFormProps {
 const formSchema = z.object({
     name: z.string().trim().min(1, "Name is required"),
     address: z.string().trim().min(1, "Address is required"),
-    estimatedBudget: z.coerce.number().min(0, "Estimated budget cannot be negative"),
+    estimatedBudget: z.number().min(0, "Estimated budget cannot be negative"),
     phases: z.array(
         z.object({
             name: z.string().trim().min(1, "Phase name is required"),
             description: z.string().optional(),
-            budget: z.coerce.number().min(0, "Budget cannot be negative"),
+            budget: z.number().min(0, "Budget cannot be negative"),
             startDate: z.string().min(1, "Start date is required"),
             paymentDeadline: z.string().min(1, "Payment deadline is required"),
         }),
-    ).default([]),
+    ),
 });
 
 type CreateProjectFormSchema = z.infer<typeof formSchema>;
@@ -148,7 +148,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                             <Input
                                 id="project-budget"
                                 type="number"
-                                {...register("estimatedBudget")}
+                                {...register("estimatedBudget", { valueAsNumber: true })}
                                 placeholder="0"
                                 className="font-mono text-stone-900 border-stone-200 focus-visible:ring-green-700"
                             />
@@ -227,7 +227,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                                                     <Input
                                                         id={`phase-${index}-budget`}
                                                         type="number"
-                                                        {...register(`phases.${index}.budget`)}
+                                                        {...register(`phases.${index}.budget`, { valueAsNumber: true })}
                                                         className="font-mono text-stone-900 border-stone-200 focus-visible:ring-green-700"
                                                     />
                                                     {errors.phases?.[index]?.budget && (

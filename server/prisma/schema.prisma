@@ -86,6 +86,7 @@ model Organization {
     updatedAt DateTime @updatedAt
     image     String?
 
+    suppliers     Supplier[]
     notifications Notification[]
     catalogue     Catalogue[]
     members       Membership[]
@@ -115,58 +116,70 @@ model Catalogue {
     unit            String
     defaultLeadTime Int               @default(0)
 
-    supplierQuotes SupplierQuote[]
-
+    supplierQuotes   SupplierQuote[]
     organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId   String
     requisitionItems RequisitionItem[]
-    inventories      Inventory[]
+
+    @@unique([name, organizationId])
+}
+
+model Supplier {
+    id            String  @id @default(uuid())
+    name          String
+    email         String?
+    phone         String?
+    contactPerson String?
+    address       String?
+
+    deletedAt DateTime?
+
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId String
+
+    quotes SupplierQuote[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@unique([name, organizationId])
 }
 
 model SupplierQuote {
     id           String  @id @default(uuid())
-    supplier     String
     truePrice    Decimal
     standardRate Decimal
     leadTime     Int?
-    email        String?
     inventory    Int     @default(0)
 
-    catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
-    catalogueId  String
-    assignedItem RequisitionItem[]
-    inventories  Inventory[]
+    supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+    supplierId String
 
-    @@unique([catalogueId, supplier])
-}
-
-model InventoryLocation {
-    id   String @id @default(uuid())
-    name String
-
-    organizationId String
-
-    inventories Inventory[]
-}
-
-model Inventory {
-    id String @id @default(uuid())
-
+    catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
     catalogueId String
-    locationId  String
 
-    supplierQuoteId String?
+    assignedItem RequisitionItem[]
+    history      SupplierQuoteHistory[]
 
-    quantity Decimal @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    catalogue     Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
-    location      InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
-    supplierQuote SupplierQuote?    @relation(fields: [supplierQuoteId], references: [id], onDelete: SetNull)
+    @@unique([catalogueId, supplierId])
+}
 
-    @@index([catalogueId])
-    @@index([locationId])
+model SupplierQuoteHistory {
+    id              String        @id @default(uuid())
+    supplierQuoteId String
+    supplierQuote   SupplierQuote @relation(fields: [supplierQuoteId], references: [id], onDelete: Cascade)
+
+    truePrice    Decimal
+    standardRate Decimal
+    leadTime     Int?
+    inventory    Int
+
+    changeReason      String?
+    changedByMemberId String?
+    changedAt         DateTime @default(now())
 }
 
 model Project {

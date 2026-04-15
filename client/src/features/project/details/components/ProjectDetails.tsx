@@ -148,7 +148,7 @@ const ProjectDetails = () => {
                     ) : (
                         <div className="flex flex-col  pl-2">
                             {recentSiteLogs.map((log) => (
-                                <div key={log.id} className="relative flex flex-col gap-1 border-l-[2px] border-green-700 pl-4 py-2">
+                                <div key={log.id} className="relative flex flex-col gap-1 border-l-2 border-green-700 pl-4 py-2">
                                     <div className="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-green-700 ring-4 ring-white" />
                                     <span className="text-sm font-semibold text-slate-900 leading-snug">{log.title}</span>
                                     <span className="text-xs font-mono text-slate-500">

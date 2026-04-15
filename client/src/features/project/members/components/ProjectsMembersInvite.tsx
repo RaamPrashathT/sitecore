@@ -169,7 +169,7 @@ const ProjectsMembersInvite = () => {
                         <Button
                             disabled={isPending}
                             type="submit"
-                            className="w-full sm:w-auto px-8 bg-gradient-to-tr from-[#006d30] to-[#00602a] hover:opacity-95 text-[#e4ffe2] shadow-sm"
+                            className="w-full sm:w-auto px-8 bg-linear-to-tr from-[#006d30] to-[#00602a] hover:opacity-95 text-[#e4ffe2] shadow-sm"
                         >
                             {isPending ? (
                                 <div className="flex items-center gap-x-2">

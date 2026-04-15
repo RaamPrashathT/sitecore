@@ -20,7 +20,7 @@ import { AlertTriangle, Loader2, ArrowLeft } from "lucide-react";
 const updateProjectSchema = z.object({
     name: z.string().min(1, "Project name is required"),
     address: z.string().min(1, "Address is required"),
-    estimatedBudget: z.coerce.number().min(0, "Budget cannot be negative"),
+    estimatedBudget: z.number().min(0, "Budget cannot be negative"),
     status: z.enum(["DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"]),
 });
 
@@ -73,7 +73,7 @@ export default function ProjectSettingsForm() {
                 name: project.name,
                 address: project.address,
                 estimatedBudget: project.budgets.estimatedTotal,
-                status: project.status,
+                status: project.status as UpdateProjectFormValues["status"],
             });
         }
     }, [project, reset]);
@@ -109,7 +109,6 @@ export default function ProjectSettingsForm() {
     return (
         <div className={`max-w-3xl mx-auto ${GRID.p} font-sans`}>
             
-            {/* Back Button */}
             <button
                 onClick={() => navigate(-1)}
                 className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-8"
@@ -136,10 +135,11 @@ export default function ProjectSettingsForm() {
                 >
                     {/* Project Name */}
                     <div className={`flex flex-col ${GRID.gapSm}`}>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                        <label htmlFor="project-name" className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                             Project Name
                         </label>
                         <Input
+                            id="project-name"
                             {...register("name")}
                             className={`font-sans text-slate-900 border-slate-200 focus-visible:ring-green-700 ${GRID.radius}`}
                         />
@@ -152,10 +152,11 @@ export default function ProjectSettingsForm() {
 
                     {/* Address */}
                     <div className={`flex flex-col ${GRID.gapSm}`}>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                        <label htmlFor="project-address" className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                             Site Address
                         </label>
                         <Input
+                            id="project-address"
                             {...register("address")}
                             className={`font-sans text-slate-900 border-slate-200 focus-visible:ring-green-700 ${GRID.radius}`}
                         />
@@ -169,19 +170,20 @@ export default function ProjectSettingsForm() {
                     <div className={`grid grid-cols-1 md:grid-cols-2 ${GRID.gap}`}>
                         {/* Budget */}
                         <div className={`flex flex-col ${GRID.gapSm}`}>
-                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                            <label htmlFor="project-budget" className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                                 Base Contract Value (₹)
                             </label>
                             <Input
+                                id="project-budget"
                                 type="number"
-                                {...register("estimatedBudget")}
+                                {...register("estimatedBudget", { valueAsNumber: true })}
                                 className={`font-mono text-slate-900 border-slate-200 focus-visible:ring-green-700 ${GRID.radius}`}
                             />
                         </div>
 
                         {/* Status */}
                         <div className={`flex flex-col w-full ${GRID.gapSm}`}>
-                            <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                            <label htmlFor="project-status" className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
                                 Operational Status
                             </label>
                             <Controller
@@ -193,6 +195,7 @@ export default function ProjectSettingsForm() {
                                         value={field.value}
                                     >
                                         <SelectTrigger
+                                            id="project-status"
                                             className={`w-full font-sans text-slate-900 border-slate-200 focus:ring-green-700 ${GRID.radius}`}
                                         >
                                             <SelectValue placeholder="Select a status" />

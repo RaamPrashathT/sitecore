@@ -39,7 +39,7 @@ export default function MembersList({ members, activeFilter }: MembersListProps)
                             <h2 className="font-display font-medium tracking-wide text-[#2b3437]/60 uppercase text-xs">
                                 {groupLabels[type as keyof typeof groupLabels]}
                             </h2>
-                            <div className="h-[1px] flex-grow bg-[#abb3b7]/20"></div>
+                            <div className="h-px grow bg-[#abb3b7]/20"></div>
                         </div>
 
                         <div className="space-y-4">
