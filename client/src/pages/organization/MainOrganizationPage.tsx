@@ -1,5 +1,4 @@
 import OrgSidebar from "@/components/organization/sidebar/OrgSidebar";
-import { Separator } from "@/components/ui/separator";
 import {
     SidebarInset,
     SidebarProvider,
@@ -52,16 +51,11 @@ const MainOrganizationPage = () => {
 
             <SidebarInset className="flex flex-col h-full">
                 <header className="flex h-15.5 items-center justify-between border-b px-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full ">
                         <SidebarTrigger />
 
                         {projectSlug && (
-                            <>
-                                <Separator
-                                    orientation="vertical"
-                                    className="h-4"
-                                />
-
+                            <div className="flex items-center justify-between w-full">
                                 <p className="font-medium text-sm capitalize">
                                     {projectSlug}
                                 </p>
@@ -107,11 +101,11 @@ const MainOrganizationPage = () => {
                                             className="flex items-center gap-1 px-2 py-1 text-sm border-b-2 border-transparent data-[state=active]:border-green-700 data-[state=active]:text-green-700"
                                         >
                                             <Banknote className="w-4 h-4" />
-                                            Payment
+                                            Payments
                                         </TabsTrigger>
                                     </TabsList>
                                 </Tabs>
-                            </>
+                            </div>
                         )}
                     </div>
                 </header>

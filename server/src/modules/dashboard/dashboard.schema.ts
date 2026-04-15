@@ -3,11 +3,11 @@ import z from "zod";
 export const getDashboardItemsSchema = z.object({
     organizationId: z.string().length(36),
     searchQuery: z.string().max(500).optional().default("")
-})
+});
 
 export const orderItemSchema = z.object({
     requisitionItemId: z.string().length(36),
-    deductInventoryQty: z.number().min(0),
+    deductInventoryQty: z.number().min(0).optional(), // Preserved so frontend doesn't crash
     organizationId: z.string().length(36)
 });
 
