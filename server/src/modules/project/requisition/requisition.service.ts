@@ -2,6 +2,23 @@ import { ValidationError } from "../../../shared/error/validation.error.js";
 import { notify } from "../../../shared/lib/notify.js";
 import { prisma } from "../../../shared/lib/prisma.js";
 import { User } from "../../../shared/models/user.js";
+import { sendRequisitionApprovalSummaryEmail } from "../../../shared/lib/emails/sendRequisitionApprovalSummary.js";
+import { slugify } from "../../../shared/utils/slugify.js";
+
+async function ensureProjectActive(projectId: string) {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { status: true },
+    });
+
+    if (!project) {
+        throw new ValidationError("Project not found");
+    }
+
+    if (project.status !== "ACTIVE") {
+        throw new ValidationError("Project must be ACTIVE to make changes.");
+    }
+}
 
 const requisitionService = {
     async getProjectRequisitions(projectId: string) {
@@ -116,6 +133,7 @@ const requisitionService = {
         const whereClause: any = {
             status: "PENDING_APPROVAL",
             phase: {
+                status: "ACTIVE",
                 project: {
                     organizationId: organizationId,
                 },
@@ -175,6 +193,7 @@ const requisitionService = {
                     phase: {
                         select: {
                             name: true,
+                            status: true,
                             project: {
                                 select: {
                                     name: true,
@@ -260,6 +279,8 @@ const requisitionService = {
             }>;
         },
     ) {
+        await ensureProjectActive(projectId);
+
         // 1. Update the query to include the organization so we can get its slug
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId: projectId },
@@ -272,11 +293,7 @@ const requisitionService = {
             );
         }
 
-        const slugBase = data.title
-            .toLowerCase()
-            .trim()
-            .replace(/[\s\W-]+/g, "-")
-            .replace(/^-+|-+$/g, "");
+        const slugBase = slugify(data.title);
         const lastReq = await prisma.requisition.findFirst({
             where: { phaseId: phaseId, slugBase: slugBase },
             orderBy: { slugIndex: "desc" },
@@ -321,6 +338,13 @@ const requisitionService = {
             include: { items: true },
         });
 
+        if (phase.status === "PLANNING") {
+            await prisma.phase.update({
+                where: { id: phase.id },
+                data: { status: "PAYMENT_PENDING" },
+            });
+        }
+
         // 2. SEND NOTIFICATION (Alerts Admin to approve)
         await notify({
             type: "REQUISITION_SUBMITTED",
@@ -351,12 +375,22 @@ const requisitionService = {
                 phase: {
                     include: { project: { include: { organization: true } } },
                 },
+                items: {
+                    include: {
+                        catalogue: { select: { name: true } },
+                        assignedSupplier: {
+                            select: { standardRate: true },
+                        },
+                    },
+                },
             },
         });
 
         if (!requisition) {
             throw new ValidationError("Requisition not found.");
         }
+
+        await ensureProjectActive(requisition.phase.projectId);
 
         if (requisition.status !== "PENDING_APPROVAL") {
             throw new ValidationError(
@@ -368,6 +402,32 @@ const requisitionService = {
             where: { id: requisitionId },
             data: { status: "APPROVED" },
         });
+
+        const approvalItems = requisition.items.map((item) => {
+            const standardRate = item.assignedSupplier?.standardRate
+                ? Number(item.assignedSupplier.standardRate)
+                : Number(item.estimatedUnitCost);
+            const quantity = Number(item.quantity);
+
+            return {
+                itemName: item.catalogue?.name || "Unnamed Item",
+                standardRate,
+                quantity,
+                totalAmount: standardRate * quantity,
+            };
+        });
+
+        const totalAmount = approvalItems.reduce(
+            (sum, item) => sum + item.totalAmount,
+            0,
+        );
+
+        await sendRequisitionApprovalSummaryEmail(
+            requisition.phase.project.name,
+            requisition.phase.name,
+            approvalItems,
+            totalAmount,
+        );
 
         // 2. SEND NOTIFICATION (Alerts Engineer it was approved)
         await notify({
@@ -396,6 +456,8 @@ const requisitionService = {
         if (!requisition) {
             throw new ValidationError("Requisition not found.");
         }
+
+        await ensureProjectActive(requisition.phase.projectId);
 
         if (requisition.status !== "PENDING_APPROVAL") {
             throw new ValidationError(

@@ -10,6 +10,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import { useProjectDetails } from "../../details/hooks/useProjectDetails";
 
 interface SiteLogCardProps {
     log: PhaseSiteLog;
@@ -21,6 +22,11 @@ const SiteLogCard = ({ log }: SiteLogCardProps) => {
         projectSlug: string;
         phaseSlug: string;
     }>();
+
+    const { data: project, isLoading } = useProjectDetails(
+        orgSlug,
+        projectSlug,
+    );
 
     const [commentText, setCommentText] = useState("");
     const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
@@ -51,6 +57,15 @@ const SiteLogCard = ({ log }: SiteLogCardProps) => {
         ? log.images.find((img) => img.id === selectedImageId)?.url
         : null;
 
+    if (isLoading || !project) {
+        return (
+            <div className="flex items-center justify-center h-32">
+                <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+            </div>
+        );
+    }
+
+    const isProjectActive = project.status === "ACTIVE";
     return (
         <article className="relative group pl-4">
             <div className="flex flex-col md:flex-row gap-16">
@@ -164,8 +179,7 @@ const SiteLogCard = ({ log }: SiteLogCardProps) => {
                                 })
                             ) : (
                                 <p className="text-sm text-stone-400 italic font-sans">
-                                    No comments yet. Be the first to start the
-                                    discussion.
+                                    {isProjectActive && "No comments yet. Be the first to share your thoughts."}
                                 </p>
                             )}
                         </div>
@@ -189,81 +203,84 @@ const SiteLogCard = ({ log }: SiteLogCardProps) => {
                                     </button>
                                 </div>
                             )}
-
-                            <div className="flex gap-3 items-end">
-                                {log.images.length > 0 && (
-                                    <Popover
-                                        open={isPopoverOpen}
-                                        onOpenChange={setIsPopoverOpen}
-                                    >
-                                        <PopoverTrigger asChild>
-                                            <button
-                                                className={`p-2.5 rounded-lg border transition-colors ${selectedImageId ? "bg-green-50 border-green-200 text-green-700" : "bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100"}`}
-                                                title="Reference an image"
-                                            >
-                                                <ImageIcon className="w-5 h-5" />
-                                            </button>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                            className="w-64 p-3 bg-white"
-                                            align="start"
-                                            side="top"
+                            {isProjectActive && (
+                                <div className="flex gap-3 items-end">
+                                    {log.images.length > 0 && (
+                                        <Popover
+                                            open={isPopoverOpen}
+                                            onOpenChange={setIsPopoverOpen}
                                         >
-                                            <p className="text-xs font-semibold uppercase tracking-widest text-stone-500 mb-3">
-                                                Attach Reference Image
-                                            </p>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {log.images.map((img) => (
-                                                    <button
-                                                        key={img.id}
-                                                        onClick={() => {
-                                                            setSelectedImageId(
-                                                                img.id,
-                                                            );
-                                                            setIsPopoverOpen(
-                                                                false,
-                                                            );
-                                                        }}
-                                                        className={`aspect-square rounded border-2 overflow-hidden hover:opacity-80 transition-all ${selectedImageId === img.id ? "border-green-700" : "border-transparent"}`}
-                                                    >
-                                                        <img
-                                                            src={img.url}
-                                                            alt="Thumbnail"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                )}
-
-                                <input
-                                    type="text"
-                                    value={commentText}
-                                    onChange={(e) =>
-                                        setCommentText(e.target.value)
-                                    }
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter")
-                                            handleSubmitComment();
-                                    }}
-                                    placeholder="Add a comment..."
-                                    className="grow bg-stone-50 border border-stone-200 rounded-lg px-4 py-2.5 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 transition-all h-[42px]"
-                                />
-
-                                <button
-                                    onClick={handleSubmitComment}
-                                    disabled={isPending || !commentText.trim()}
-                                    className="bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium font-sans hover:bg-green-800 disabled:opacity-50 transition-all flex items-center justify-center min-w-[80px] h-[42px]"
-                                >
-                                    {isPending ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        <Send className="w-4 h-4" />
+                                            <PopoverTrigger asChild>
+                                                <button
+                                                    className={`p-2.5 rounded-lg border transition-colors ${selectedImageId ? "bg-green-50 border-green-200 text-green-700" : "bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100"}`}
+                                                    title="Reference an image"
+                                                >
+                                                    <ImageIcon className="w-5 h-5" />
+                                                </button>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-64 p-3 bg-white"
+                                                align="start"
+                                                side="top"
+                                            >
+                                                <p className="text-xs font-semibold uppercase tracking-widest text-stone-500 mb-3">
+                                                    Attach Reference Image
+                                                </p>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {log.images.map((img) => (
+                                                        <button
+                                                            key={img.id}
+                                                            onClick={() => {
+                                                                setSelectedImageId(
+                                                                    img.id,
+                                                                );
+                                                                setIsPopoverOpen(
+                                                                    false,
+                                                                );
+                                                            }}
+                                                            className={`aspect-square rounded border-2 overflow-hidden hover:opacity-80 transition-all ${selectedImageId === img.id ? "border-green-700" : "border-transparent"}`}
+                                                        >
+                                                            <img
+                                                                src={img.url}
+                                                                alt="Thumbnail"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
                                     )}
-                                </button>
-                            </div>
+
+                                    <input
+                                        type="text"
+                                        value={commentText}
+                                        onChange={(e) =>
+                                            setCommentText(e.target.value)
+                                        }
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter")
+                                                handleSubmitComment();
+                                        }}
+                                        placeholder="Add a comment..."
+                                        className="grow bg-stone-50 border border-stone-200 rounded-lg px-4 py-2.5 text-sm font-sans focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 transition-all h-[42px]"
+                                    />
+
+                                    <button
+                                        onClick={handleSubmitComment}
+                                        disabled={
+                                            isPending || !commentText.trim()
+                                        }
+                                        className="bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium font-sans hover:bg-green-800 disabled:opacity-50 transition-all flex items-center justify-center min-w-[80px] h-[42px]"
+                                    >
+                                        {isPending ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <Send className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -52,6 +52,7 @@ const ProjectDetails = () => {
         );
     }
 
+    
     const { budgets, phases, recentSiteLogs } = project;
     const budgetPercentage = budgets.estimatedTotal > 0
         ? Math.min((budgets.consumed / budgets.estimatedTotal) * 100, 100)
@@ -81,12 +82,12 @@ const ProjectDetails = () => {
                         <span className="inline-flex items-center px-3 py-1 bg-green-700 text-white text-sm font-medium uppercase tracking-wider rounded-sm">
                             {project.status}
                         </span>
-                        <button 
-                            onClick={() => navigate(`settings`)}
-                            className="flex items-center justify-center w-10 h-10 rounded-md border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition"
-                        >
-                            <Settings className="w-4 h-4" />
-                        </button>
+                            <button 
+                                onClick={() => navigate(`settings`)}
+                                className="flex items-center justify-center w-10 h-10 rounded-md border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition"
+                            >
+                                <Settings className="w-4 h-4" />
+                            </button>
                     </div>
                 </div>
             </div>
@@ -142,13 +143,13 @@ const ProjectDetails = () => {
                     </h2>
                     
                     {recentSiteLogs.length === 0 ? (
-                        <div className="flex-1 flex items-center justify-center text-sm font-mono text-slate-400 p-8 border border-dashed border-slate-200 rounded-md bg-slate-50/50">
+                        <div className="flex-1 flex items-center justify-center text-sm font-mono text-slate-400 border border-dashed border-slate-200 rounded-md bg-slate-50/50">
                             No recent logs recorded.
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-4 pl-2">
+                        <div className="flex flex-col  pl-2">
                             {recentSiteLogs.map((log) => (
-                                <div key={log.id} className="relative flex flex-col gap-1 border-l-[2px] border-green-700 pl-4 py-1">
+                                <div key={log.id} className="relative flex flex-col gap-1 border-l-[2px] border-green-700 pl-4 py-2">
                                     <div className="absolute -left-[5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-green-700 ring-4 ring-white" />
                                     <span className="text-sm font-semibold text-slate-900 leading-snug">{log.title}</span>
                                     <span className="text-xs font-mono text-slate-500">

@@ -6,6 +6,7 @@ import * as z from "zod";
 
 import { usePhaseDetails } from "../hooks/usePhaseDetails";
 import { useUpdatePhase } from "../hooks/useUpdatePhase";
+import { useProjectDetails } from "@/features/project/details/hooks/useProjectDetails";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,6 +39,8 @@ export default function UpdatePhaseForm() {
         isLoading: isFetching,
         isError,
     } = usePhaseDetails(orgSlug, projectSlug, phaseSlug);
+    const { data: project, isLoading: isProjectLoading } = useProjectDetails(orgSlug, projectSlug);
+    const isProjectActive = project?.status === "ACTIVE";
 
     const { mutate: updatePhase, isPending: isUpdating } = useUpdatePhase(
         orgSlug!,
@@ -102,6 +105,28 @@ export default function UpdatePhaseForm() {
                 <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
                 <p className="font-medium font-sans text-stone-900">
                     Failed to load phase details.
+                </p>
+            </div>
+        );
+    }
+
+    if (isProjectLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-stone-50 font-sans text-stone-500">
+                Loading project state...
+            </div>
+        );
+    }
+
+    if (project && !isProjectActive) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-stone-50 text-stone-500 px-6 text-center">
+                <AlertCircle className="w-8 h-8 text-amber-500 mb-2" />
+                <p className="font-medium font-sans text-stone-900">
+                    Project is not active.
+                </p>
+                <p className="mt-2 max-w-md text-sm">
+                    Phase updates are locked until the project becomes ACTIVE.
                 </p>
             </div>
         );

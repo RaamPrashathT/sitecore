@@ -1,9 +1,18 @@
 import z from "zod";
 
+const createProjectPhaseSchema = z.object({
+    name: z.string().min(1, "Phase name is required"),
+    description: z.string().optional(),
+    budget: z.coerce.number(),
+    startDate: z.coerce.date(),
+    paymentDeadline: z.coerce.date(),
+});
+
 export const createProjectSchema = z.object({
     name: z.string().min(1),
     address: z.string().min(1),
     estimatedBudget: z.coerce.number(),
+    phases: z.array(createProjectPhaseSchema).optional().default([]),
 });
 
 export const getProjectListSchema = z.object({

@@ -14,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import z from "zod";
+import { useProjectDetails } from "@/features/project/details/hooks/useProjectDetails";
 
 const formSchema = z.object({
     email: z.email("Invalid email address"),
@@ -29,6 +30,8 @@ interface PayloadSchema {
 const ProjectsMembersInvite = () => {
     const { orgSlug, projectSlug } = useParams();
     const navigate = useNavigate();
+    const { data: project, isLoading: isProjectLoading } = useProjectDetails(orgSlug, projectSlug);
+    const isProjectActive = project?.status === "ACTIVE";
     const {
         register,
         handleSubmit,
@@ -53,6 +56,29 @@ const ProjectsMembersInvite = () => {
     const onSubmit = (data: FormValues) => {
         mutate(data);
     };
+
+    if (isProjectLoading) {
+        return (
+            <div className="w-full max-w-xl mx-auto mt-12 mb-20 p-6 font-sans text-[#737c7f]">
+                Loading project state...
+            </div>
+        );
+    }
+
+    if (project && !isProjectActive) {
+        return (
+            <div className="w-full max-w-xl mx-auto mt-12 mb-20 p-6">
+                <div className="bg-white p-10 rounded-xl border border-[#abb3b7]/20 shadow-sm">
+                    <h1 className="font-serif text-3xl font-light text-[#2b3437] tracking-tight mb-4">
+                        Invite Member
+                    </h1>
+                    <p className="text-sm text-[#737c7f]">
+                        Member invitations are locked until the project is ACTIVE.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-xl mx-auto mt-12 mb-20 p-6">

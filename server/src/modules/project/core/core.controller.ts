@@ -26,6 +26,7 @@ const coreController = {
                 projectName: validatedData.data.name,
                 address: validatedData.data.address,
                 estimatedBudget: validatedData.data.estimatedBudget,
+                phases: validatedData.data.phases,
             });
 
             return response.status(201).json(result);
@@ -105,6 +106,7 @@ const coreController = {
 
             return response.status(200).json(result);
         } catch (error) {
+            console.log(error)
             logger.error(error);
             return response
                 .status(500)

@@ -2,7 +2,6 @@ import { notify } from "../../shared/lib/notify.js";
 import { prisma } from "../../shared/lib/prisma.js";
 import { sendSupplierOrderNotification } from "../../shared/lib/emails/sendSupplierOrderNotification.js";
 import { sendPartialOrderNotification } from "../../shared/lib/emails/sendPartialOrderNotification.js";
-import type { SetDashboardItemsType } from "./dashboard.schema.js";
 
 const dashboardService = {
     async getDashboardItems(organizationId: string, searchQuery: string) {
@@ -10,7 +9,10 @@ const dashboardService = {
             status: "UNORDERED",
             requisition: {
                 status: "APPROVED",
-                phase: { project: { organizationId } },
+                phase: {
+                    status: "ACTIVE",
+                    project: { organizationId, status: "ACTIVE" },
+                },
             },
         };
 
@@ -71,11 +73,14 @@ const dashboardService = {
                             phase: {
                                 select: {
                                     name: true,
+                                    budget: true,
                                     startDate: true,
+                                    status: true,
                                     project: {
                                         select: {
                                             id: true,
                                             name: true,
+                                            estimatedBudget: true,
                                         },
                                     },
                                 },
@@ -112,7 +117,9 @@ const dashboardService = {
                 : undefined,
             projectid: item.requisition.phase.project.id,
             projectName: item.requisition.phase.project.name,
+            projectBudget: Number(item.requisition.phase.project.estimatedBudget),
             phaseName: item.requisition.phase.name,
+            phaseBudget: Number(item.requisition.phase.budget),
             phaseStartDate: item.requisition.phase.startDate,
             inventory: item.assignedSupplier?.inventory ?? 0,
         }));
@@ -302,6 +309,7 @@ const dashboardService = {
         const projects = await prisma.project.findMany({
             where: {
                 organizationId,
+                status: "ACTIVE",
                 assignments: { some: { userId: engineerId } },
             },
             include: {
@@ -417,6 +425,7 @@ const dashboardService = {
         const projects = await prisma.project.findMany({
             where: {
                 organizationId,
+                status: "ACTIVE",
                 assignments: {
                     some: { userId, role: "CLIENT" }
                 }
@@ -536,7 +545,7 @@ const dashboardService = {
                 where: {
                     status: "PAYMENT_PENDING",
                     isPaid: false,
-                    project: { organizationId },
+                    project: { organizationId, status: "ACTIVE" },
                 },
                 select: {
                     id: true,
@@ -555,7 +564,9 @@ const dashboardService = {
             prisma.requisition.findMany({
                 where: {
                     status: "PENDING_APPROVAL",
-                    phase: { project: { organizationId } },
+                    phase: {
+                        project: { organizationId, status: "ACTIVE" },
+                    },
                 },
                 select: {
                     id: true,
@@ -564,7 +575,7 @@ const dashboardService = {
                     budget: true,
                     requestedBy: true,
                     phase: {
-                        select: { name: true },
+                        select: { name: true, status: true },
                     },
                 },
                 orderBy: { createdAt: "asc" },

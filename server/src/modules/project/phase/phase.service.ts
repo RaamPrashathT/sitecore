@@ -2,6 +2,21 @@ import { ValidationError } from "../../../shared/error/validation.error.js";
 import { notify } from "../../../shared/lib/notify.js";
 import { prisma } from "../../../shared/lib/prisma.js";
 
+async function ensureProjectActive(projectId: string) {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { status: true },
+    });
+
+    if (!project) {
+        throw new ValidationError("Project not found");
+    }
+
+    if (project.status !== "ACTIVE") {
+        throw new ValidationError("Project must be ACTIVE to make changes.");
+    }
+}
+
 const phaseService = {
     async createPhase(
         projectId: string,
@@ -15,6 +30,8 @@ const phaseService = {
             nextOrder?: number | undefined;
         },
     ) {
+        await ensureProjectActive(projectId);
+
         const slugBase = data.name
             .toLowerCase()
             .trim()
@@ -64,7 +81,7 @@ const phaseService = {
                 startDate: data.startDate,
                 paymentDeadline: data.paymentDeadline,
                 sequenceOrder: calculatedOrder,
-                status: "PAYMENT_PENDING",
+                status: "PLANNING",
                 slug: currentSlug,
                 slugBase: slugBase,
                 slugIndex: nextIndex,
@@ -512,6 +529,8 @@ const phaseService = {
             paymentDeadline?: Date | undefined;
         },
     ) {
+        await ensureProjectActive(projectId);
+
         const phase = await prisma.phase.findUnique({
             where: {
                 slug_projectId: {
@@ -569,6 +588,8 @@ const phaseService = {
     },
 
     async deletePhase(projectId: string, phaseId: string) {
+        await ensureProjectActive(projectId);
+
         const phase = await prisma.phase.findUnique({
             where: {
                 id: phaseId,
@@ -592,6 +613,8 @@ const phaseService = {
     },
 
     async requestPayment(projectId: string, phaseId: string) {
+        await ensureProjectActive(projectId);
+
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
         });
@@ -610,6 +633,8 @@ const phaseService = {
     },
 
     async approvePayment(projectId: string, phaseId: string) {
+        await ensureProjectActive(projectId);
+
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
             include: { project: { include: { organization: true } } }, // <-- Need slugs for actionUrl
@@ -645,6 +670,8 @@ const phaseService = {
     },
 
     async completePhase(projectId: string, phaseId: string) {
+        await ensureProjectActive(projectId);
+
         const phase = await prisma.phase.findUnique({
             where: { id: phaseId, projectId },
             include: { project: { include: { organization: true } } }, // <-- Need slugs for actionUrl

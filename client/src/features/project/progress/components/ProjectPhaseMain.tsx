@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import SiteLogCard from "./SiteLogCard";
 import ProjectPhaseSkeleton from "./ProjectPhaseSkeleton.tsx";
 import { useMembership } from "@/hooks/useMembership.ts";
+import { useProjectDetails } from "../../details/hooks/useProjectDetails.ts";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -24,17 +25,20 @@ const ProjectPhaseMain = () => {
         phaseSlug: string;
     }>();
 
+        
+    const { data: project, isLoading: isProjectLoading } = useProjectDetails(orgSlug, projectSlug);
+    
     const {
         data: phase,
         isLoading,
         isError,
     } = usePhaseDetails(orgSlug, projectSlug, phaseSlug);
 
-    if (isLoading || isMembershipLoading) {
+    if (isLoading || isProjectLoading || isMembershipLoading) {
         return <ProjectPhaseSkeleton />;
     }
 
-    if (isError || !phase) {
+    if (isError || !project || !phase) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2">
                 <AlertCircle className="w-8 h-8 text-stone-400" />
@@ -50,7 +54,7 @@ const ProjectPhaseMain = () => {
         new Date(phase.startDate),
         "MMMM dd, yyyy",
     );
-
+    const isProjectActive = project.status === "ACTIVE";
     return (
         <main className="max-w-4xl mx-auto px-8 pb-32 pt-8">
             <section className="mb-8">
@@ -67,8 +71,9 @@ const ProjectPhaseMain = () => {
                         </span>
                     </div>
                     <div>
-                        {(membership?.role === "ADMIN" ||
-                            membership?.role === "ENGINEER") && (
+                        {((membership?.role === "ADMIN" ||
+                            membership?.role === "ENGINEER") && isProjectActive
+                            ) && (
                             <Button
                                 variant={"ghost"}
                                 onClick={() => navigate(`update-phase`)}
@@ -121,8 +126,9 @@ const ProjectPhaseMain = () => {
                         Updates:
                     </div>
 
-                    {(phase.status === "ACTIVE" && (membership?.role === "ADMIN" || membership?.role === "ENGINEER")) && (
-                        <>
+                    {phase.status === "ACTIVE" &&
+                        ((membership?.role === "ADMIN" ||
+                            membership?.role === "ENGINEER") && isProjectActive) && (
                             <Button
                                 variant={"ghost"}
                                 onClick={() => navigate(`create-log`)}
@@ -131,8 +137,7 @@ const ProjectPhaseMain = () => {
                                 <Plus className="w-4 h-4" />
                                 Add Update
                             </Button>
-                        </>
-                    )}
+                        )}
                 </div>
             </section>
             <div className="space-y-24 relative min-h-[400px] ">

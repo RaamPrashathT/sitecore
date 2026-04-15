@@ -13,7 +13,9 @@ export interface DashboardItemSchema {
     standardRate: number | undefined;
     projectid: string;
     projectName: string;
+    projectBudget: number;
     phaseName: string;
+    phaseBudget: number;
     phaseStartDate: string;
     inventory: string;
 }

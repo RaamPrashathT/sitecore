@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import type { PhaseWithRequisitions } from "../../hooks/useProjectRequisitions";
+import { useProjectDetails } from "@/features/project/details/hooks/useProjectDetails";
 
 interface PhaseRequisitionsSectionProps {
     phase: PhaseWithRequisitions;
@@ -16,6 +17,8 @@ export default function PhaseRequisitionsSection({
     orgSlug,
     projectSlug,
 }: PhaseRequisitionsSectionProps) {
+    
+    const { data: project, isLoading } = useProjectDetails(orgSlug, projectSlug);
     const formattedIndex = String(index + 1).padStart(2, "0");
     const isCompleted = phase.status === "COMPLETED";
 
@@ -45,6 +48,10 @@ export default function PhaseRequisitionsSection({
         }
     };
 
+    if (isLoading || !project) {
+        return 
+    }
+    const isProjectActive = project.status === "ACTIVE";
     return (
         <section
             className={`first:mt-0 mt-12  group ${
@@ -115,7 +122,7 @@ export default function PhaseRequisitionsSection({
                 )}
             </div>
 
-            {!isCompleted && (
+            {(!isCompleted && isProjectActive )&& (
                 <div className="mt-3 flex justify-start">
                     <Link
                         to={`/${orgSlug}/${projectSlug}/requisitions/${phase.slug}/new`}

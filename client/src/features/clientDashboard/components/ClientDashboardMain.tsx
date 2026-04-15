@@ -4,64 +4,92 @@ import ClientPayments from "./ClientPayments";
 import ClientProjects from "./ClientProjects";
 import ClientActivity from "./ClientActivity";
 
-const ClientDashboardMain = () => {
-    const { data: dashboardData, isLoading: dashboardLoading } = useGetClientDashboardItems();
-
-    const isInitialLoading = dashboardLoading;
-
-    if (isInitialLoading) {
-        return (
-            <div className="min-h-screen bg-[#f8f9fa] font-sans">
-                <div className="max-w-7xl mx-auto px-4 py-8">
-                    <div className="mb-8 space-y-2">
-                        <Skeleton className="h-10 w-64 rounded-sm" />
-                        <Skeleton className="h-4 w-96 rounded-sm" />
-                    </div>
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="flex-1 space-y-8">
-                            <Skeleton className="h-48 w-full rounded-sm" />
-                            <Skeleton className="h-64 w-full rounded-sm" />
-                        </div>
-                        <div className="w-full lg:w-1/4">
-                            <Skeleton className="h-96 w-full rounded-sm" />
-                        </div>
+const ClientDashboardSkeleton = () => (
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+            <Skeleton className="h-3 w-32 mb-2" />
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-3.5 w-40 mt-2" />
+        </div>
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <div className="flex-1 space-y-8">
+                {/* Payments */}
+                <div>
+                    <Skeleton className="h-3 w-20 mb-2" />
+                    <Skeleton className="h-6 w-36 mb-4" />
+                    <div className="flex flex-col gap-3">
+                        <Skeleton className="h-36 w-full rounded-2xl" />
+                        <Skeleton className="h-36 w-full rounded-2xl" />
                     </div>
                 </div>
+                {/* Activity */}
+                <div>
+                    <Skeleton className="h-3 w-24 mb-2" />
+                    <Skeleton className="h-6 w-32 mb-4" />
+                    <Skeleton className="h-48 w-full rounded-2xl" />
+                </div>
             </div>
-        );
-    }
+            <div className="w-full lg:w-72 shrink-0 space-y-4">
+                <Skeleton className="h-3 w-16 mb-2" />
+                <Skeleton className="h-6 w-24 mb-4" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+            </div>
+        </div>
+    </div>
+);
+
+const ClientDashboardMain = () => {
+    const { data: dashboardData, isLoading } = useGetClientDashboardItems();
+
+    if (isLoading) return <ClientDashboardSkeleton />;
 
     if (!dashboardData) {
         return (
-            <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
-                <p className="font-mono text-xs uppercase tracking-widest text-slate-400">Ledger unavailable.</p>
+            <div className="flex items-center justify-center py-20">
+                <p className="text-sm text-slate-500">Dashboard unavailable.</p>
             </div>
         );
     }
 
+    const overdueCount = dashboardData.pendingPayments.filter(
+        (p) => p.status === "OVERDUE" || p.status === "URGENT",
+    ).length;
+
     return (
-        <div className="min-h-screen bg-[#f8f9fa] text-slate-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
-            <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 pb-12 pt-6">
 
-                {/* Editorial Header */}
-                <header className=" pb-4">
-                    <h1 className="font-serif text-3xl md:text-4xl text-slate-900 mb-1.5 leading-none tracking-tight">
-                        Dashboard
-                    </h1>
-                </header>
+            {/* ── Page Header ─────────────────────────────────────────── */}
+            <div className="mb-8">
+                <p className="text-[11px] uppercase tracking-widest text-slate-400 font-mono mb-1.5">
+                    Client · Overview
+                </p>
+                <h1 className="text-[28px] font-bold text-slate-900 tracking-tight font-display leading-none">
+                    My Dashboard
+                </h1>
+                {overdueCount > 0 && (
+                    <p className="text-[13px] text-slate-500 mt-1.5">
+                        <span className="text-red-600 font-semibold">{overdueCount} payment{overdueCount === 1 ? "" : "s"}</span>
+                        {" "}need{overdueCount === 1 ? "s" : ""} immediate attention
+                    </p>
+                )}
+            </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
-                    {/* Left Column - Primary List */}
-                    <div className="w-full lg:w-3/4 flex flex-col gap-8 min-w-0">
-                        <ClientPayments payments={dashboardData.pendingPayments} />
-                        <ClientActivity projects={dashboardData.projects} />
-                    </div>
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-                    {/* Right Column - Static Sidebar */}
-                    <aside className="w-full lg:w-1/4 shrink-0 lg:sticky lg:top-20">
-                        <ClientProjects projects={dashboardData.projects} />
-                    </aside>
+                {/* ── Left: Main content ──────────────────────────────── */}
+                <div className="flex-1 min-w-0 flex flex-col gap-10">
+                    <ClientPayments payments={dashboardData.pendingPayments} />
+                    <ClientActivity projects={dashboardData.projects} />
                 </div>
+
+                {/* ── Right: Sidebar ──────────────────────────────────── */}
+                <aside className="w-full lg:w-72 shrink-0 lg:sticky lg:top-6">
+                    <ClientProjects projects={dashboardData.projects} />
+                </aside>
+
             </div>
         </div>
     );

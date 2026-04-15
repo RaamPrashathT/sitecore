@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import PhaseCard from "./PhaseCard";
 import ProjectProgressSkeleton from "./ProjectProgressSkeleton";
 import { useMembership } from "@/hooks/useMembership";
+import { useProjectDetails } from "@/features/project/details/hooks/useProjectDetails";
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -21,6 +22,7 @@ const ProjectProgressMain = () => {
         orgSlug: string;
         projectSlug: string;
     }>();
+    const { data: projectDetails } = useProjectDetails(orgSlug, projectSlug);
 
     const { data, isLoading, isError } = useProjectProgress(
         orgSlug,
@@ -46,6 +48,7 @@ const ProjectProgressMain = () => {
     }
 
     const { project, phases } = data;
+    const isProjectActive = projectDetails?.status === "ACTIVE";
 
     const formattedActivePhases =
         project.activePhasesCount < 10
@@ -78,7 +81,7 @@ const ProjectProgressMain = () => {
                             </p>
                         </div>
                     </div>
-                    {(membership?.role === "ADMIN" ||
+                    {isProjectActive && (membership?.role === "ADMIN" ||
                         membership?.role === "ENGINEER") && (
                         <Button
                             variant={"ghost"}
@@ -96,7 +99,7 @@ const ProjectProgressMain = () => {
                 <div className="absolute left-[11px] top-0 bottom-0 w-px bg-stone-300 opacity-50"></div>
 
                 {phases.map((phase) => (
-                    <PhaseCard key={phase.id} phase={phase} />
+                    <PhaseCard key={phase.id} phase={phase} isProjectActive={isProjectActive} />
                 ))}
             </div>
         </main>

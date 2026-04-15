@@ -3,8 +3,6 @@ import {
     UserRoundCheck,
     ScrollText,
     Users,
-    ClipboardClock,
-    ClipboardPlus,
     Mail,
     ChartArea,
     Bell,
@@ -108,8 +106,6 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
             },
             {
                 Pending: [
-                    { title: "Payments", url: "/pending-payments", icon: ClipboardClock },
-                    { title: "Requests", url: "/pending-requisitions", icon: ClipboardPlus },
                     { title: "Invitations", url: "/pending-invitations", icon: Mail },
                 ],
             }
@@ -164,7 +160,6 @@ const OrgSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                         <SidebarMenu className="flex flex-col gap-0.5">
                         {[
                             { title: "Notifications", url: `/${orgSlug}/notifications`, icon: Bell },
-                            { title: "Settings", url: `/${orgSlug}/settings`, icon: Settings },
                         ].map((item) => {
                             const isActive = location.pathname === item.url;
 

@@ -6,17 +6,40 @@ import crypto from "node:crypto";
 import { sendInviteEmail } from "../../../shared/lib/emails/sendClientInvitation.js"; // Adjust path if needed
 import { ValidationError } from "../../../shared/error/validation.error.js";
 
+async function ensureProjectActive(projectId: string) {
+    const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { status: true },
+    });
+
+    if (!project) {
+        throw new ValidationError("Project not found");
+    }
+
+    if (project.status !== "ACTIVE") {
+        throw new ValidationError("Project must be ACTIVE to make changes.");
+    }
+}
+
 const coreService = {
     async createProject({
         organizationId,
         projectName,
         address,
         estimatedBudget,
+        phases,
     }: {
         readonly organizationId: string;
         readonly projectName: string;
         readonly address: string;
         readonly estimatedBudget: number;
+        readonly phases: Array<{
+            name: string;
+            description?: string | undefined;
+            budget: number;
+            startDate: Date;
+            paymentDeadline: Date;
+        }>;
     }) {
         const slugBase = slugify(projectName);
         const lastProject = await prisma.project.findFirst({
@@ -27,17 +50,51 @@ const coreService = {
         const nextIndex = lastProject ? lastProject.slugIndex + 1 : 1;
         const slug = nextIndex === 1 ? slugBase : `${slugBase}-${nextIndex}`;
 
-        const result = await prisma.project.create({
-            data: {
-                name: projectName,
-                slug,
-                slugBase,
-                slugIndex: nextIndex,
-                organizationId: organizationId,
-                address,
-                estimatedBudget,
-                status: "ACTIVE",
-            },
+        const result = await prisma.$transaction(async (tx) => {
+            const project = await tx.project.create({
+                data: {
+                    name: projectName,
+                    slug,
+                    slugBase,
+                    slugIndex: nextIndex,
+                    organizationId: organizationId,
+                    address,
+                    estimatedBudget,
+                    status: "ACTIVE",
+                },
+            });
+
+            if (phases.length > 0) {
+                const phaseSlugCountMap = new Map<string, number>();
+
+                await tx.phase.createMany({
+                    data: phases.map((phase, index) => {
+                        const phaseSlugBase = slugify(phase.name);
+                        const currentCount = phaseSlugCountMap.get(phaseSlugBase) || 0;
+                        const slugIndex = currentCount + 1;
+                        phaseSlugCountMap.set(phaseSlugBase, slugIndex);
+
+                        return {
+                            projectId: project.id,
+                            name: phase.name,
+                            description: phase.description || null,
+                            budget: phase.budget,
+                            startDate: phase.startDate,
+                            paymentDeadline: phase.paymentDeadline,
+                            sequenceOrder: index + 1,
+                            status: "PLANNING" as const,
+                            slugBase: phaseSlugBase,
+                            slugIndex,
+                            slug:
+                                slugIndex === 1
+                                    ? phaseSlugBase
+                                    : `${phaseSlugBase}-${slugIndex}`,
+                        };
+                    }),
+                });
+            }
+
+            return project;
         });
 
         return { id: result.id, name: result.name, slug: result.slug };
@@ -126,7 +183,6 @@ const coreService = {
                         name: true,
                         status: true,
                         budget: true,
-                        // NEW: Fetch all ordered items to calculate actual consumed budget
                         requisitions: {
                             select: {
                                 items: {
@@ -149,7 +205,6 @@ const coreService = {
 
         if (!project) throw new Error("Project not found");
 
-        // Fetch recent site logs across all phases of this project
         const recentLogs = await prisma.siteLog.findMany({
             where: { phase: { projectId: projectId } },
             orderBy: { workDate: "desc" },
@@ -157,7 +212,6 @@ const coreService = {
             include: { author: { select: { userId: true } } },
         });
 
-        // Fetch authors for the logs
         const authorUserIds = [
             ...new Set(recentLogs.map((log) => log.author.userId)),
         ];
@@ -170,12 +224,11 @@ const coreService = {
             return {
                 id: log.id,
                 title: log.title,
-                workDate: log.workDate as any, // Will serialize to ISO string
+                workDate: log.workDate as any, 
                 authorName: author ? author.username : "Unknown",
             };
         });
 
-        // NEW: Calculate Consumed Budget from ORDERED items
         let consumedBudget = 0;
         project.phases.forEach((phase) => {
             phase.requisitions.forEach((req) => {
@@ -211,6 +264,7 @@ const coreService = {
     },
 
     async updateProject(projectId: string, data: any) {
+
         const project = await prisma.project.update({
             where: { id: projectId },
             data: {
@@ -225,7 +279,6 @@ const coreService = {
     },
 
     async getMembers(projectId: string, organizationId: string) {
-        // Find all admins for the organization + all direct assignments for the project
         const [adminMembers, projectAssignments] = await Promise.all([
             prisma.membership.findMany({
                 where: { organizationId, role: "ADMIN" },
@@ -288,6 +341,8 @@ const coreService = {
         userId: string,
         role: "ENGINEER" | "CLIENT",
     ) {
+        await ensureProjectActive(projectId);
+
         const orgMember = await prisma.membership.findUnique({
             where: {
                 userId_organizationId: {
@@ -322,6 +377,8 @@ const coreService = {
     },
 
     async removeMember(projectId: string, userId: string) {
+        await ensureProjectActive(projectId);
+
         await prisma.assignment
             .delete({
                 where: {
@@ -342,6 +399,8 @@ const coreService = {
         email: string,
         role: "ENGINEER" | "CLIENT",
     ) {
+        await ensureProjectActive(projectId);
+
         const existingInvite = await prisma.invitation.findFirst({
             where: {
                 email: email,

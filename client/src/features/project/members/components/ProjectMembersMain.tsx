@@ -6,6 +6,7 @@ import MembersFilterBar from "./ProjectMembersFilter";
 import MembersList from "./ProjectsMembersList";
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
+import { useProjectDetails } from "../../details/hooks/useProjectDetails";
 
 export type FilterType = "ALL" | "CLIENT" | "ENGINEER" | "ADMIN";
 
@@ -25,6 +26,8 @@ export const ProjectMembersMain = () => {
         orgSlug: string;
         projectSlug: string;
     }>();
+    
+    const { data: project, isLoading: detailLoading } = useProjectDetails(orgSlug, projectSlug);
     const navigate = useNavigate();
     const { data, isLoading, isError } = useProjectMembers(
         orgSlug,
@@ -76,7 +79,7 @@ export const ProjectMembersMain = () => {
         });
     }, [allMembers, activeFilter, searchQuery]);
 
-    if (isLoading || membershipLoading) {
+    if (isLoading || membershipLoading || detailLoading) {
         return (
             <div className="flex justify-center items-center py-16">
                 <Loader2 className="h-8 w-8 animate-spin text-[#006d30]" />
@@ -84,13 +87,15 @@ export const ProjectMembersMain = () => {
         );
     }
 
-    if (isError) {
+    if (isError || !project) {
         return (
             <div className="text-red-500 py-8 text-center">
                 Failed to load project members.
             </div>
         );
     }
+
+    const isProjectActive = project.status === "ACTIVE";
 
     return (
         <div className="bg-[#f8f9fa] min-h-screen font-sans text-[#2b3437]">
@@ -103,7 +108,7 @@ export const ProjectMembersMain = () => {
                             </h1>
                         </div>
                         <div className="flex flex-col items-end gap-4">
-                            {(membership?.role === "ADMIN" || membership?.role === "ENGINEER")&& (
+                            {((membership?.role === "ADMIN" || membership?.role === "ENGINEER") && isProjectActive)&& (
                                 <Button onClick={() => navigate("invite")}>
                                     <UserPlus className="h-4 w-4" />
                                     Invite New Member

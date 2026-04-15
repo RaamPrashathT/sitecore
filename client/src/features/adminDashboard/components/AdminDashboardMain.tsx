@@ -16,7 +16,6 @@ import { useDebounce } from "@/hooks/useDebounce";
 const AdminDashboardMain = () => {
     const [globalFilter, setGlobalFilter] = useState<string>("");
     const debouncedSearch = useDebounce(globalFilter, 200);
-
     const [rowSelection, setRowSelection] = useState({});
 
     const { data: membership, isLoading: membershipLoading } = useMembership();
@@ -30,30 +29,47 @@ const AdminDashboardMain = () => {
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         onGlobalFilterChange: setGlobalFilter,
-        manualFiltering: true, // Backend handles filtering
+        manualFiltering: true,
         onRowSelectionChange: setRowSelection,
         getRowId: (row) => row.id,
-        state: {
-            globalFilter,
-            rowSelection,
-        },
+        state: { globalFilter, rowSelection },
     });
 
     const isInitialLoading =
         membershipLoading || (dashboardItemsLoading && !dashboardItems);
 
     if (isInitialLoading) return <AdminDashboardSkeleton />;
-    if (!membership || !dashboardItems) return <div>No access</div>;
+    if (membership == null || dashboardItems == null) return <div>No access</div>;
+
+    const totalItems = dashboardItems.data.length;
+    const urgentCount = dashboardItems.data.filter((i) => i.daysTillOrder <= 3).length;
 
     return (
         <section className="col-span-12 lg:col-span-8 flex flex-col gap-6 px-4 lg:px-0">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                <h2 className="text-4xl font-bold text-foreground tracking-tight font-display">
-                    Materials to Fulfill
-                </h2>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-2">
+                <div>
+                    <p className="text-[11px] uppercase tracking-widest text-slate-400 font-mono mb-1.5">
+                        Procurement · Admin
+                    </p>
+                    <h2 className="text-[28px] font-bold text-slate-900 tracking-tight font-display leading-none">
+                        Materials to Fulfill
+                    </h2>
+                    {totalItems > 0 && (
+                        <p className="text-[13px] text-slate-500 mt-1.5">
+                            {totalItems} item{totalItems !== 1 ? "s" : ""} pending
+                            {urgentCount > 0 && (
+                                <span className="ml-2 text-red-500 font-semibold">
+                                    · {urgentCount} urgent
+                                </span>
+                            )}
+                        </p>
+                    )}
+                </div>
                 <SearchTableControl table={table} />
             </div>
 
+            {/* Table */}
             <div className="flex-1 w-full min-h-0">
                 <AdminDashboardDataTable table={table} />
             </div>

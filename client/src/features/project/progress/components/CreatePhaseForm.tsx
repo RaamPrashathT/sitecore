@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useCreatePhase } from "../hooks/usePhase";
+import { useProjectDetails } from "@/features/project/details/hooks/useProjectDetails";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export default function CreatePhaseForm() {
     const { orgSlug, projectSlug } = useParams<{ orgSlug: string; projectSlug: string }>();
     const navigate = useNavigate();
     const { mutate: createPhase, isPending } = useCreatePhase(orgSlug!, projectSlug!);
+    const { data: project, isLoading: isProjectLoading } = useProjectDetails(orgSlug, projectSlug);
+    const isProjectActive = project?.status === "ACTIVE";
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
         resolver: zodResolver(createPhaseSchema),
@@ -45,6 +48,27 @@ export default function CreatePhaseForm() {
             onSuccess: () => navigate(`/${orgSlug}/${projectSlug}/progress`)
         });
     };
+
+    if (isProjectLoading) {
+        return (
+            <div className="min-h-screen bg-stone-50 flex items-center justify-center font-sans text-stone-500">
+                Loading project state...
+            </div>
+        );
+    }
+
+    if (project && !isProjectActive) {
+        return (
+            <div className="min-h-screen bg-stone-50 p-6 font-sans">
+                <div className="max-w-3xl mx-auto rounded-lg border border-amber-200 bg-amber-50 p-6 text-amber-900">
+                    <h1 className="text-2xl font-semibold">Project is not active</h1>
+                    <p className="mt-2 text-sm text-amber-800">
+                        Phase creation is locked until the project becomes ACTIVE.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`min-h-screen bg-stone-50 ${GRID.p} font-sans`}>

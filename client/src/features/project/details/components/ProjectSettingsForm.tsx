@@ -105,6 +105,7 @@ export default function ProjectSettingsForm() {
         );
     }
 
+
     return (
         <div className={`max-w-3xl mx-auto ${GRID.p} font-sans`}>
             
@@ -197,10 +198,8 @@ export default function ProjectSettingsForm() {
                                             <SelectValue placeholder="Select a status" />
                                         </SelectTrigger>
                                         <SelectContent className={`${GRID.radius}`}>
-                                            <SelectItem value="DRAFT">Draft</SelectItem>
                                             <SelectItem value="ACTIVE">Active</SelectItem>
                                             <SelectItem value="COMPLETED">Completed</SelectItem>
-                                            <SelectItem value="ARCHIVED">Archived</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 )}

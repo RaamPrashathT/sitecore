@@ -158,7 +158,7 @@ const EditCatalogueForm = ({
         <div className="flex items-center justify-center px-4 py-2 font-sans">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-4xl rounded-xl border border-border/70 bg-background p-6 md:p-8"
+                className="w-full max-w-4xl bg-background p-6 md:p-8"
             >
                 <h1 className="mb-8 border-b border-border/70 pb-4 font-display text-3xl font-normal tracking-wide text-foreground">
                     Edit Catalogue Item:

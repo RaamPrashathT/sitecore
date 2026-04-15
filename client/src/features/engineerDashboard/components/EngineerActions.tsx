@@ -2,111 +2,182 @@ import { Link } from "react-router-dom";
 import type { ActionablePhase, RecentRequisition } from "../hooks/useEngineerDashboardItem";
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
-import { AlertCircle, Clock, CheckCircle2, XCircle } from "lucide-react";
+import {
+    AlertTriangle,
+    Clock,
+    CheckCircle2,
+    XCircle,
+    FileText,
+    CalendarClock,
+} from "lucide-react";
 
 interface EngineerActionsProps {
     actionablePhases: ActionablePhase[];
     recentRequisitions: RecentRequisition[];
 }
 
+const RequisitionStatusIcon = ({ status }: { status: string }) => {
+    if (status === "REJECTED") return <XCircle className="w-3.5 h-3.5" />;
+    if (status === "PENDING_APPROVAL") return <Clock className="w-3.5 h-3.5" />;
+    if (status === "APPROVED") return <CheckCircle2 className="w-3.5 h-3.5" />;
+    return <FileText className="w-3.5 h-3.5" />;
+};
+
+const requisitionBadge = (status: string) => {
+    if (status === "REJECTED")
+        return "bg-red-50 text-red-600 ring-1 ring-red-200";
+    if (status === "PENDING_APPROVAL")
+        return "bg-amber-50 text-amber-600 ring-1 ring-amber-200";
+    if (status === "APPROVED")
+        return "bg-green-50 text-green-700 ring-1 ring-green-200";
+    return "bg-slate-100 text-slate-500 ring-1 ring-slate-200";
+};
+
+const requisitionCard = (status: string) => {
+    if (status === "REJECTED")
+        return "ring-1 ring-red-200 bg-white shadow-sm shadow-red-100/60";
+    if (status === "PENDING_APPROVAL")
+        return "ring-1 ring-amber-200 bg-white shadow-sm shadow-amber-100/40";
+    if (status === "APPROVED")
+        return "ring-1 ring-green-200 bg-white shadow-sm shadow-green-100/40";
+    return "ring-1 ring-slate-200/80 bg-white shadow-sm";
+};
+
+const formatStatus = (status: string) =>
+    status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
 const EngineerActions = ({ actionablePhases, recentRequisitions }: EngineerActionsProps) => {
     const { data: membership } = useMembership();
 
     return (
         <div className="space-y-10">
-            {/* ALERT SECTION: Actionable Phases */}
-            <section className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold tracking-tight text-foreground">Action Required</h2>
-                    <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest bg-muted px-2 py-1 rounded">
-                        {actionablePhases.length} Tasks
-                    </span>
+
+            {/* ── Action Required ─────────────────────────────────────── */}
+            <section>
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <p className="text-[11px] uppercase tracking-widest text-slate-400 font-mono mb-1">
+                            Needs Attention
+                        </p>
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
+                            Action Required
+                        </h2>
+                    </div>
+                    {actionablePhases.length > 0 && (
+                        <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold font-mono">
+                            {actionablePhases.length}
+                        </span>
+                    )}
                 </div>
-                
-                <div className="space-y-4">
+
+                <div className="flex flex-col gap-3">
                     {actionablePhases.length === 0 ? (
-                        <div className="bg-card p-6 rounded-xl border border-border text-center text-muted-foreground text-sm">
-                            All active phases have drafted requisitions.
+                        <div className="flex flex-col items-center justify-center py-8 rounded-2xl bg-slate-50 ring-1 ring-slate-200/80">
+                            <div className="w-10 h-10 rounded-2xl bg-white ring-1 ring-slate-200 flex items-center justify-center mb-3 shadow-sm">
+                                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                            </div>
+                            <p className="text-sm font-semibold text-slate-700">All phases covered</p>
+                            <p className="text-xs text-slate-400 mt-1">Every active phase has a requisition</p>
                         </div>
                     ) : (
                         actionablePhases.map((phase) => (
-                            <div key={phase.phaseId} className="p-6 rounded-xl border-2 border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all hover:border-amber-500/60">
-                                <div className="space-y-1.5 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 flex items-center gap-1">
-                                            <AlertCircle className="w-3 h-3" /> Needs Materials
+                            <div
+                                key={phase.phaseId}
+                                className="rounded-2xl ring-1 ring-amber-200 bg-white shadow-sm shadow-amber-100/60 p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 ring-1 ring-amber-200 font-mono">
+                                            <AlertTriangle className="w-2.5 h-2.5" />
+                                            Needs Materials
                                         </span>
-                                        <span className="font-semibold text-foreground truncate">{phase.phaseName}</span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground truncate">
-                                        {phase.projectName} • Phase is active but no requisition has been created.
+                                    <p className="font-bold text-[15px] text-slate-900 truncate leading-tight">
+                                        {phase.phaseName}
+                                    </p>
+                                    <p className="text-[12px] text-slate-500 mt-0.5 truncate">
+                                        <span className="font-medium text-slate-700">{phase.projectName}</span>
+                                        <span className="mx-1.5 text-slate-300">·</span>
+                                        No requisition drafted yet
                                     </p>
                                 </div>
-                                <div className="text-right shrink-0">
-                                    <Link to={`/${membership?.slug}/${phase.projectSlug}/requisitions/${phase.phaseSlug}/new`}>
-                                        <Button className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm">
-                                            Draft Requisition
-                                        </Button>
-                                    </Link>
-                                </div>
+                                <Link
+                                    to={`/${membership?.slug}/${phase.projectSlug}/requisitions/${phase.phaseSlug}/new`}
+                                    className="shrink-0"
+                                >
+                                    <Button
+                                        size="sm"
+                                        className="h-9 text-xs font-semibold px-4 bg-amber-600 hover:bg-amber-700 text-white shadow-sm shadow-amber-200 transition-all duration-150 w-full sm:w-auto"
+                                    >
+                                        <FileText className="w-3.5 h-3.5 mr-1.5" />
+                                        Draft Requisition
+                                    </Button>
+                                </Link>
                             </div>
                         ))
                     )}
                 </div>
             </section>
 
-            {/* TRACKER SECTION: Recent Material Orders */}
-            <section className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold tracking-tight text-foreground">Material Request Status</h2>
+            {/* ── Material Request Status ──────────────────────────────── */}
+            <section>
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <p className="text-[11px] uppercase tracking-widest text-slate-400 font-mono mb-1">
+                            Procurement
+                        </p>
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
+                            Material Requests
+                        </h2>
+                    </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex flex-col gap-3">
                     {recentRequisitions.length === 0 ? (
-                        <div className="bg-card p-6 rounded-xl border border-border text-center text-muted-foreground text-sm">
-                            No recent material requests submitted.
+                        <div className="flex flex-col items-center justify-center py-8 rounded-2xl bg-slate-50 ring-1 ring-slate-200/80">
+                            <div className="w-10 h-10 rounded-2xl bg-white ring-1 ring-slate-200 flex items-center justify-center mb-3 shadow-sm">
+                                <FileText className="w-5 h-5 text-slate-400" />
+                            </div>
+                            <p className="text-sm font-semibold text-slate-700">No requests yet</p>
+                            <p className="text-xs text-slate-400 mt-1">Submitted requisitions will appear here</p>
                         </div>
                     ) : (
-                        recentRequisitions.map((req) => {
-                            const isRejected = req.status === "REJECTED";
-                            const isPending = req.status === "PENDING_APPROVAL";
-
-                            const cardStyle = isRejected 
-                                ? "border-destructive/30 bg-destructive/5" 
-                                : isPending 
-                                    ? "border-amber-500/20 bg-card" 
-                                    : "border-green-500/30 bg-green-500/5";
-
-                            const badgeStyle = isRejected 
-                                ? "bg-destructive/10 text-destructive border-destructive/20" 
-                                : isPending 
-                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
-                                    : "bg-green-500/10 text-green-700 border-green-500/20";
-
-                            const Icon = isRejected ? XCircle : isPending ? Clock : CheckCircle2;
-
-                            return (
-                                <div key={req.id} className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all ${cardStyle}`}>
-                                    <div className="space-y-1.5 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1 ${badgeStyle}`}>
-                                                <Icon className="w-3 h-3" /> {req.status.replace("_", " ")}
-                                            </span>
-                                            <span className="font-semibold text-foreground truncate">{req.title}</span>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            {req.projectName} • {req.phaseName}
-                                        </p>
+                        recentRequisitions.map((req) => (
+                            <div
+                                key={req.id}
+                                className={`rounded-2xl ${requisitionCard(req.status)} p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md`}
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full font-mono ${requisitionBadge(req.status)}`}>
+                                            <RequisitionStatusIcon status={req.status} />
+                                            {formatStatus(req.status)}
+                                        </span>
                                     </div>
-                                    <div className="text-left sm:text-right shrink-0">
-                                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Submitted</p>
-                                        <p className="font-mono text-sm font-medium text-foreground">
-                                            {new Date(req.createdAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
+                                    <p className="font-bold text-[15px] text-slate-900 truncate leading-tight">
+                                        {req.title}
+                                    </p>
+                                    <p className="text-[12px] text-slate-500 mt-0.5 truncate">
+                                        <span className="font-medium text-slate-700">{req.projectName}</span>
+                                        <span className="mx-1.5 text-slate-300">·</span>
+                                        {req.phaseName}
+                                    </p>
                                 </div>
-                            );
-                        })
+                                <div className="shrink-0 text-left sm:text-right">
+                                    <p className="text-[9px] uppercase tracking-widest text-slate-400 font-semibold mb-0.5 flex items-center gap-1 sm:justify-end">
+                                        <CalendarClock className="w-3 h-3" />
+                                        Submitted
+                                    </p>
+                                    <p className="font-mono text-sm font-semibold text-slate-700">
+                                        {new Date(req.createdAt).toLocaleDateString(undefined, {
+                                            month: "short",
+                                            day: "numeric",
+                                            year: "numeric",
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
                     )}
                 </div>
             </section>

@@ -1,13 +1,14 @@
 import { format } from "date-fns";
 import type { PhaseProgress } from "../hooks/useProjectProgress";
 import { Check, ArrowRight, FileText, MessageSquare, Plus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
 import { Spinner } from "@/components/ui/spinner";
 
 interface PhaseCardProps {
     phase: PhaseProgress;
+    isProjectActive: boolean;
 }
 
 const formatCurrency = (amount: number) =>
@@ -65,9 +66,13 @@ const getPhaseStyling = (status: string) => {
     }
 };
 
-const PhaseCard = ({ phase }: PhaseCardProps) => {
+const PhaseCard = ({ phase, isProjectActive }: PhaseCardProps) => {
     const {data: membership, isLoading: membershipLoading} = useMembership()
     const navigate = useNavigate();
+    const { orgSlug, projectSlug } = useParams<{
+        orgSlug: string;
+        projectSlug: string;
+    }>();
     const styles = getPhaseStyling(phase.status);
     const formattedSequence = String(phase.sequenceOrder).padStart(2, "0");
 
@@ -138,6 +143,23 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                                 Phase scheduled to begin upon completion of
                                 prior requirements.
                             </p>
+                            {isProjectActive && phase.status === "PLANNING" &&
+                                (membership?.role === "ADMIN" ||
+                                    membership?.role === "ENGINEER") &&
+                                orgSlug &&
+                                projectSlug && (
+                                    <Button
+                                        type="button"
+                                        onClick={() =>
+                                            navigate(
+                                                `/${orgSlug}/${projectSlug}/requisitions/${phase.slug}/new`,
+                                            )
+                                        }
+                                        className="mt-4 bg-green-700 text-white hover:bg-green-800 text-xs font-semibold uppercase tracking-wider px-5"
+                                    >
+                                        Add Requisition
+                                    </Button>
+                                )}
                         </div>
                     ) : (
                         /* Active/Completed State with Logs */
@@ -157,7 +179,7 @@ const PhaseCard = ({ phase }: PhaseCardProps) => {
                                 <h3 className="font-sans text-xs uppercase tracking-widest text-stone-500 font-bold">
                                     Latest Activity
                                 </h3>
-                                {( phase.status === "ACTIVE" && (membership?.role === "ADMIN" || membership?.role === "ENGINEER")) && (
+                                {isProjectActive && phase.status === "ACTIVE" && (membership?.role === "ADMIN" || membership?.role === "ENGINEER") && (
                                     <Button
                                         variant={"ghost"}
                                         onClick={() => navigate(`${phase.slug}/create-log`)}

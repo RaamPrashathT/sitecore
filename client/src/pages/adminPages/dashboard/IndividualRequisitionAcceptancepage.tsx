@@ -82,7 +82,7 @@ const IndividualRequisitionAcceptancePage = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6 h-full">
+        <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6 min-h-full pb-20">
             
             <div>
                 <Button 
