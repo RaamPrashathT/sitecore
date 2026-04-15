@@ -139,7 +139,7 @@ const RequisitionDetailsMain = () => {
                             <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-3 mb-1">
-                                        <h2 className="font-serif  text-2xl text-stone-900">{req.slug.toUpperCase()}</h2>
+                                        <h2 className="font-display  text-2xl text-stone-900">{req.slug.toUpperCase()}</h2>
                                         <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-bold ${
                                             req.status === "APPROVED" ? "bg-emerald-100 text-emerald-800" :
                                             req.status === "REJECTED" ? "bg-red-100 text-red-800" :
@@ -153,7 +153,7 @@ const RequisitionDetailsMain = () => {
                                 </div>
                                 <div className="md:text-right">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-0.5">Total Cost</p>
-                                    <p className="font-serif text-xl text-emerald-800 font-bold tracking-tight">₹{req.budget.toLocaleString("en-IN")}</p>
+                                    <p className="font-display text-xl text-emerald-800 font-bold tracking-tight">₹{req.budget.toLocaleString("en-IN")}</p>
                                 </div>
                             </div>
                             

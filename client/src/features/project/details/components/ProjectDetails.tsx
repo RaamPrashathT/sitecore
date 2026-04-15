@@ -65,7 +65,7 @@ const ProjectDetails = () => {
             {/* Top Bar: Project Identity & Status */}
             <div className="flex flex-col md:flex-row md:items-start justify-between mb-8">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-4xl font-serif text-slate-900 tracking-tight">
+                    <h1 className="text-4xl  text-slate-900 tracking-tight">
                         {project.name}
                     </h1>
                     <div className="flex items-center gap-4 text-slate-400 text-sm font-mono">
@@ -92,7 +92,6 @@ const ProjectDetails = () => {
                 </div>
             </div>
 
-            {/* Financial Overview - Hero KPIs */}
             <div className={`grid grid-cols-1 md:grid-cols-3 ${GRID.gap} mb-6`}>
                 <div className={`bg-white border border-slate-200 ${GRID.p} ${GRID.radius}`}>
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Estimated Total</p>

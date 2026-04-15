@@ -103,7 +103,7 @@ export const ProjectMembersMain = () => {
                 <header className="mb-16">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
-                            <h1 className="font-serif text-4xl md:text-4xl font-light text-[#2b3437] tracking-tight">
+                            <h1 className="font-display text-4xl md:text-4xl font-light text-[#2b3437] tracking-tight">
                                 Members
                             </h1>
                         </div>

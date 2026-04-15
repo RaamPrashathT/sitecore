@@ -151,7 +151,7 @@ export default function UpdatePhaseForm() {
 
             {/* Editorial Header */}
             <header className="mb-8">
-                <h1 className="text-2xl md:text-4xl font-serif text-stone-900 tracking-tight">
+                <h1 className="text-2xl md:text-4xl font-display text-stone-900 tracking-tight">
                     Update Phase
                 </h1>
             </header>

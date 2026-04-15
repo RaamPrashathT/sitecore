@@ -62,12 +62,12 @@ export default function PhaseRequisitionsSection({
         >
             <div className="flex items-baseline justify-between mb-2 border-stone-200 pb-4">
                 <div className="flex items-center gap-6">
-                    <span className="font-serif  text-4xl text-stone-300 leading-none">
+                    <span className="font-display  text-4xl text-stone-300 leading-none">
                         {formattedIndex}
                     </span>
                     <div className="flex flex-col">
                         <div className="flex items-center gap-3">
-                            <h2 className="font-serif text-2xl font-semibold text-stone-900">
+                            <h2 className="font-display text-2xl font-semibold text-stone-900">
                                 {phase.name}
                             </h2>
                             <span

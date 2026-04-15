@@ -101,7 +101,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
                 </button>
 
                 <div className="mb-8">
-                    <h1 className="text-4xl font-serif text-stone-900 tracking-tight">Create Project</h1>
+                    <h1 className="text-4xl font-display text-stone-900 tracking-tight">Create Project</h1>
                     <p className="text-sm font-sans text-stone-500 mt-2">Establish a new construction site and financial baseline.</p>
                 </div>
 

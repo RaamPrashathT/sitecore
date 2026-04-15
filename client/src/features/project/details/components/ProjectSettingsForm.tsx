@@ -120,7 +120,7 @@ export default function ProjectSettingsForm() {
 
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-4xl font-serif text-slate-900 tracking-tight">
+                <h1 className="text-4xl font-display text-slate-900 tracking-tight">
                     Project Settings
                 </h1>
                 <p className="text-sm text-slate-500 mt-2">

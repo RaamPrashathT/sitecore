@@ -42,7 +42,7 @@ export default function ProjectRequisitionsMain() {
                 {/* Editorial Header */}
                 <header className=" py-4">
                     <div className="flex flex-col">
-                        <h1 className="font-serif text-4xl tracking-tight text-stone-900">
+                        <h1 className="font-display text-4xl tracking-tight text-stone-900">
                             Requisitions
                         </h1>
                         <p className="font-sans text-sm text-stone-500 tracking-wide mt-1">

@@ -69,7 +69,7 @@ const ProjectsMembersInvite = () => {
         return (
             <div className="w-full max-w-xl mx-auto mt-12 mb-20 p-6">
                 <div className="bg-white p-10 rounded-xl border border-[#abb3b7]/20 shadow-sm">
-                    <h1 className="font-serif text-3xl font-light text-[#2b3437] tracking-tight mb-4">
+                    <h1 className="font-display text-3xl font-light text-[#2b3437] tracking-tight mb-4">
                         Invite Member
                     </h1>
                     <p className="text-sm text-[#737c7f]">
@@ -83,7 +83,7 @@ const ProjectsMembersInvite = () => {
     return (
         <div className="w-full max-w-xl mx-auto mt-12 mb-20 p-6">
             <div className="bg-white p-10 rounded-xl border border-[#abb3b7]/20 shadow-sm">
-                <h1 className="font-serif text-3xl font-light text-[#2b3437] tracking-tight mb-8">
+                <h1 className="font-display text-3xl font-light text-[#2b3437] tracking-tight mb-8">
                     Invite Member
                 </h1>
 

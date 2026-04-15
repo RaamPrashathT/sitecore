@@ -82,7 +82,7 @@ export default function CreatePhaseForm() {
                 </button>
 
                 <div className="mb-8">
-                    <h1 className="text-3xl font-serif text-stone-900 tracking-tight">Create New Phase</h1>
+                    <h1 className="text-3xl font-display text-stone-900 tracking-tight">Create New Phase</h1>
                     <p className="text-sm font-sans text-stone-500 mt-2">Add a new milestone to the project pipeline.</p>
                 </div>
 

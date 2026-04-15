@@ -58,7 +58,7 @@ const RequisitionSelectionMain = () => {
         <div className="px-8 py-8 h-full flex flex-col bg-slate-50/30">
             <div className="mb-4 flex justify-between items-end">
                 <div>
-                    <h1 className="text-4xl font-bold font-serif text-slate-900 tracking-tight mb-2">Requisition</h1>
+                    <h1 className="text-4xl font-bold font-display text-slate-900 tracking-tight mb-2">Requisition</h1>
                 </div>
                 
                 {/* Placed Search elegantly next to the header */}

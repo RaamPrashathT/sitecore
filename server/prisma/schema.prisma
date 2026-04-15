@@ -120,6 +120,7 @@ model Catalogue {
     organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId   String
     requisitionItems RequisitionItem[]
+    inventories      Inventory[]
 
     @@unique([name, organizationId])
 }
@@ -136,8 +137,36 @@ model SupplierQuote {
     catalogue    Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
     catalogueId  String
     assignedItem RequisitionItem[]
+    inventories  Inventory[]
 
     @@unique([catalogueId, supplier])
+}
+
+model InventoryLocation {
+    id   String @id @default(uuid())
+    name String
+
+    organizationId String
+
+    inventories Inventory[]
+}
+
+model Inventory {
+    id String @id @default(uuid())
+
+    catalogueId String
+    locationId  String
+
+    supplierQuoteId String?
+
+    quantity Decimal @default(0)
+
+    catalogue     Catalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+    location      InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+    supplierQuote SupplierQuote?    @relation(fields: [supplierQuoteId], references: [id], onDelete: SetNull)
+
+    @@index([catalogueId])
+    @@index([locationId])
 }
 
 model Project {

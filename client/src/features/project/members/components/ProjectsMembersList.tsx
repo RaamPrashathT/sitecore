@@ -36,7 +36,7 @@ export default function MembersList({ members, activeFilter }: MembersListProps)
                 return (
                     <section key={type}>
                         <div className="flex items-center gap-4">
-                            <h2 className="font-serif font-medium tracking-wide text-[#2b3437]/60 uppercase text-xs">
+                            <h2 className="font-display font-medium tracking-wide text-[#2b3437]/60 uppercase text-xs">
                                 {groupLabels[type as keyof typeof groupLabels]}
                             </h2>
                             <div className="h-[1px] flex-grow bg-[#abb3b7]/20"></div>
