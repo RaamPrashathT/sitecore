@@ -68,6 +68,22 @@ enum NotificationType {
     ORGANIZATION_INVITATION_REQUEST
 }
 
+enum InventoryLocationType {
+    WAREHOUSE
+    PROJECT
+}
+
+enum InventoryMovementType {
+    RECEIPT
+    ISSUE
+    TRANSFER_IN
+    TRANSFER_OUT
+    ADJUSTMENT_ADD
+    ADJUSTMENT_SUB
+    RETURN_IN
+    RETURN_OUT
+}
+
 enum NotificationEntityType {
     REQUISITION
     PHASE
@@ -86,11 +102,14 @@ model Organization {
     updatedAt DateTime @updatedAt
     image     String?
 
-    suppliers     Supplier[]
-    notifications Notification[]
-    catalogue     Catalogue[]
-    members       Membership[]
-    projects      Project[]
+    suppliers          Supplier[]
+    notifications      Notification[]
+    catalogue          Catalogue[]
+    members            Membership[]
+    projects           Project[]
+    inventoryLocations InventoryLocation[]
+    inventoryStocks    InventoryStock[]
+    inventoryMovements InventoryMovement[]
 }
 
 model Membership {
@@ -105,6 +124,7 @@ model Membership {
     images                 Image[]
     comments               Comment[]
     notificationRecipients NotificationRecipient[]
+    inventoryMovements     InventoryMovement[]
 
     @@unique([userId, organizationId])
 }
@@ -116,10 +136,12 @@ model Catalogue {
     unit            String
     defaultLeadTime Int               @default(0)
 
-    supplierQuotes   SupplierQuote[]
-    organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    organizationId   String
-    requisitionItems RequisitionItem[]
+    supplierQuotes     SupplierQuote[]
+    organization       Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    organizationId     String
+    requisitionItems   RequisitionItem[]
+    inventoryStocks    InventoryStock[]
+    inventoryMovements InventoryMovement[]
 
     @@unique([name, organizationId])
 }
@@ -161,8 +183,9 @@ model SupplierQuote {
     assignedItem RequisitionItem[]
     history      SupplierQuoteHistory[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @updatedAt
+    inventoryMovements InventoryMovement[]
 
     @@unique([catalogueId, supplierId])
 }
@@ -182,6 +205,88 @@ model SupplierQuoteHistory {
     changedAt         DateTime @default(now())
 }
 
+model InventoryLocation {
+    id             String                @id @default(uuid())
+    organizationId String
+    name           String
+    code           String?
+    type           InventoryLocationType
+    projectId      String?
+    isActive       Boolean               @default(true)
+    createdAt      DateTime              @default(now())
+    updatedAt      DateTime              @updatedAt
+
+    organization Organization @relation(fields: [organizationId], references: [id])
+    project      Project?     @relation(fields: [projectId], references: [id])
+
+    stocks        InventoryStock[]
+    movementsFrom InventoryMovement[] @relation("InventoryMovementFrom")
+    movementsTo   InventoryMovement[] @relation("InventoryMovementTo")
+
+    @@unique([organizationId, name])
+    @@unique([organizationId, code])
+    @@index([organizationId])
+    @@index([projectId])
+}
+
+model InventoryStock {
+    id               String   @id @default(uuid())
+    organizationId   String
+    locationId       String
+    catalogueId      String
+    quantity         Decimal  @default(0) @db.Decimal(18, 3)
+    minimumQuantity  Decimal? @db.Decimal(18, 3)
+    reservedQuantity Decimal? @db.Decimal(18, 3)
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    organization Organization      @relation(fields: [organizationId], references: [id])
+    location     InventoryLocation @relation(fields: [locationId], references: [id])
+    catalogue    Catalogue         @relation(fields: [catalogueId], references: [id])
+
+    @@unique([locationId, catalogueId])
+    @@index([organizationId])
+    @@index([locationId])
+    @@index([catalogueId])
+}
+
+model InventoryMovement {
+    id             String                @id @default(uuid())
+    organizationId String
+    type           InventoryMovementType
+    catalogueId    String
+    quantity       Decimal               @db.Decimal(18, 3)
+
+    fromLocationId String?
+    toLocationId   String?
+
+    referenceType   String?
+    referenceId     String?
+    transferGroupId String?
+    supplierQuoteId String?
+    unitCost        Decimal? @db.Decimal(18, 2)
+
+    remarks           String?
+    movementDate      DateTime @default(now())
+    createdByMemberId String?
+    createdAt         DateTime @default(now())
+
+    organization    Organization       @relation(fields: [organizationId], references: [id])
+    catalogue       Catalogue          @relation(fields: [catalogueId], references: [id])
+    fromLocation    InventoryLocation? @relation("InventoryMovementFrom", fields: [fromLocationId], references: [id])
+    toLocation      InventoryLocation? @relation("InventoryMovementTo", fields: [toLocationId], references: [id])
+    supplierQuote   SupplierQuote?     @relation(fields: [supplierQuoteId], references: [id])
+    createdByMember Membership?        @relation(fields: [createdByMemberId], references: [id])
+
+    @@index([organizationId, movementDate])
+    @@index([catalogueId, movementDate])
+    @@index([fromLocationId])
+    @@index([toLocationId])
+    @@index([supplierQuoteId])
+    @@index([transferGroupId])
+    @@index([referenceType, referenceId])
+}
+
 model Project {
     id              String  @id @default(uuid())
     name            String
@@ -196,10 +301,11 @@ model Project {
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     organizationId String
 
-    assignments   Assignment[]
-    phases        Phase[]
-    invitations   InvitationProject[]
-    notifications Notification[]
+    assignments        Assignment[]
+    phases             Phase[]
+    invitations        InvitationProject[]
+    notifications      Notification[]
+    inventoryLocations InventoryLocation[]
 
     @@unique([slug, organizationId])
 }
@@ -359,7 +465,6 @@ model Notification {
     title String
     body  String?
 
-    // NEW: Store the exact relative URL here!
     actionUrl String?
 
     entityType NotificationEntityType
