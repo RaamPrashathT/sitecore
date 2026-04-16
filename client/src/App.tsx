@@ -14,9 +14,7 @@ import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
 import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
 
 import DashboardPage from "./pages/adminPages/dashboard/DashboardPage";
-import CataloguePage from "./pages/adminPages/catalogue/CataloguePage";
-import CreateCataloguePage from "./pages/adminPages/catalogue/CreateCataloguePages";
-import EditCataloguePage from "./pages/adminPages/catalogue/EditCataloguePage";
+import CataloguePage from "./pages/adminPages/resources/CataloguePage";
 
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
@@ -52,6 +50,8 @@ import ProjectPhaseMain from "./features/project/progress/components/ProjectPhas
 import RequisitionDetailsPage from "./pages/project/RequisitionDetailsPage";
 import IndividualPaymentAcceptancePage from "./pages/adminPages/dashboard/IndividualPaymentAcceptancePage";
 import IndividualRequisitionAcceptancePage from "./pages/adminPages/dashboard/IndividualRequisitionAcceptancepage";
+import InventoryLocationPage from "./pages/adminPages/resources/InventoryLocationPage";
+import SuppliersPage from "./pages/adminPages/resources/SuppliersPage";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -109,14 +109,13 @@ function App() {
                                     element={<CataloguePage />}
                                 />
                                 <Route
-                                    path="catalogue/create"
-                                    element={<CreateCataloguePage />}
+                                    path="inventory-location"
+                                    element={<InventoryLocationPage />}
                                 />
-                                <Route
-                                    path="catalogue/edit/:catalogueId/:quoteId"
-                                    element={<EditCataloguePage />}
+                                <Route 
+                                    path="suppliers"
+                                    element={<SuppliersPage />}
                                 />
-
                                 {/* Users */}
                                 <Route
                                     path="engineers"

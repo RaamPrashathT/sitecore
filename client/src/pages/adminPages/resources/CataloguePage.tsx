@@ -1,4 +1,4 @@
-import CatalogueMain from "@/features/catalogue/components/CatalogueMain"
+import CatalogueMain from "@/features/resource/catalogue/components/CatalogueMain"
 
 const CataloguePage = () => {
     return (
