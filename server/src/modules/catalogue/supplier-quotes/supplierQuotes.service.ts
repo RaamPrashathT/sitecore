@@ -30,7 +30,6 @@ const supplierQuotesService = {
                     truePrice: true,
                     standardRate: true,
                     leadTime: true,
-                    inventory: true,
                     supplierId: true,
                     catalogueId: true,
                     createdAt: true,
@@ -63,7 +62,6 @@ const supplierQuotesService = {
                 truePrice: true,
                 standardRate: true,
                 leadTime: true,
-                inventory: true,
                 supplierId: true,
                 catalogueId: true,
                 createdAt: true,
@@ -102,7 +100,6 @@ const supplierQuotesService = {
                     supplierId: input.supplierId,
                     truePrice: input.truePrice,
                     standardRate: input.standardRate,
-                    inventory: input.inventory,
                     leadTime: input.leadTime ?? null,
                 },
                 select: { id: true },
@@ -137,7 +134,6 @@ const supplierQuotesService = {
                 truePrice: true,
                 standardRate: true,
                 leadTime: true,
-                inventory: true,
             },
         });
 
@@ -150,7 +146,6 @@ const supplierQuotesService = {
                     truePrice: quote.truePrice,
                     standardRate: quote.standardRate,
                     leadTime: quote.leadTime,
-                    inventory: quote.inventory,
                     changeReason: input.changeReason ?? null,
                     changedByMemberId: changedByMemberId ?? null,
                 },
@@ -160,7 +155,6 @@ const supplierQuotesService = {
                 data: {
                     ...(input.truePrice !== undefined && { truePrice: input.truePrice }),
                     ...(input.standardRate !== undefined && { standardRate: input.standardRate }),
-                    ...(input.inventory !== undefined && { inventory: input.inventory }),
                     ...(input.leadTime !== undefined && { leadTime: input.leadTime }),
                 },
                 select: { id: true },
@@ -211,7 +205,6 @@ const supplierQuotesService = {
                 truePrice: true,
                 standardRate: true,
                 leadTime: true,
-                inventory: true,
                 supplierId: true,
                 supplier: { select: { id: true, name: true } },
             },
@@ -240,7 +233,6 @@ const supplierQuotesService = {
                 truePrice: true,
                 standardRate: true,
                 leadTime: true,
-                inventory: true,
                 catalogue: { select: { id: true, name: true, unit: true } },
             },
         });
@@ -250,7 +242,6 @@ const supplierQuotesService = {
             truePrice: Number(q.truePrice),
             standardRate: Number(q.standardRate),
             leadTime: q.leadTime,
-            inventory: q.inventory,
             catalogue: q.catalogue,
         }));
 

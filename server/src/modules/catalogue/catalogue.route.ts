@@ -196,25 +196,25 @@ catalogueRouter.get(
 
 //New Routes to be implemented
 // inventory-locations
-catalogueRouter.get("/inventory/locations",authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getInventoryLocations);
-catalogueRouter.get("/inventory/locations/:locationId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getInventoryLocationById);
-catalogueRouter.post("/inventory/locations", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.createInventoryLocation);
-catalogueRouter.patch("/inventory/locations/:locationId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.editInventoryLocation);
-catalogueRouter.delete("/inventory/locations/:locationId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.deleteInventoryLocation);
-catalogueRouter.get("/inventory/locations/:locationId/stocks", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getStocksByLocationId);
-catalogueRouter.get("/inventory/locations/:locationId/movements", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getMovementsByLocationId);
+    catalogueRouter.get("/inventory/locations",authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getInventoryLocations);
+    catalogueRouter.get("/inventory/locations/:locationId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getInventoryLocationById);
+    catalogueRouter.post("/inventory/locations", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.createInventoryLocation);
+    catalogueRouter.patch("/inventory/locations/:locationId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.editInventoryLocation);
+    catalogueRouter.delete("/inventory/locations/:locationId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.deleteInventoryLocation);
+    catalogueRouter.get("/inventory/locations/:locationId/stocks", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getStocksByLocationId);
+    catalogueRouter.get("/inventory/locations/:locationId/movements", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryLocationsController.getMovementsByLocationId);
 
-// inventory-stocks
-catalogueRouter.get("/inventory/stocks", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryStocksController.getInventoryStocks);
-catalogueRouter.get("/inventory/stocks/:stockId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryStocksController.getInventoryStockById);
-catalogueRouter.get("/inventory/catalogue-items/:catalogueId/stocks", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryStocksController.getStocksByCatalogueId);
+    // inventory-stocks
+    catalogueRouter.get("/inventory/stocks", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryStocksController.getInventoryStocks);
+    catalogueRouter.get("/inventory/stocks/:stockId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryStocksController.getInventoryStockById);
+    catalogueRouter.get("/inventory/catalogue-items/:catalogueId/stocks", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryStocksController.getStocksByCatalogueId);
 
-// inventory-movements
-catalogueRouter.get("/inventory/movements", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.getInventoryMovements);
-catalogueRouter.get("/inventory/movements/:movementId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.getInventoryMovementById);
-catalogueRouter.post("/inventory/movements/receipt", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createReceipt);
-catalogueRouter.post("/inventory/movements/issue", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createIssue);
-catalogueRouter.post("/inventory/movements/transfer", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createTransfer);
-catalogueRouter.post("/inventory/movements/adjustment", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createAdjustment);
+    // inventory-movements
+    catalogueRouter.get("/inventory/movements", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.getInventoryMovements);
+    catalogueRouter.get("/inventory/movements/:movementId", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.getInventoryMovementById);
+    catalogueRouter.post("/inventory/movements/receipt", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createReceipt);
+    catalogueRouter.post("/inventory/movements/issue", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createIssue);
+    catalogueRouter.post("/inventory/movements/transfer", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createTransfer);
+    catalogueRouter.post("/inventory/movements/adjustment", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createAdjustment);
 
 export default catalogueRouter;

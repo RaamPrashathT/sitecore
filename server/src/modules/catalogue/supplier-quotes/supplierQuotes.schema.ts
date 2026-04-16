@@ -27,7 +27,6 @@ export const createSupplierQuoteBodySchema = z.object({
     supplierId: z.string().min(1, "supplierId is required"),
     truePrice: z.number().positive("truePrice must be positive"),
     standardRate: z.number().positive("standardRate must be positive"),
-    inventory: z.number().int().min(0, "inventory must be non-negative"),
     leadTime: z.number().int().min(0).optional(),
 });
 export type CreateSupplierQuoteBody = z.infer<typeof createSupplierQuoteBodySchema>;
@@ -35,7 +34,6 @@ export type CreateSupplierQuoteBody = z.infer<typeof createSupplierQuoteBodySche
 export const editSupplierQuoteBodySchema = z.object({
     truePrice: z.number().positive().optional(),
     standardRate: z.number().positive().optional(),
-    inventory: z.number().int().min(0).optional(),
     leadTime: z.number().int().min(0).optional().nullable(),
     changeReason: z.string().optional().nullable(),
 });
