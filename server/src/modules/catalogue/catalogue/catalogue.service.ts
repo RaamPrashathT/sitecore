@@ -31,17 +31,10 @@ const catalogueService = {
                     category: true,
                     unit: true,
                     defaultLeadTime: true,
-                    supplierQuotes: {
+                    _count: {
                         select: {
-                            id: true,
-                            truePrice: true,
-                            standardRate: true,
-                            leadTime: true,
-                            inventory: true,
-                            supplierId: true,
-                            supplier: {
-                                select: { id: true, name: true },
-                            },
+                            supplierQuotes: true,
+                            inventoryStocks: true,
                         },
                     },
                 },
@@ -49,13 +42,11 @@ const catalogueService = {
             prisma.catalogue.count({ where }),
         ]);
 
-        const data = items.map((item) => ({
+        const data = items.map(({ _count, ...item }) => ({
             ...item,
-            supplierQuotes: item.supplierQuotes.map((q) => ({
-                ...q,
-                truePrice: Number(q.truePrice),
-                standardRate: Number(q.standardRate),
-            })),
+            quotesCount: _count.supplierQuotes,
+            suppliersCount: _count.supplierQuotes,
+            locationsCount: _count.inventoryStocks,
         }));
 
         return { data, count };

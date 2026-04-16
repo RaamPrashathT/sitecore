@@ -28,7 +28,6 @@ function buildLocationStockSearchFilter(search: string): Prisma.InventoryStockWh
 
     const orClauses: Prisma.InventoryStockWhereInput[] = [
         { catalogue: { name: { contains: search, mode: "insensitive" } } },
-        { catalogue: { unit: { contains: search, mode: "insensitive" } } },
     ];
 
     if (matchedCategory) {

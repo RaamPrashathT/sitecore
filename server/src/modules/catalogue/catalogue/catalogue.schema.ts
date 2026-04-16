@@ -24,7 +24,12 @@ const catalogueCategorySchema = z.enum([
 export const createCatalogueBodySchema = z.object({
     name: z.string().min(1, "name is required"),
     category: catalogueCategorySchema,
-    unit: z.string().min(1, "unit is required"),
+    unit: z.enum([
+        "NOS", "BAG", "ROLL", "BUNDLE", "SET", "PAIR",
+        "KG", "MT", "QUINTAL",
+        "CUM", "CFT", "LITRE", "SQM", "SQFT", "RMT", "RFT",
+        "DAY", "HOUR", "MONTH", "TRIP", "LS",
+    ]),
     defaultLeadTime: z.number().int().min(0).default(0),
 });
 export type CreateCatalogueBody = z.infer<typeof createCatalogueBodySchema>;

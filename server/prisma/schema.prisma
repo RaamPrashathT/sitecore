@@ -92,6 +92,31 @@ enum NotificationEntityType {
     INVITATION
 }
 
+enum MeasurementUnit {
+    NOS
+    BAG
+    ROLL
+    BUNDLE
+    SET
+    PAIR
+    KG
+    MT
+    QUINTAL
+    CUM
+    CFT
+    LITRE
+    SQM
+    SQFT
+    RMT
+    RFT
+    DAY
+    HOUR
+    MONTH
+    TRIP
+    LS
+}
+
+
 model Organization {
     id        String   @id @default(uuid())
     name      String
@@ -133,7 +158,7 @@ model Catalogue {
     id              String            @id @default(uuid())
     name            String
     category        CatalogueCategory
-    unit            String
+    unit            MeasurementUnit
     defaultLeadTime Int               @default(0)
 
     supplierQuotes     SupplierQuote[]

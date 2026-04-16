@@ -2,8 +2,8 @@ import CatalogueMain from "@/features/resource/catalogue/components/CatalogueMai
 
 const CataloguePage = () => {
     return (
-        <div className="h-full">
-            <CatalogueMain/>
+        <div className="h-full flex flex-col">
+            <CatalogueMain />
         </div>
     )
 }

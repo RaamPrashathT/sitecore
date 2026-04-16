@@ -1,4 +1,4 @@
-import { Prisma, CatalogueCategory } from "../../../../generated/prisma/index.js";
+import { Prisma, CatalogueCategory, MeasurementUnit } from "../../../../generated/prisma/index.js";
 import { prisma } from "../../../shared/lib/prisma.js";
 import { MissingError } from "../../../shared/error/missing.error.js";
 
@@ -11,16 +11,21 @@ function buildCatalogueSearchFilter(search: string): Prisma.InventoryStockWhereI
     const matchedCategory = Object.values(CatalogueCategory).find(
         (v) => v === upperSearch,
     );
+    const matchedUnit = Object.values(MeasurementUnit).find(
+        (v) => v === upperSearch,
+    );
 
     const orClauses: Prisma.InventoryStockWhereInput[] = [
         { catalogue: { name: { contains: search, mode: "insensitive" } } },
-        { catalogue: { unit: { contains: search, mode: "insensitive" } } },
         { location: { name: { contains: search, mode: "insensitive" } } },
         { location: { code: { contains: search, mode: "insensitive" } } },
     ];
 
     if (matchedCategory) {
         orClauses.push({ catalogue: { category: { equals: matchedCategory } } });
+    }
+    if (matchedUnit) {
+        orClauses.push({ catalogue: { unit: { equals: matchedUnit } } });
     }
 
     return { OR: orClauses };
