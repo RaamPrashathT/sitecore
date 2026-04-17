@@ -2,17 +2,13 @@ import { Prisma } from "../../../../generated/prisma/index.js";
 import { prisma } from "../../../shared/lib/prisma.js";
 import { ConflictError } from "../../../shared/error/conflict.error.js";
 import { MissingError } from "../../../shared/error/missing.error.js";
-import type { CreateCatalogueBody, EditCatalogueBody } from "./catalogue.schema.js";
+import type {
+    CreateCatalogueBody,
+    EditCatalogueBody,
+} from "./catalogue.schema.js";
 
 const catalogueService = {
-    async getCatalogue(
-        orgId: string,
-        pageIndex: number,
-        pageSize: number,
-        search: string,
-    ) {
-        const skip = pageIndex * pageSize;
-
+    async getCatalogue(orgId: string, search: string) {
         const where: Prisma.CatalogueWhereInput = {
             organizationId: orgId,
             ...(search.length > 0 && {
@@ -20,36 +16,15 @@ const catalogueService = {
             }),
         };
 
-        const [items, count] = await Promise.all([
-            prisma.catalogue.findMany({
-                where,
-                skip,
-                take: pageSize,
-                select: {
-                    id: true,
-                    name: true,
-                    category: true,
-                    unit: true,
-                    defaultLeadTime: true,
-                    _count: {
-                        select: {
-                            supplierQuotes: true,
-                            inventoryStocks: true,
-                        },
-                    },
-                },
-            }),
-            prisma.catalogue.count({ where }),
-        ]);
+        const list = await prisma.catalogue.findMany({
+            where,
+            select: {
+                id: true,
+                name: true,
+            },
+        });
 
-        const data = items.map(({ _count, ...item }) => ({
-            ...item,
-            quotesCount: _count.supplierQuotes,
-            suppliersCount: _count.supplierQuotes,
-            locationsCount: _count.inventoryStocks,
-        }));
-
-        return { data, count };
+        return { list, count: list.length };
     },
 
     async getCatalogueById(orgId: string, catalogueId: string) {
@@ -61,7 +36,19 @@ const catalogueService = {
                 category: true,
                 unit: true,
                 defaultLeadTime: true,
+                inventoryStocks: {
+                    where: {
+                        location: { deletedAt: null, isActive: true },
+                    },
+                    select: {
+                        quantity: true,
+                        location: {
+                            select: { id: true, name: true, type: true, updatedAt: true },
+                        },
+                    },
+                },
                 supplierQuotes: {
+                    where: { supplier: { deletedAt: null } },
                     select: {
                         id: true,
                         truePrice: true,
@@ -79,13 +66,72 @@ const catalogueService = {
 
         if (!item) throw new MissingError("Catalogue item not found");
 
+        // ── Stock summary ──────────────────────────────────────────────────
+        let totalQuantity = 0;
+        const locations = item.inventoryStocks.map((stock) => {
+            const qty = Number(stock.quantity);
+            totalQuantity += qty;
+            return {
+                locationId: stock.location.id,
+                locationName: stock.location.name,
+                locationType: stock.location.type,
+                locationUpdatedAt: stock.location.updatedAt.toISOString(),
+                quantity: qty,
+            };
+        });
+
+        // ── Supplier / quote summary ───────────────────────────────────────
+        const rawQuotes = item.supplierQuotes.map((q) => ({
+            id: q.id,
+            supplierId: q.supplierId,
+            supplierName: q.supplier.name,
+            truePrice: Number(q.truePrice),
+            standardRate: Number(q.standardRate),
+            leadTime: q.leadTime,
+            inventory: q.inventory,
+            profit: Number(q.standardRate) - Number(q.truePrice),
+        }));
+
+        let shortestLeadTime: number | null = null;
+        let maxProfit = 0;
+        let minProfit = 0;
+        let isDifferentiable = false;
+
+        if (rawQuotes.length > 0) {
+            maxProfit = Math.max(...rawQuotes.map((q) => q.profit));
+            minProfit = Math.min(...rawQuotes.map((q) => q.profit));
+            isDifferentiable = rawQuotes.length > 1 && maxProfit !== minProfit;
+
+            const validLeadTimes = rawQuotes
+                .filter((q) => q.leadTime !== null)
+                .map((q) => q.leadTime as number);
+
+            if (validLeadTimes.length > 0) {
+                shortestLeadTime = Math.min(...validLeadTimes);
+            }
+        }
+
+        const quotes = rawQuotes.map((q) => ({
+            ...q,
+            isHighestProfit: isDifferentiable && q.profit === maxProfit,
+            isShortestLeadTime:
+                q.leadTime !== null && q.leadTime === shortestLeadTime,
+        }));
+
         return {
-            ...item,
-            supplierQuotes: item.supplierQuotes.map((q) => ({
-                ...q,
-                truePrice: Number(q.truePrice),
-                standardRate: Number(q.standardRate),
-            })),
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            unit: item.unit,
+            defaultLeadTime: item.defaultLeadTime,
+            stockSummary: {
+                totalQuantity,
+                locations,
+            },
+            supplierSummary: {
+                activeSuppliersCount: quotes.length,
+                quotes,
+            },
         };
     },
 
@@ -138,7 +184,9 @@ const catalogueService = {
                 where: { id: catalogueId },
                 data: {
                     ...(input.name !== undefined && { name: input.name }),
-                    ...(input.category !== undefined && { category: input.category }),
+                    ...(input.category !== undefined && {
+                        category: input.category,
+                    }),
                     ...(input.unit !== undefined && { unit: input.unit }),
                     ...(input.defaultLeadTime !== undefined && {
                         defaultLeadTime: input.defaultLeadTime,

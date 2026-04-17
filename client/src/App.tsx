@@ -14,7 +14,6 @@ import SearchOrgPage from "./pages/organization/orgList/SearchOrgPage";
 import MainOrganizationPage from "./pages/organization/MainOrganizationPage";
 
 import DashboardPage from "./pages/adminPages/dashboard/DashboardPage";
-import CataloguePage from "./pages/adminPages/resources/CataloguePage";
 
 import EngineerPage from "./pages/adminPages/engineers/EngineersPage";
 import EngineerInvitePage from "./pages/adminPages/engineers/EngineerInvitePage";
@@ -52,7 +51,13 @@ import IndividualPaymentAcceptancePage from "./pages/adminPages/dashboard/Indivi
 import IndividualRequisitionAcceptancePage from "./pages/adminPages/dashboard/IndividualRequisitionAcceptancepage";
 import InventoryLocationPage from "./pages/adminPages/resources/InventoryLocationPage";
 import SuppliersPage from "./pages/adminPages/resources/SuppliersPage";
-
+import CatalogueMain from "@/features/resource/catalogue/components/CatalogueMain";
+import CatalogueDetailLayout from "@/features/resource/catalogue/components/CatalogueDetailLayout";
+import CatalogueOverview from "@/features/resource/catalogue/components/CatalogueOverview";
+import CatalogueEmptyState from "@/features/resource/catalogue/components/CatalogueEmptyState";
+import CatalogueSuppliersMain from "./features/resource/catalogue/components/Suppliers/CatalogueSuppliersMain";
+import CatalogueQuotesMain from "./features/resource/catalogue/components/Quotes/CatalogueQuotesMain";
+import CatalogueLocationsMain from "./features/resource/catalogue/components/Locations/CatalogueLocationsMain";
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -103,16 +108,41 @@ function App() {
                                     element={<NotificationPage />}
                                 />
 
-                                {/* Catalogue */}
                                 <Route
                                     path="catalogue"
-                                    element={<CataloguePage />}
-                                />
+                                    element={<CatalogueMain />}
+                                >
+                                    <Route
+                                        index
+                                        element={<CatalogueEmptyState />}
+                                    />
+                                    <Route
+                                        path=":catalogueId"
+                                        element={<CatalogueDetailLayout />}
+                                    >
+                                        <Route
+                                            index
+                                            element={<CatalogueOverview />}
+                                        />
+                                        <Route
+                                            path="suppliers"
+                                            element={<CatalogueSuppliersMain />}
+                                        />
+                                        <Route
+                                            path="quotes"
+                                            element={<CatalogueQuotesMain />}
+                                        />
+                                        <Route
+                                            path="locations"
+                                            element={<CatalogueLocationsMain />}
+                                        />
+                                    </Route>
+                                </Route>
                                 <Route
                                     path="inventory-location"
                                     element={<InventoryLocationPage />}
                                 />
-                                <Route 
+                                <Route
                                     path="suppliers"
                                     element={<SuppliersPage />}
                                 />
