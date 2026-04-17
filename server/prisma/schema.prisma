@@ -116,7 +116,6 @@ enum MeasurementUnit {
     LS
 }
 
-
 model Organization {
     id        String   @id @default(uuid())
     name      String
@@ -233,6 +232,7 @@ model InventoryLocation {
     id             String                @id @default(uuid())
     organizationId String
     name           String
+    address        String?
     code           String?
     type           InventoryLocationType
     projectId      String?

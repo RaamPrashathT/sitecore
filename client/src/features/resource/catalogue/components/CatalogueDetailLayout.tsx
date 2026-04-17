@@ -6,7 +6,6 @@ import { useGetCatalogueItem } from "../hooks/useGetCatalogueItem";
 const TABS = [
     { value: "overview", label: "Overview" },
     { value: "quotes", label: "Quotes" },
-    { value: "suppliers", label: "Suppliers" },
     { value: "locations", label: "Locations" },
     { value: "transactions", label: "Transactions" },
 ] as const;

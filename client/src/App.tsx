@@ -58,6 +58,7 @@ import CatalogueEmptyState from "@/features/resource/catalogue/components/Catalo
 import CatalogueSuppliersMain from "./features/resource/catalogue/components/Suppliers/CatalogueSuppliersMain";
 import CatalogueQuotesMain from "./features/resource/catalogue/components/Quotes/CatalogueQuotesMain";
 import CatalogueLocationsMain from "./features/resource/catalogue/components/Locations/CatalogueLocationsMain";
+import CatalogueTransactionMain from "./features/resource/catalogue/components/Transaction/CatalogueTransactionMain";
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -135,6 +136,10 @@ function App() {
                                         <Route
                                             path="locations"
                                             element={<CatalogueLocationsMain />}
+                                        />
+                                        <Route
+                                            path="transactions"
+                                            element={<CatalogueTransactionMain />}
                                         />
                                     </Route>
                                 </Route>
