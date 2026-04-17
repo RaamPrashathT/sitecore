@@ -39,6 +39,7 @@ function handleError(
 const supplierQuotesController = {
     async getSupplierQuotes(request: Request, response: Response) {
         try {
+            console.log("==============================")
             const parsed = getSupplierQuotesQuerySchema.safeParse(request.query);
             if (!parsed.success) {
                 throw new ValidationError(parsed.error.issues[0]?.message ?? "Invalid query parameters");
@@ -46,7 +47,7 @@ const supplierQuotesController = {
 
             const orgId = request.tenant?.orgId;
             if (!orgId) throw new ValidationError("Organization context missing");
-
+            console.log(parsed.data)
             const { index, size, catalogueId, supplierId } = parsed.data;
             const result = await supplierQuotesService.getSupplierQuotes(
                 orgId,

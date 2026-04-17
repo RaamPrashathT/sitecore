@@ -81,6 +81,11 @@
       "sourceType": "github",
       "computedHash": "c2b06cf395b04471bdd4cb07b71b49e3bce50800acdfa773a824d1c46d0661d3"
     },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "computedHash": "642a177bee320618caa49f5106cadb4e7594c606e867f61ba7b56d19cf745cd5"
+    },
     "shape": {
       "source": "pbakaus/impeccable",
       "sourceType": "github",

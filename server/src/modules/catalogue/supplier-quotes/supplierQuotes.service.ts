@@ -1,8 +1,43 @@
 import { Prisma } from "../../../../generated/prisma/index.js";
 import { prisma } from "../../../shared/lib/prisma.js";
+import { User } from "../../../shared/models/user.js";
 import { ConflictError } from "../../../shared/error/conflict.error.js";
 import { MissingError } from "../../../shared/error/missing.error.js";
 import type { CreateSupplierQuoteBody, EditSupplierQuoteBody } from "./supplierQuotes.schema.js";
+
+async function enrichHistoryWithUsers(
+    history: Array<{
+        id: string;
+        supplierQuoteId: string;
+        truePrice: number;
+        standardRate: number;
+        leadTime: number | null;
+        changeReason: string | null;
+        changedByMemberId: string | null;
+        changedAt: Date;
+    }>,
+) {
+    const memberIds = [...new Set(history.map((h) => h.changedByMemberId).filter(Boolean))] as string[];
+
+    const users =
+        memberIds.length > 0
+            ? await User.find({ _id: { $in: memberIds } })
+                  .select("_id username profileImage")
+                  .lean()
+            : [];
+
+    const userMap = new Map(
+        users.map((u) => [
+            u._id.toString(),
+            { username: u.username as string, profileImage: (u.profileImage as string | undefined) ?? null },
+        ]),
+    );
+
+    return history.map((h) => ({
+        ...h,
+        changedBy: h.changedByMemberId ? (userMap.get(h.changedByMemberId) ?? null) : null,
+    }));
+}
 
 const supplierQuotesService = {
     async getSupplierQuotes(
@@ -73,10 +108,34 @@ const supplierQuotesService = {
 
         if (!quote) throw new MissingError("Supplier quote not found");
 
+        const rawHistory = await prisma.supplierQuoteHistory.findMany({
+            where: { supplierQuoteId: quoteId },
+            orderBy: { changedAt: "desc" },
+            select: {
+                id: true,
+                supplierQuoteId: true,
+                truePrice: true,
+                standardRate: true,
+                leadTime: true,
+                changeReason: true,
+                changedByMemberId: true,
+                changedAt: true,
+            },
+        });
+
+        const mappedHistory = rawHistory.map((h) => ({
+            ...h,
+            truePrice: Number(h.truePrice),
+            standardRate: Number(h.standardRate),
+        }));
+
+        const history = await enrichHistoryWithUsers(mappedHistory);
+
         return {
             ...quote,
             truePrice: Number(quote.truePrice),
             standardRate: Number(quote.standardRate),
+            history,
         };
     },
 

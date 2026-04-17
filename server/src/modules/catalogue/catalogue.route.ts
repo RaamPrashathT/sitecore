@@ -13,16 +13,11 @@ import inventoryMovementsController from "./inventory-movements/inventoryMovemen
 
 const catalogueRouter = Router();
 
-// Catalogue
+// Catalogue (root)
 catalogueRouter.get("/", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.getCatalogue);
 catalogueRouter.post("/", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.createCatalogue);
-catalogueRouter.get("/:catalogueId", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.getCatalogueById);
-catalogueRouter.patch("/:catalogueId", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.editCatalogue);
-catalogueRouter.delete("/:catalogueId", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.deleteCatalogue);
-catalogueRouter.get("/:catalogueId/quotes", authorize, orgAuthorize, requiredRole("ADMIN"), supplierQuotesController.getQuotesByCatalogueId);
-catalogueRouter.get("/:catalogueId/suppliers", authorize, orgAuthorize, requiredRole("ADMIN"), suppliersController.getSuppliersByCatalogueId);
 
-// Suppliers
+// Suppliers — must be before /:catalogueId to avoid wildcard capture
 catalogueRouter.get("/suppliers", authorize, orgAuthorize, requiredRole("ADMIN"), suppliersController.getSuppliers);
 catalogueRouter.get("/suppliers/:supplierId", authorize, orgAuthorize, requiredRole("ADMIN"), suppliersController.getSupplierById);
 catalogueRouter.post("/suppliers", authorize, orgAuthorize, requiredRole("ADMIN"), suppliersController.createSupplier);
@@ -64,5 +59,12 @@ catalogueRouter.post("/inventory/movements/receipt", authorize, orgAuthorize, re
 catalogueRouter.post("/inventory/movements/issue", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createIssue);
 catalogueRouter.post("/inventory/movements/transfer", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createTransfer);
 catalogueRouter.post("/inventory/movements/adjustment", authorize, orgAuthorize, requiredRole("ADMIN"), inventoryMovementsController.createAdjustment);
+
+// Catalogue item by ID — MUST be last: /:catalogueId is a wildcard that would capture all static segments above
+catalogueRouter.get("/:catalogueId", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.getCatalogueById);
+catalogueRouter.patch("/:catalogueId", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.editCatalogue);
+catalogueRouter.delete("/:catalogueId", authorize, orgAuthorize, requiredRole("ADMIN"), catalogueController.deleteCatalogue);
+catalogueRouter.get("/:catalogueId/quotes", authorize, orgAuthorize, requiredRole("ADMIN"), supplierQuotesController.getQuotesByCatalogueId);
+catalogueRouter.get("/:catalogueId/suppliers", authorize, orgAuthorize, requiredRole("ADMIN"), suppliersController.getSuppliersByCatalogueId);
 
 export default catalogueRouter;
