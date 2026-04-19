@@ -47,7 +47,7 @@ const inventoryLocationsController = {
             const orgId = request.tenant?.orgId;
             if (!orgId) throw new ValidationError("Organization context missing");
 
-            const { index, size, search, includeDeleted, includeInactive, type, projectId } = parsed.data;
+            const { index, size, search, includeDeleted, includeInactive, type, projectId, catalogueId } = parsed.data;
             const result = await inventoryLocationsService.getInventoryLocations(orgId, {
                 pageIndex: index,
                 pageSize: size,
@@ -56,6 +56,7 @@ const inventoryLocationsController = {
                 includeInactive,
                 ...(type !== undefined && { type }),
                 ...(projectId !== undefined && { projectId }),
+                ...(catalogueId !== undefined && { catalogueId }),
             });
 
             return response.status(200).json({

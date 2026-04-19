@@ -48,10 +48,85 @@ const inventoryLocationsService = {
             includeInactive: boolean;
             type?: InventoryLocationType;
             projectId?: string;
+            catalogueId?: string;
         },
     ) {
-        const { pageIndex, pageSize, search, includeDeleted, includeInactive, type, projectId } = options;
+        const { pageIndex, pageSize, search, includeDeleted, includeInactive, type, projectId, catalogueId } = options;
         const skip = pageIndex * pageSize;
+
+        if (catalogueId !== undefined) {
+            const catalogue = await prisma.catalogue.findFirst({
+                where: { id: catalogueId, organizationId: orgId },
+                select: { id: true },
+            });
+
+            if (!catalogue) throw new MissingError("Catalogue item not found");
+
+            const locationWhere: Prisma.InventoryLocationWhereInput = {
+                organizationId: orgId,
+                ...(!includeDeleted && { deletedAt: null }),
+                ...(!includeInactive && { isActive: true }),
+                ...(type && { type }),
+                ...(projectId && { projectId }),
+                ...(search.length > 0 && {
+                    OR: [
+                        { name: { contains: search, mode: "insensitive" } },
+                        { code: { contains: search, mode: "insensitive" } },
+                    ],
+                }),
+            };
+
+            const where: Prisma.InventoryStockWhereInput = {
+                organizationId: orgId,
+                catalogueId,
+                location: locationWhere,
+            };
+
+            const [stocks, count] = await Promise.all([
+                prisma.inventoryStock.findMany({
+                    where,
+                    skip,
+                    take: pageSize,
+                    select: {
+                        id: true,
+                        quantity: true,
+                        updatedAt: true,
+                        location: {
+                            select: {
+                                id: true,
+                                name: true,
+                                code: true,
+                                type: true,
+                                projectId: true,
+                                isActive: true,
+                                deletedAt: true,
+                                createdAt: true,
+                                updatedAt: true,
+                            },
+                        },
+                    },
+                    orderBy: { updatedAt: "desc" },
+                }),
+                prisma.inventoryStock.count({ where }),
+            ]);
+
+            const data = stocks.map((stock) => ({
+                id: stock.location.id,
+                name: stock.location.name,
+                code: stock.location.code,
+                type: stock.location.type,
+                projectId: stock.location.projectId,
+                isActive: stock.location.isActive,
+                deletedAt: stock.location.deletedAt,
+                createdAt: stock.location.createdAt,
+                updatedAt: stock.location.updatedAt,
+                stockId: stock.id,
+                quantityStored: Number(stock.quantity),
+                lastUpdatedAt: stock.updatedAt,
+            }));
+
+            return { data, count };
+        }
 
         const searchFilter: Prisma.InventoryLocationWhereInput =
             search.length > 0

@@ -10,6 +10,7 @@ export const getInventoryLocationsQuerySchema = z.object({
     search: z.string().default(""),
     type: z.enum(["WAREHOUSE", "PROJECT"]).optional(),
     projectId: z.string().optional(),
+    catalogueId: z.string().min(1, "catalogueId is required").optional(),
     includeDeleted: booleanLike.default(false),
     includeInactive: booleanLike.default(false),
 });
