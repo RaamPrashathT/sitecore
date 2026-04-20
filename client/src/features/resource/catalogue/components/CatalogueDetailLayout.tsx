@@ -8,6 +8,7 @@ const TABS = [
     { value: "quotes", label: "Quotes" },
     { value: "locations", label: "Locations" },
     { value: "transactions", label: "Transactions" },
+    { value: "logs", label: "Logs" },
 ] as const;
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -29,7 +30,12 @@ const CatalogueDetailLayout = () => {
 
     const pathSegments = location.pathname.split("/");
     const lastSegment = pathSegments.at(-1);
-    const currentTab = lastSegment === catalogueId ? "overview" : lastSegment;
+    const currentTab =
+        lastSegment === catalogueId
+            ? "overview"
+            : pathSegments.includes("quotes")
+              ? "quotes"
+              : lastSegment;
 
     const handleTabChange = (value: string) => {
         navigate(value === "overview" ? "" : value);

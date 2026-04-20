@@ -19,10 +19,31 @@ export interface CatalogueInventoryLocation {
     lastUpdatedAt: string;
 }
 
+export interface InventoryLocationOption {
+    id: string;
+    name: string;
+    code: string | null;
+    type: CatalogueInventoryLocationType;
+    projectId: string | null;
+    isActive: boolean;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface CatalogueInventoryLocationsResponse {
     success: boolean;
     message: string;
     data: CatalogueInventoryLocation[];
+    count: number;
+    pageIndex: number;
+    pageSize: number;
+}
+
+export interface InventoryLocationsResponse {
+    success: boolean;
+    message: string;
+    data: InventoryLocationOption[];
     count: number;
     pageIndex: number;
     pageSize: number;
@@ -49,6 +70,16 @@ export const catalogueInventoryLocationsQueryOptions = (
         enabled: !!orgSlug && !!catalogueId,
     });
 
+export const inventoryLocationsQueryOptions = (orgSlug: string) =>
+    queryOptions({
+        queryKey: catalogueInventoryLocationKeys.all(orgSlug),
+        queryFn: () =>
+            api
+                .get<InventoryLocationsResponse>("/catalogue/inventory/locations?size=100")
+                .then((r) => r.data),
+        enabled: !!orgSlug,
+    });
+
 export function useCatalogueInventoryLocations() {
     const { orgSlug, catalogueId } = useParams<{
         orgSlug: string;
@@ -58,4 +89,10 @@ export function useCatalogueInventoryLocations() {
     return useQuery(
         catalogueInventoryLocationsQueryOptions(orgSlug ?? "", catalogueId ?? ""),
     );
+}
+
+export function useInventoryLocations() {
+    const { orgSlug } = useParams<{ orgSlug: string }>();
+
+    return useQuery(inventoryLocationsQueryOptions(orgSlug ?? ""));
 }

@@ -65,6 +65,14 @@ export interface CreateQuoteInput {
     leadTime?: number;
 }
 
+export interface CreateSupplierInput {
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    contactPerson?: string | null;
+    address?: string | null;
+}
+
 // ─── Query Key Factory ────────────────────────────────────────────────────────
 
 export const supplierQuoteKeys = {
@@ -114,7 +122,7 @@ export const suppliersQueryOptions = (orgSlug: string) =>
         queryFn: () =>
             api
                 .get<{ success: boolean; data: Supplier[]; count: number }>(
-                    `/catalogue/suppliers`,
+                    `/catalogue/suppliers?size=1000`,
                 )
                 .then((r) => r.data),
         enabled: !!orgSlug,
@@ -237,6 +245,34 @@ export function useCreateQuote() {
             });
             toast.success("Quote created");
         },
-        onError: () => toast.error("Failed to create quote"),
+        onError: (error: unknown) => {
+            const status = (error as { response?: { status?: number } })?.response?.status;
+            if (status === 409) {
+                toast.error("A quote for this supplier already exists on this catalogue item");
+            } else {
+                toast.error("Failed to create quote");
+            }
+        },
+    });
+}
+
+export function useCreateSupplier() {
+    const queryClient = useQueryClient();
+    const { orgSlug } = useParams<{ orgSlug: string }>();
+
+    return useMutation({
+        mutationFn: (data: CreateSupplierInput) =>
+            api
+                .post<{ success: boolean; data: { id: string } }>(
+                    `/catalogue/suppliers`,
+                    data,
+                )
+                .then((r) => r.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: supplierQuoteKeys.suppliers(orgSlug ?? ""),
+            });
+        },
+        onError: () => toast.error("Failed to create supplier"),
     });
 }

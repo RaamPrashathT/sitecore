@@ -33,6 +33,8 @@ function mapMovement(m: {
     fromLocationId: string | null;
     toLocationId: string | null;
     catalogue: { id: string; name: string; unit: string };
+    fromLocation: { id: string; name: string; type: string } | null;
+    toLocation: { id: string; name: string; type: string } | null;
 }) {
     return {
         ...m,
@@ -54,6 +56,8 @@ const movementSelect = {
     fromLocationId: true,
     toLocationId: true,
     catalogue: { select: { id: true, name: true, unit: true } },
+    fromLocation: { select: { id: true, name: true, type: true } },
+    toLocation: { select: { id: true, name: true, type: true } },
 } as const;
 
 const inventoryMovementsService = {

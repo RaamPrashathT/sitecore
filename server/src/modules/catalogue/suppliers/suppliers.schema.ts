@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const getSuppliersQuerySchema = z.object({
     index: z.coerce.number().int().min(0).default(0),
-    size: z.coerce.number().int().min(1).max(100).default(10),
+    size: z.coerce.number().int().min(1).max(1000).default(10),
     search: z.string().default(""),
     includeDeleted: z
         .union([z.literal("true"), z.literal("false"), z.boolean()])

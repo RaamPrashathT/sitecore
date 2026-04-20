@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const getInventoryMovementsQuerySchema = z.object({
     index: z.coerce.number().int().min(0).default(0),
-    size: z.coerce.number().int().min(1).max(100).default(10),
+    size: z.coerce.number().int().min(1).max(1000).default(10),
     search: z.string().default(""),
     catalogueId: z.string().optional(),
     locationId: z.string().optional(),

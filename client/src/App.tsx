@@ -57,8 +57,10 @@ import CatalogueOverview from "@/features/resource/catalogue/components/Catalogu
 import CatalogueEmptyState from "@/features/resource/catalogue/components/CatalogueEmptyState";
 import CatalogueSuppliersMain from "./features/resource/catalogue/components/Suppliers/CatalogueSuppliersMain";
 import CatalogueQuotesMain from "./features/resource/catalogue/components/Quotes/CatalogueQuotesMain";
+import CatalogueQuoteCreatePage from "./features/resource/catalogue/components/Quotes/CatalogueQuoteCreatePage";
 import CatalogueLocationsMain from "./features/resource/catalogue/components/Locations/CatalogueLocationsMain";
 import CatalogueTransactionMain from "./features/resource/catalogue/components/Transaction/CatalogueTransactionMain";
+import CatalogueLogsMain from "./features/resource/catalogue/components/MovementLogs/CatalogueLogsMain";
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -134,12 +136,20 @@ function App() {
                                             element={<CatalogueQuotesMain />}
                                         />
                                         <Route
+                                            path="quotes/new"
+                                            element={<CatalogueQuoteCreatePage />}
+                                        />
+                                        <Route
                                             path="locations"
                                             element={<CatalogueLocationsMain />}
                                         />
                                         <Route
                                             path="transactions"
                                             element={<CatalogueTransactionMain />}
+                                        />
+                                        <Route
+                                            path="logs"
+                                            element={<CatalogueLogsMain />}
                                         />
                                     </Route>
                                 </Route>
