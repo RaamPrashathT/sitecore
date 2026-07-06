@@ -63,3 +63,8 @@ Thumbs.db
 # Cache
 # =========================
 .cache/
+# Rush local build state
+client/.rush/
+
+# Local Rush logs
+client/rush-logs/
