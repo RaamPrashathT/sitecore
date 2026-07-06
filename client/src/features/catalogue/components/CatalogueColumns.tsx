@@ -1,8 +1,8 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import type { CatalogueWithQuotes } from "@/hooks/useGetCatalogs";
+import type { CatalogueItemType } from "../hooks/useGetCatalogues";
 import CatalogueActionButton from "./CatalogueActionButton";
 
-const columnHelper = createColumnHelper<CatalogueWithQuotes>();
+const columnHelper = createColumnHelper<CatalogueItemType>();
 
 export const CatalogueColumns = [
     columnHelper.accessor("name", {

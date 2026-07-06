@@ -8,6 +8,14 @@ export interface MembershipType {
     role: "ADMIN" | "ENGINEER" | "CLIENT" | "IDLE";
 }
 
+const resolveMembershipRole = (role: string): MembershipType["role"] => {
+    if (role === "ADMIN" || role === "ENGINEER" || role === "CLIENT") {
+        return role;
+    }
+
+    return "IDLE";
+};
+
 export const useMembership = () => {
     const { orgSlug } = useParams();
     const { user, isLoading: isSessionLoading } = useSession();
@@ -16,8 +24,9 @@ export const useMembership = () => {
 
     const membership: MembershipType | null = tenantConfig ? {
         id: tenantConfig.id,
-        role: tenantConfig.role,
-        slug: orgSlug as string
+        role: resolveMembershipRole(tenantConfig.role),
+        slug: orgSlug as string,
+        profile: null,
     } : null;
 
     return {

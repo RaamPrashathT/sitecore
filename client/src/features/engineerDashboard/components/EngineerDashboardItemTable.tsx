@@ -1,9 +1,9 @@
 import { flexRender } from "@tanstack/react-table";
 import type { Table as ReactTableType } from "@tanstack/react-table";
-import type { EngineerDashboardItem } from "../hooks/useEngineerDashboardItem";
+import type { ActionablePhase } from "../hooks/useEngineerDashboardItem";
 
 interface EngineerDashboardItemTableProps {
-    table: ReactTableType<EngineerDashboardItem>;
+    table: ReactTableType<ActionablePhase>;
 }
 
 const EngineerDashboardItemTable = ({ table }: EngineerDashboardItemTableProps) => {

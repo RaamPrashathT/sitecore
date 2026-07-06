@@ -10,10 +10,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { ClientDashboardItemSchema } from "../hooks/useClientDashboardItem";
+import type { ProcessedPendingPayment } from "../hooks/useClientDashboardItem";
 
 interface ClientDashboardDataTableProps {
-    table: ReactTableType<ClientDashboardItemSchema>;
+    table: ReactTableType<ProcessedPendingPayment>;
 }
 
 const ClientDashboardDataTable = ({ table }: ClientDashboardDataTableProps) => {

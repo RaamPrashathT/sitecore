@@ -24,7 +24,8 @@ const updateProjectSchema = z.object({
     status: z.enum(["DRAFT", "ACTIVE", "COMPLETED", "ARCHIVED"]),
 });
 
-type UpdateProjectFormValues = z.infer<typeof updateProjectSchema>;
+type UpdateProjectFormInput = z.input<typeof updateProjectSchema>;
+type UpdateProjectFormValues = z.output<typeof updateProjectSchema>;
 
 const GRID = {
     p: "p-6",
@@ -57,7 +58,7 @@ export default function ProjectSettingsForm() {
         control,
         reset,
         formState: { errors, isDirty },
-    } = useForm<UpdateProjectFormValues>({
+    } = useForm<UpdateProjectFormInput, unknown, UpdateProjectFormValues>({
         resolver: zodResolver(updateProjectSchema),
         defaultValues: {
             name: "",
@@ -73,7 +74,7 @@ export default function ProjectSettingsForm() {
                 name: project.name,
                 address: project.address,
                 estimatedBudget: project.budgets.estimatedTotal,
-                status: project.status,
+                status: project.status as UpdateProjectFormValues["status"],
             });
         }
     }, [project, reset]);

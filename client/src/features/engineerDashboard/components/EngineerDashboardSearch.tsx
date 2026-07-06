@@ -1,9 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import type { EngineerDashboardPhase } from "../hooks/useEngineerDashboardItem";
+import type { EngineerDashboardResponse } from "../hooks/useEngineerDashboardItem";
 import type { Table as ReactTableType } from "@tanstack/react-table";
 interface EngineerDashboardSearchProps {
-    table: ReactTableType<EngineerDashboardPhase>;
+    table: ReactTableType<EngineerDashboardResponse>;
 }
 
 const EngineerSearch = ({ table }: EngineerDashboardSearchProps) => {

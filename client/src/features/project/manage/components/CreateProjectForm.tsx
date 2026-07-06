@@ -29,7 +29,8 @@ const formSchema = z.object({
     ).default([]),
 });
 
-type CreateProjectFormSchema = z.infer<typeof formSchema>;
+type CreateProjectFormInput = z.input<typeof formSchema>;
+type CreateProjectFormSchema = z.output<typeof formSchema>;
 
 const GRID = { p: "p-6", gap: "gap-6", gapSm: "gap-2", radius: "rounded-lg" };
 
@@ -43,7 +44,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
         handleSubmit,
         control,
         formState: { errors },
-    } = useForm<CreateProjectFormSchema>({
+    } = useForm<CreateProjectFormInput, unknown, CreateProjectFormSchema>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
@@ -53,7 +54,7 @@ const CreateProjectForm = ({ orgId, slug }: CreateProjectFormProps) => {
         }
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove } = useFieldArray<CreateProjectFormInput>({
         control,
         name: "phases",
     });

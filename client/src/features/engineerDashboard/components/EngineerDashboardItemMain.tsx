@@ -2,10 +2,10 @@
 import { EngineerColumns as columns } from "./EngineerDashboardItemColumn";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import EngineerDashboardItemTable from "./EngineerDashboardItemTable";
-import type { EngineerDashboardItem } from "../hooks/useEngineerDashboardItem";
+import type { ActionablePhase } from "../hooks/useEngineerDashboardItem";
 
 interface EngineerDashboardItemProps {
-    dashboardItems: EngineerDashboardItem[];
+    dashboardItems: ActionablePhase[];
 }
 
 

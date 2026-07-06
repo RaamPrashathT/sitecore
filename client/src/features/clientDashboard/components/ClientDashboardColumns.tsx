@@ -1,7 +1,7 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import type { ClientDashboardItemSchema } from "../hooks/useClientDashboardItem"
+import type { ProcessedPendingPayment } from "../hooks/useClientDashboardItem"
 
-const columnHelper = createColumnHelper<ClientDashboardItemSchema>();
+const columnHelper = createColumnHelper<ProcessedPendingPayment>();
 
 export const ClientDashboardColumns = [
     columnHelper.accessor("projectName", {
@@ -12,16 +12,8 @@ export const ClientDashboardColumns = [
             </div>
         ),
     }),
-    columnHelper.accessor("name", {
+    columnHelper.accessor("phaseName", {
         header: "Phase Name",
-        cell: (info) => (
-            <div className="font-medium flex items-center h-12 px-4">
-                {info.getValue()}
-            </div>
-        ),
-    }),
-    columnHelper.accessor("estimatedBudget", {
-        header: "Total Cost",
         cell: (info) => (
             <div className="font-medium flex items-center h-12 px-4">
                 {info.getValue()}
@@ -49,7 +41,7 @@ export const ClientDashboardColumns = [
                     <span className="font-medium">
                         {dropDeadDate.toLocaleDateString()}
                     </span>
-                    <span> {row.original.daysTillOrder} days to pay</span>
+                    <span> {row.original.daysTillDue} days to pay</span>
                 </div>
             );
         },

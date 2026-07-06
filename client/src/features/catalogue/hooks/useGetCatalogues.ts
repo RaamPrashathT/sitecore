@@ -9,6 +9,7 @@ export interface SupplierQuotesType {
     leadTime: number | null;
     catalogueId: string;
     email: string;
+    inventory: number;
 }
 
 export type CatalogueItemType = {

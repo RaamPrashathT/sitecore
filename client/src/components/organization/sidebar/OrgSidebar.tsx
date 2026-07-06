@@ -6,7 +6,6 @@ import {
     Mail,
     ChartArea,
     Bell,
-    Settings,
     FolderDot, // Icon for individual projects
     Folder // Icon for all projects
 } from "lucide-react";

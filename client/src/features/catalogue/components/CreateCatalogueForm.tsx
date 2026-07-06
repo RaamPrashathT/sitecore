@@ -105,6 +105,7 @@ const CreateCatalogueForm = ({ orgId, slug }: CreateCatalogueFormProps) => {
                         standardRate: newCatalogueData.standardRate,
                         leadTime: newCatalogueData.leadTime,
                         catalogueId: tempId,
+                        inventory: newCatalogueData.inventory,
                     },
                 ],
             };

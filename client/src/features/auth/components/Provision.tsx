@@ -16,7 +16,7 @@ export default function Provision() {
 
     useEffect(() => {
         if (user?.onboarded) {
-            mutate(token, {
+            mutate(undefined, {
                 onSuccess: (data) => {
                     navigate(data.redirectTo, { replace: true });
                 }

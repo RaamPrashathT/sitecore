@@ -17,7 +17,8 @@ const createPhaseSchema = z.object({
     paymentDeadline: z.string().min(1, "Payment deadline is required"),
 });
 
-type FormValues = z.infer<typeof createPhaseSchema>;
+type FormInput = z.input<typeof createPhaseSchema>;
+type FormValues = z.output<typeof createPhaseSchema>;
 
 const GRID = { p: "p-6", gap: "gap-6", gapSm: "gap-2", radius: "rounded-lg" };
 
@@ -28,7 +29,7 @@ export default function CreatePhaseForm() {
     const { data: project, isLoading: isProjectLoading } = useProjectDetails(orgSlug, projectSlug);
     const isProjectActive = project?.status === "ACTIVE";
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    const { register, handleSubmit, formState: { errors } } = useForm<FormInput, unknown, FormValues>({
         resolver: zodResolver(createPhaseSchema),
         defaultValues: {
             name: "",

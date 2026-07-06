@@ -77,7 +77,7 @@ const DeleteCatalogueButton = (props: DeleteCatalogueButtonProps) => {
             // 5. Return the snapshot so we can roll back if it fails
             return { previousQueries };
         },
-        onError: (error, variables, context) => {
+        onError: (error, _variables, context) => {
             console.error("Failed to delete:", error);
             // 6. Roll back every specific query (page/search) to its exact previous state
             if (context?.previousQueries) {

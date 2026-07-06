@@ -1,5 +1,5 @@
 import type { Table as ReactTableType } from "@tanstack/react-table";
-import type { EngineerDashboardPhase } from "../hooks/useEngineerDashboardItem";
+import type { EngineerDashboardResponse } from "../hooks/useEngineerDashboardItem";
 import {
     Pagination,
     PaginationContent,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 
 interface EngineerDashboardPaginationProps {
-    table: ReactTableType<EngineerDashboardPhase>;
+    table: ReactTableType<EngineerDashboardResponse>;
 }
 
 const getPaginationNumbers = (pageIndex: number, pageCount: number) => {

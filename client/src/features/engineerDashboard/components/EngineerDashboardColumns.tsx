@@ -1,8 +1,8 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import type { EngineerDashboardPhase } from "../hooks/useEngineerDashboardItem";
+import type { EngineerDashboardResponse } from "../hooks/useEngineerDashboardItem";
 import { ChevronDown } from "lucide-react";
 
-const columnHelper = createColumnHelper<EngineerDashboardPhase>();
+const columnHelper = createColumnHelper<EngineerDashboardResponse>();
 
 export const EngineerColumns = [
     columnHelper.display({
@@ -17,27 +17,30 @@ export const EngineerColumns = [
             </div>
         ),
     }),
-    columnHelper.accessor("projectName", {
-        header: "Project",
+    columnHelper.display({
+        id: "activeProjects",
+        header: "Active Projects",
         cell: (info) => (
             <div className="font-medium flex items-center h-12 px-4">
-                {info.getValue()}
+                {info.row.original.activeProjects.length}
             </div>
         ),
     }),
-    columnHelper.accessor("name", {
-        header: "Phase Name",
+    columnHelper.display({
+        id: "actionablePhases",
+        header: "Actionable Phases",
         cell: (info) => (
             <div className="font-medium flex items-center h-12 px-4">
-                {info.getValue()}
+                {info.row.original.actionablePhases.length}
             </div>
         ),
     }),
-    columnHelper.accessor("budget", {
-        header: "Budget",
+    columnHelper.display({
+        id: "recentRequisitions",
+        header: "Recent Requisitions",
         cell: (info) => (
             <div className="font-medium flex items-center h-12 px-4">
-                {info.getValue()}
+                {info.row.original.recentRequisitions.length}
             </div>
         ),
     }),
