@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
-import { MissingError } from "../../shared/error/missing.error";
-import { prisma } from "../../shared/lib/prisma";
-import { User } from "../../shared/models/user";
-import { UnAuthorizedError } from "../../shared/error/unauthorized.error";
-import { notify } from "../../shared/lib/notify";
+import { MissingError } from "../../shared/error/missing.error.js";
+import { prisma } from "../../shared/lib/prisma.js";
+import { User } from "../../shared/models/user.js";
+import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
+import { notify } from "../../shared/lib/notify.js";
 
 export const userService = {
     async getInvitationDetails(token: string) {

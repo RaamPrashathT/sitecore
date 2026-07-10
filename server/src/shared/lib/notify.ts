@@ -1,5 +1,5 @@
-import { Role, type NotificationEntityType, type NotificationType } from "../../../generated/prisma";
-import { prisma } from "./prisma";
+import { Role, type NotificationEntityType, type NotificationType } from "../../../generated/prisma/index.js";
+import { prisma } from "./prisma.js";
 
 interface NotifyInput {
     type: NotificationType;

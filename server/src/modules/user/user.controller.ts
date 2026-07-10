@@ -5,7 +5,7 @@ import { logger } from "../../shared/lib/logger.js";
 import { MissingError } from "../../shared/error/missing.error.js";
 import { UnAuthorizedError } from "../../shared/error/unauthorized.error.js";
 import { userService } from "./user.service.js";
-import { syncSessionTenants } from "../../shared/lib/syncSession.js";
+import { syncSessionTenants } from "../../shared/lib/SyncSession.js";
 import { notify } from "../../shared/lib/notify.js";
 import {
     NotificationEntityType,

@@ -20,6 +20,7 @@ import axios from "axios";
 import { useInvitationDetails } from "@/features/clients/hooks/useInvitationDetails";
 import { useLogin } from "@/features/auth/hooks/useLogin";
 import { LoginFormSkeleton } from "./LoginFormSkeleton";
+import { API_URL } from "@/lib/axios";
 
 export function LoginForm({
     className,
@@ -165,7 +166,7 @@ export function LoginForm({
                         type="button"
                         className="flex items-center"
                         onClick={() => {
-                            globalThis.location.href = `${import.meta.env.VITE_API_URL}/auth/google${inviteToken ? `?inviteToken=${inviteToken}` : ""}`;
+                            globalThis.location.href = `${API_URL}/auth/google${inviteToken ? `?inviteToken=${inviteToken}` : ""}`;
                         }}
                     >
                         <FcGoogle className="mt-0.5 mr-2" /> Login with Google

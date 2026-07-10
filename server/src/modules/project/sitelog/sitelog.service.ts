@@ -87,7 +87,7 @@ const sitelogService = {
         userId: string,
         data: {
             text: string;
-            imageId?: string | null;
+            imageId?: string | null | undefined;
         },
     ) {
         // 1. Fetch the SiteLog with all nested relations to get our slugs

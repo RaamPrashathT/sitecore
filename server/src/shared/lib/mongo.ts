@@ -8,6 +8,8 @@ export const connectMongoDB = async () => {
         logger.info(`MongoDB connected: ${connection.connection.host}`);
     } catch (error) {
         logger.error(`Error: ${error}`);
-        process.exit(1);
+        throw error;
     }
 }
+
+export const disconnectMongoDB = async () => mongoose.disconnect();

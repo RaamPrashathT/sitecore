@@ -19,5 +19,14 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Generated UI primitives and TanStack Table intentionally use patterns
+      // that React Compiler's advisory rules cannot safely analyze yet.
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/incompatible-library': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
 ])

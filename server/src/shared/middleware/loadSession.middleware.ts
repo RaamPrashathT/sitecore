@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { logger } from "../lib/logger";
-import redis from "../lib/redis";
+import { logger } from "../lib/logger.js";
+import redis from "../lib/redis.js";
 
 export const loadSession = async (
     request: Request,

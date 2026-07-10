@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import type { Request, Response, NextFunction } from "express";
-import { logger } from "../lib/logger";
+import { logger } from "../lib/logger.js";
 
 export const validate =
     (schema: ZodType) =>

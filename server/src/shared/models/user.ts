@@ -79,7 +79,7 @@ UserSchema.index(
 );
 
 const VerificationTokenSchema = new Schema<IVerificationToken>({
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     token: { type: String, required: true, unique: true, index: true },
     otpHash: { type: String, required: true },
     email: { type: String, required: true, lowercase: true, trim: true },

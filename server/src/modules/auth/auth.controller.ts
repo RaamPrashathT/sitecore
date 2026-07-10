@@ -12,6 +12,7 @@ import { prisma } from "../../shared/lib/prisma.js";
 import { UnverifiedError } from "../../shared/error/unverified.error.js";
 import { ValidationError } from "../../shared/error/validation.error.js";
 import { TwoFactorRequiredError } from "../../shared/error/twoFactor.error.js";
+import { env } from "../../shared/config/env.js";
 
 type ProfileSchema = {
     sub: string;
@@ -611,8 +612,7 @@ const authController = {
                     where: { token: inviteToken, status: "PENDING" },
                 });
                 if (invite && invite.email !== validatedProfile.data.email) {
-                    const frontendUrl =
-                        process.env.FRONTEND_URL || "http://localhost:5173";
+                    const frontendUrl = env.FRONTEND_URL;
                     return response.redirect(
                         `${frontendUrl}/login?error=account_mismatch&expected=${invite.email}`,
                     );
@@ -699,8 +699,7 @@ const authController = {
                 maxAge: 1000 * 60 * 60 * 24,
             });
 
-            const frontendUrl =
-                process.env.FRONTEND_URL || "http://localhost:5173";
+            const frontendUrl = env.FRONTEND_URL;
             if (inviteToken) {
                 return response.redirect(
                     `${frontendUrl}/invitation?token=${inviteToken}`,
@@ -728,8 +727,7 @@ const authController = {
                 errorDetails:
                     error instanceof Error ? error.stack : String(error),
             });
-            const frontendUrl =
-                process.env.FRONTEND_URL || "http://localhost:5173";
+            const frontendUrl = env.FRONTEND_URL;
             return response.redirect(`${frontendUrl}/login?error=oauth_failed`);
         }
     },

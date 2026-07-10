@@ -218,7 +218,7 @@ const orgService = {
     
     async updateSettings(
         organizationId: string,
-        data: { name?: string; image?: string },
+        data: { name?: string | undefined; image?: string | undefined },
     ) {
         const updateData: { name?: string; image?: string } = {};
     

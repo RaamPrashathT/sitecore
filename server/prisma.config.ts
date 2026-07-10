@@ -1,6 +1,5 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
-import { env } from "./src/shared/config/env.js";
 
 export default defineConfig({
     schema: "prisma/schema.prisma",
@@ -8,6 +7,10 @@ export default defineConfig({
         path: "prisma/migrations",
     },
     datasource: {
-        url: env.DATABASE_URL,
+        // Client generation only needs a syntactically valid URL. Render supplies
+        // the real DATABASE_URL for database commands and at runtime.
+        url:
+            process.env.DATABASE_URL ??
+            "postgresql://placeholder:placeholder@localhost:5432/placeholder",
     },
 });

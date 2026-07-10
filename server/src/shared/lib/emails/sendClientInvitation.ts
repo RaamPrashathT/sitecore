@@ -1,5 +1,6 @@
 import { resend } from "../resend.js";
 import { logger } from "../logger.js";
+import { env } from "../../config/env.js";
 
 export async function sendInviteEmail(email: string, token: string) {
     try {
@@ -25,7 +26,7 @@ export async function sendInviteEmail(email: string, token: string) {
 
                     <div style="text-align: center; margin: 24px 0;">
                         <a 
-                            href="http://localhost:5173/invitation?token=${token}" 
+                            href="${env.FRONTEND_URL}/invitation?token=${token}"
                             style="
                                 display: inline-block;
                                 padding: 12px 20px;
@@ -47,7 +48,7 @@ export async function sendInviteEmail(email: string, token: string) {
 
                     <p style="font-size: 12px; color: #aaa; margin-top: 16px; word-break: break-all;">
                         If the button does not work, copy and paste this link into your browser:<br/>
-                        http://localhost:5173/invitation?token=${token}
+                        ${env.FRONTEND_URL}/invitation?token=${token}
                     </p>
                 </div>
             `,
