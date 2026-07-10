@@ -13,6 +13,7 @@ import { generateOTP, hashOTP } from "../../shared/lib/otp.js";
 import { sendVerificationEmail } from "../../shared/lib/emails/sendEmailVerification.js";
 import { UnverifiedError } from "../../shared/error/unverified.error.js";
 import { TwoFactorRequiredError } from "../../shared/error/twoFactor.error.js";
+import { env } from "../../shared/config/env.js";
 
 const authService = {
     async register(data: RegisterInputSchema) {
@@ -358,8 +359,8 @@ const authService = {
         );
         const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
         const options = {
-            redirect_uri: process.env.GOOGLE_REDIRECT_URI as string,
-            client_id: process.env.GOOGLE_CLIENT_ID as string,
+            redirect_uri: env.GOOGLE_REDIRECT_URI,
+            client_id: env.GOOGLE_CLIENT_ID ?? "",
             access_type: "offline",
             response_type: "code",
             prompt: "consent",

@@ -566,9 +566,9 @@ const authController = {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         code,
-                        client_id: process.env.GOOGLE_CLIENT_ID,
-                        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-                        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+                        client_id: env.GOOGLE_CLIENT_ID,
+                        client_secret: env.GOOGLE_CLIENT_SECRET,
+                        redirect_uri: env.GOOGLE_REDIRECT_URI,
                         grant_type: "authorization_code",
                         code_verifier: codeVerifier,
                     }),

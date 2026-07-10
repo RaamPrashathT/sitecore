@@ -13,12 +13,9 @@ const skippedResponseHeaders = new Set([
 ]);
 
 export default async function handler(request, response) {
-    const backendUrl = process.env.BACKEND_URL?.replace(/\/$/, "");
-    if (!backendUrl) {
-        return response.status(500).json({
-            message: "The Vercel BACKEND_URL environment variable is not configured",
-        });
-    }
+    const backendUrl = (
+        process.env.BACKEND_URL ?? "https://sitecore-asho.onrender.com"
+    ).replace(/\/$/, "");
 
     const path = Array.isArray(request.query.path)
         ? request.query.path.join("/")

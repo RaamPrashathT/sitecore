@@ -17,16 +17,17 @@ Render. `RESEND_API_KEY` is optional for this demo; email sends fail gracefully 
 
 Set the project root directory to `client`. Add one server-side environment variable:
 
-- `BACKEND_URL=https://YOUR_RENDER_SERVICE.onrender.com`
+- `BACKEND_URL=https://sitecore-asho.onrender.com`
 
-The frontend production build defaults to `/api`, so `VITE_API_URL` is not required on
-Vercel. Cloudinary variables are only needed for image uploads.
+The frontend production build always uses `/api`, so `VITE_API_URL` is ignored on
+Vercel. The proxy also defaults to the current Render URL, making `BACKEND_URL` optional.
+Cloudinary variables are only needed for image uploads.
 
 ## Google OAuth
 
 Set `GOOGLE_REDIRECT_URI` on Render to:
 
-`https://YOUR_VERCEL_APP.vercel.app/api/auth/google/callback`
+`https://sitecore-eta.vercel.app/api/auth/google/callback`
 
 Add that exact URL to the Google OAuth client's authorized redirect URIs. This keeps the
 session cookie on the Vercel site even though Express runs on Render.
